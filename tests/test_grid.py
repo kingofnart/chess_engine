@@ -18,7 +18,7 @@ def test_vaild_move():
     # move1: (invalid move)
     assert board.valid_move(move1) == 0
     # move2: (invalid piecce id)
-    assert board.valid_move(move2) == -1
+    assert board.valid_move(move2) == -2
     # move3: (invalid piece)
     assert board.valid_move(move3) == -1
     # move4: (valid)
