@@ -12,20 +12,26 @@ move2 = [[0,0], [3,0]] # a1->a4
 move3 = [[2,0], [3,0]] # a3->a4
 move4 = [[6,0], [5,0]] # a7->a6
 move5 = [[6,0], [4,0]] # a7->a5
+move6 = [[1,0], [4,0]] # a2->a5
+move7 = [[6,0], [3,0]] # a7->a4
 
 def test_vaild_move():
     # move0: (valid)
     assert board.valid_move(move0) == 1
-    # move1: (invalid move)
-    assert board.valid_move(move1) == 0
+    # move1: (valid move)
+    assert board.valid_move(move1) == 1
     # move2: (invalid piecce id)
     assert board.valid_move(move2) == -2
     # move3: (invalid piece)
     assert board.valid_move(move3) == -1
     # move4: (valid)
     assert board.valid_move(move4) == 1
-    # move5: (invalid move)
-    assert board.valid_move(move5) == 0
+    # move5: (valid move)
+    assert board.valid_move(move5) == 1
+    # move6: (invalid move)
+    assert board.valid_move(move6) == 0
+    # move7: (invalid move)
+    assert board.valid_move(move7) == 0
 
 def test_attacked_squares():
     # set grid with kings on e4 and e5
