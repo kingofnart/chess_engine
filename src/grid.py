@@ -9,7 +9,7 @@ class Grid():
         # coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
         self.w_coords = np.array([[4,0], [3,0], [0,0], [7,0], [1,0], [6,0], [3,0], [5,0], [0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]])
         self.b_coords = np.array([[4,7], [3,7], [0,7], [7,7], [1,7], [6,7], [3,7], [5,7], [0,6], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]])
-        self.w_attacked_squares = np.array([[0,3], [1,3], [2,3], [3,3], [4,3], [5,3], [6,3], [7,3]])
+        self.w_attacked_squares = np.array([[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]])
         self.b_attacked_squares = np.array([[0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5]])
         self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
                      self.w_pcs[8:], 
@@ -21,51 +21,55 @@ class Grid():
                      [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
 
     def attacked_squares(self, color):
+        attacked_list = []
         if color:
             pieces = self.b_pcs
             coords = self.b_coords
-            attacked_squares = self.b_attacked_squares
         else:
             pieces = self.w_pcs
             coords = self.w_coords
-            attacked_squares = self.w_attacked_squares
         for piece, coord in zip(pieces, coords):
-            match piece.id:
-                # king
-                case 0:
-                    if coord[0] != 0:
-                        attacked_squares.append([coord + [-1,0]])
+            if not piece.captured:
+                match piece.id:
+                    # king
+                    case 0:
+                        if coord[0] != 0:
+                            attacked_list.append(coord + [-1,0])
+                            if coord[1] != 0:
+                                attacked_list.append(coord + [-1,-1])
+                            if coord[1] != 7:
+                                attacked_list.append(coord + [-1,1])
+                        if coord[0] != 7:
+                            attacked_list.append(coord + [1,0])
+                            if coord[1] != 0:
+                                attacked_list.append(coord + [1,-1])
+                            if coord[1] != 7:
+                                attacked_list.append(coord + [1,1])
                         if coord[1] != 0:
-                            attacked_squares.append(coord + [-1,-1])
+                            attacked_list.append(coord + [0,-1])
                         if coord[1] != 7:
-                            attacked_squares.append(coord + [-1,1])
-                    if coord[0] != 7:
-                        attacked_squares.append([coord + [1,0]])
-                        if coord[1] != 0:
-                            attacked_squares.append(coord + [1,-1])
-                        if coord[1] != 7:
-                            attacked_squares.append(coord + [1,1])
-                    if coord[1] != 0:
-                        attacked_squares.append(coord + [0,-1])
-                    if coord[1] != 7:
-                        attacked_squares.append(coord + [0,1])
-                # queen
-                #case 1:
-                
-                # rook
-                #case 2:
+                            attacked_list.append(coord + [0,1])
+                    # queen
+                    #case 1:
+                    
+                    # rook
+                    #case 2:
 
-                # bishop
-                #case 3:
+                    # bishop
+                    #case 3:
 
-                # knight
-                #case 4:
+                    # knight
+                    #case 4:
 
-                # pawn
-                #case 5:
+                    # pawn
+                    #case 5:
 
-                case _:
-                    return -1
+                    case _:
+                        pass
+                    
+        if color:
+            self.b_attacked_squares = attacked_list
+        else: self.w_attacked_squares = attacked_list
 
     # 0 = King, 1 = Queen, 2 = Rook, 3 = Bishop, 4 = Knight, 5 = Pawn
     def valid_move(self, move):
