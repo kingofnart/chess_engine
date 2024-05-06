@@ -73,6 +73,7 @@ class Grid():
 
     # 0 = King, 1 = Queen, 2 = Rook, 3 = Bishop, 4 = Knight, 5 = Pawn
     def valid_move(self, move):
+        # move = [[x1, y1], [x2, y2]]
         piece = self.grid[move[0][0]][move[0][1]]
         
         if (piece != 0):
@@ -94,15 +95,35 @@ class Grid():
 
                 # pawn
                 case 5:
-                    if piece.color == 0:
-                        if move[0][0] == move[1][0] - 1:
+                    if piece.color == 0: # white
+                        sign = 1 
+                    else: # black
+                        sign = -1 
+                    if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # capture
+                        if move[0][0] + sign != move[1][0]: # invalid move
+                            return 0
+                        elif self.grid[move[1][0]][move[1][1]] == 0: # no piece forward-diagonal from pawn
+                            if self.grid[move[1][0] + 1][move[1][1]] != 0: # en pesant?
+                                pawn2 = self.grid[move[1][0] + 1][move[1][1]]
+                                if pawn2.enpassant:
+                                    pawn2.set_captured(1)
+                                    return 1
+                            elif self.grid[move[1][0] - 1][move[1][1]] != 0:
+                                pawn2 = self.grid[move[1][0] - 1][move[1][1]]
+                                if pawn2.enpassant:
+                                    pawn2.set_captured(1)
+                                    return 1
+                            else: return 0
+                        else: # valid move
                             return 1
-                        else: return 0
-                    elif piece.color == 1:
-                        if move[0][0] == move[1][0] + 1:
-                            return 1
-                        else: return 0
-                case _:
+                    if move[0][0] + sign == move[1][0]: # valid move
+                        return 1    
+                    elif move[0][0] + 2*sign == move[1][0] and piece.moved == 0: # valid move
+                        piece.enpassant = 1
+                        return 1
+                    else: # invalid move
+                        return 0
+                case _: # invalid piece id
                     return -2
-        else:
+        else: # not piece
             return -1
