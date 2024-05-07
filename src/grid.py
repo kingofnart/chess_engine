@@ -127,6 +127,7 @@ class Grid():
     # for queen, rook, bishop
     def line_search(self, x, y, coord): # x, y = -1,0,1 to set search direction
         lst = []
+        search = True
         idx = [coord[0] + x, coord[1] + y] # don't set square piece is on to attacked, piece cant attack itself!
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
             lst.append(idx)
