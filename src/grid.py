@@ -22,6 +22,7 @@ class Grid():
 
     def attacked_squares(self, color):
         attacked_list = []
+        # get correct pieces/coordinates
         if color:
             pieces = self.b_pcs
             coords = self.b_coords
@@ -33,6 +34,7 @@ class Grid():
                 match piece.id:
                     # king
                     case 0:
+                        # only move one square, no moving off the board
                         if coord[0] != 0:
                             attacked_list.append(coord + [-1,0])
                             if coord[1] != 0:
@@ -50,28 +52,92 @@ class Grid():
                         if coord[1] != 7:
                             attacked_list.append(coord + [0,1])
                     # queen
-                    #case 1:
-                    
+                    case 1:
+                        # just gonna search all 8 directions in order
+                        attacked_list.append(self.line_search(1, 0, coord)) # 0
+                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
+                        attacked_list.append(self.line_search(0, 1, coord)) # pi/2
+                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
+                        attacked_list.append(self.line_search(-1, 0, coord)) # pi
+                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
+                        attacked_list.append(self.line_search(0, -1, coord)) # 3pi/2
+                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
+
                     # rook
-                    #case 2:
+                    case 2:
+                        # only horizontals & verticals
+                        attacked_list.append(self.line_search(1, 0, coord)) # 0
+                        attacked_list.append(self.line_search(0, 1, coord)) # pi/2
+                        attacked_list.append(self.line_search(-1, 0, coord)) # pi
+                        attacked_list.append(self.line_search(0, -1, coord)) # 3pi/2
 
                     # bishop
-                    #case 3:
+                    case 3:
+                        # only diagonals
+                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
+                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
+                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
+                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
 
                     # knight
-                    #case 4:
-
+                    case 4:
+                        # check for move 2 squares in one cardinal directrion
+                        # then check for move 1 square perpendicular
+                        if coord[0] >= 2: # move up
+                            if coord[1] > 0:
+                                attacked_list.append([coord[0] - 2, coord[1] - 1])
+                            if coord[1] < 7:
+                                attacked_list.append([coord[0] - 2, coord[1] + 1])
+                        if coord[0] <= 5: # move down
+                            if coord[1] > 0:
+                                attacked_list.append([coord[0] + 2, coord[1] - 1])
+                            if coord[1] < 7:
+                                attacked_list.append([coord[0] + 2, coord[1] + 1])
+                        if coord[1] >= 2: # move left
+                            if coord[0] > 0:
+                                attacked_list.append([coord[0] - 1, coord[1] - 2])
+                            if coord[0] < 7:
+                                attacked_list.append([coord[0] + 1, coord[1] - 2])
+                        if coord[1] <= 5: # move right
+                            if coord[0] > 0:
+                                attacked_list.append([coord[0] - 1, coord[1] + 2])
+                            if coord[0] < 7:
+                                attacked_list.append([coord[0] + 1, coord[1] + 2])
                     # pawn
-                    #case 5:
-
-                    case _:
-                        pass
+                    case 5:
+                        if color: # black
+                            if coord[1] > 0:
+                                attacked_list.append([coord[0] - 1, coord[1] - 1])
+                            if coord[1] < 7:
+                                attacked_list.append([coord[0] - 1, coord[1] + 1])
+                        else:
+                            if coord[1] > 0:
+                                attacked_list.append([coord[0] + 1, coord[1] - 1])
+                            if coord[1] < 7:
+                                attacked_list.append([coord[0] + 1, coord[1] + 1])
                     
+                    case _:
+                        raise Exception("Invalid piece id")
+        # update correct list
         if color:
             self.b_attacked_squares = attacked_list
         else: self.w_attacked_squares = attacked_list
 
-    # 0 = King, 1 = Queen, 2 = Rook, 3 = Bishop, 4 = Knight, 5 = Pawn
+    # helper function for attacked_squares to search along vert/hor/diag lines
+    # for queen, rook, bishop
+    def line_search(self, x, y, coord): # x, y = -1,0,1 to set search direction
+        lst = []
+        idx = [coord[0] + x, coord[1] + y] # don't set square piece is on to attacked, piece cant attack itself!
+        while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
+            lst.append(idx)
+            if self.grid[idx[0]][idx[1]] != 0: # found piece, stop search this direction
+                search = False
+                break
+            else:
+                idx[0] = idx[0] + x
+                idx[1] = idx[1] + y
+        return lst
+    
     def valid_move(self, move):
         # move = [[x1, y1], [x2, y2]]
         piece = self.grid[move[0][0]][move[0][1]]
