@@ -130,7 +130,7 @@ class Grid():
         search = True
         idx = [coord[0] + x, coord[1] + y] # don't set square piece is on to attacked, piece cant attack itself!
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
-            lst.append(idx)
+            lst.append(idx) # include peice as attacked square
             if self.grid[idx[0]][idx[1]] != 0: # found piece, stop search this direction
                 search = False
                 break
@@ -146,7 +146,11 @@ class Grid():
         if (piece != 0):
             match piece.id:
                 # king
-                #case 0:  
+                case 0:
+                    if np.sqrt((move[0][0]-move[1][0])**2 + (move[1][0]-move[1][1])**2) <= np.sqrt(2):
+                        if move[1][0] >= 0 and move[1][0] <= 7 and move[1][1] >= 0 and move[1][1] <= 7:
+                            return 1
+                    return 0
 
                 # queen
                 #case 1:
