@@ -6,6 +6,7 @@ from piece import Piece
 names = {0: "King", 1: "Queen", 2: "Rook", 3: "Bishop", 4: "Knight", 5: "Pawn"}
 board = Grid()
 grid = board.grid
+# NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row  
 move0 = [[1,0], [2,0]] # a2->a3
 move1 = [[1,0], [3,0]] # a2->a4
 move2 = [[0,0], [3,0]] # a1->a4
@@ -14,6 +15,8 @@ move4 = [[6,0], [5,0]] # a7->a6
 move5 = [[6,0], [4,0]] # a7->a5
 move6 = [[1,0], [4,0]] # a2->a5
 move7 = [[6,0], [3,0]] # a7->a4
+move8 = [[0,1], [2,2]] # b1->c3
+move9 = [[7,1], [5,2]] # b8->c6
 
 def test_vaild_move():
     # move0: (valid)
@@ -32,6 +35,10 @@ def test_vaild_move():
     assert board.valid_move(move6) == 0
     # move7: (invalid move)
     assert board.valid_move(move7) == 0
+    # move8: (valid move)
+    assert board.valid_move(move8) == 1
+    # move9: (valid move)
+    assert board.valid_move(move9) == 1
 
 def test_attacked_squares():
     # set grid with kings on e4 and e5
