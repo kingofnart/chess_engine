@@ -14,4 +14,4 @@ class Piece:
 
     def set_enpassant(self, val):
         self.enpassant = val
-# 0 = King, 1 = Queen, 2 = Rook, 3 = Knight, 4 = Bishop, 5 = Pawn
+# 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
