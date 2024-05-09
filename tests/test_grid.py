@@ -7,6 +7,7 @@ names = {0: "King", 1: "Queen", 2: "Rook", 3: "Bishop", 4: "Knight", 5: "Pawn"}
 board = Grid()
 grid = board.grid
 # NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row  
+# opening moves
 move0 = [[1,0], [2,0]] # a2->a3
 move1 = [[1,0], [3,0]] # a2->a4
 move2 = [[0,0], [3,0]] # a1->a4
@@ -25,6 +26,15 @@ move14 = [[7,0], [4,4]] # a8->e5
 move15 = [[7,2], [4,4]] # c8->e5
 move16 = [[7,3], [4,4]] # d8->e5
 move17 = [[7,4], [4,4]] # e8->e5
+# Fried Liver moves
+move18 = [[4,6], [6,5]] # g5->f7
+move19 = [[6,3], [4,3]] # d7->d5
+move20 = [[7,5], [4,2]] # f8->c5
+move21 = [[5,5], [3,4]] # f6->e4
+move22 = [[4,6], [3,4]] # g5->e4
+move23 = [[0,3], [3,6]] # d1->g4
+move24 = [[0,3], [4,3]] # d1->d5
+
 
 def test_vaild_move():
     # move0: (valid)
@@ -64,6 +74,30 @@ def test_vaild_move():
     # move17: (invalid move)
     assert board.valid_move(move17) == 0
 
+    # 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
+    # set grid to Fried Liver opening
+    board.grid = [[Piece(0,2), Piece(0,3), Piece(0,4), Piece(0,1), Piece(0,0), 0, 0, Piece(0,2)], 
+                  [Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 0, Piece(0,5), Piece(0,5), Piece(0,5)], 
+                  [0 for _ in range(8)], 
+                  [0, 0, Piece(0,4), 0, Piece(0,5), 0, 0, 0], 
+                  [0, 0, 0, 0, Piece(1,5), 0, Piece(0,3), 0], 
+                  [0, 0, Piece(1,3), 0, 0, Piece(1,3), 0, 0], 
+                  [Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 0, Piece(1,5), Piece(1,5), Piece(1,5)], 
+                  [Piece(1,2), 0, Piece(1,4), Piece(1,1), Piece(1,0), Piece(1,4), 0, Piece(1,2)]]
+    # move18: (valid)
+    assert board.valid_move(move18) == 1
+    # move19: (valid)
+    assert board.valid_move(move19) == 1
+    # move20: (valid)
+    assert board.valid_move(move20) == 1
+    # move21: (valid)
+    assert board.valid_move(move21) == 1
+    # move22: (invalid)
+    assert board.valid_move(move22) == 0
+    # move23: (valid)
+    assert board.valid_move(move23) == 1
+    # move24: (invalid)
+    assert board.valid_move(move24) == 0
 
 def test_attacked_squares():
     # set grid with kings on e4 and e5

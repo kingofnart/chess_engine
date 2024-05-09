@@ -126,22 +126,30 @@ class Grid():
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
-    def line_search(self, x, y, coord): # x, y = -1,0,1 to set search direction
+    def line_search(self, y, x, coord): # x, y = -1,0,1 to set search direction
+        search = True
         lst = []
-        idx = [coord[0] + x, coord[1] + y] # don't set square piece is on to attacked, piece cant attack itself!
+        idx = [coord[0] + y, coord[1] + x] # don't set square piece is on to attacked, piece cant attack itself!
         # want to search in straight line until you find piece or edge of board
-        while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and self.grid[idx[0]][idx[1]] == 0:
-            lst.append(idx) # include coordinate idx as attacked square
-            idx[0] = idx[0] + x
-            idx[1] = idx[1] + y
+        while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
+            lst.append(idx.copy())
+            if self.grid[idx[0]][idx[1]] != 0: # found piece, stop search
+                search = False
+            idx[0] = idx[0] + y
+            idx[1] = idx[1] + x
         return lst
     
     def valid_move(self, move):
         # move = [[x1, y1], [x2, y2]]
         piece = self.grid[move[0][0]][move[0][1]]
-        
-        if (piece != 0):
+        if piece:
+            # first make sure you're not capturing your own piece
+            piece2 = self.grid[move[1][0]][move[1][1]]
+            if piece2:
+                if piece2.color == piece.color:
+                    return 0
             match piece.id:
+                
                 # king
                 case 0:
                     if np.sqrt((move[0][0]-move[1][0])**2 + (move[1][0]-move[1][1])**2) <= np.sqrt(2):
