@@ -17,6 +17,14 @@ move6 = [[1,0], [4,0]] # a2->a5
 move7 = [[6,0], [3,0]] # a7->a4
 move8 = [[0,1], [2,2]] # b1->c3
 move9 = [[7,1], [5,2]] # b8->c6
+move10 = [[0,0], [4,4]] # a1->e5
+move11 = [[0,2], [4,4]] # c1->e5
+move12 = [[0,3], [4,4]] # d1->e5
+move13 = [[0,4], [4,4]] # e1->e5
+move14 = [[7,0], [4,4]] # a8->e5
+move15 = [[7,2], [4,4]] # c8->e5
+move16 = [[7,3], [4,4]] # d8->e5
+move17 = [[7,4], [4,4]] # e8->e5
 
 def test_vaild_move():
     # move0: (valid)
@@ -39,6 +47,23 @@ def test_vaild_move():
     assert board.valid_move(move8) == 1
     # move9: (valid move)
     assert board.valid_move(move9) == 1
+    # move10: (invalid move)
+    assert board.valid_move(move10) == 0
+    # move11: (invalid move)
+    assert board.valid_move(move11) == 0
+    # move12: (invalid move)
+    assert board.valid_move(move12) == 0
+    # move13: (invalid move)
+    assert board.valid_move(move13) == 0
+    # move14: (invalid move)
+    assert board.valid_move(move14) == 0
+    # move15: (invalid move)
+    assert board.valid_move(move15) == 0
+    # move16: (invalid move)
+    assert board.valid_move(move16) == 0
+    # move17: (invalid move)
+    assert board.valid_move(move17) == 0
+
 
 def test_attacked_squares():
     # set grid with kings on e4 and e5
