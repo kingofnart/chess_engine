@@ -127,16 +127,12 @@ class Grid():
     # for queen, rook, bishop
     def line_search(self, x, y, coord): # x, y = -1,0,1 to set search direction
         lst = []
-        search = True
         idx = [coord[0] + x, coord[1] + y] # don't set square piece is on to attacked, piece cant attack itself!
-        while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
-            lst.append(idx) # include peice as attacked square
-            if self.grid[idx[0]][idx[1]] != 0: # found piece, stop search this direction
-                search = False
-                break
-            else:
-                idx[0] = idx[0] + x
-                idx[1] = idx[1] + y
+        # want to search in straight line until you find piece or edge of board
+        while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and self.grid[idx[0]][idx[1]] == 0:
+            lst.append(idx) # include coordinate idx as attacked square
+            idx[0] = idx[0] + x
+            idx[1] = idx[1] + y
         return lst
     
     def valid_move(self, move):
@@ -153,16 +149,58 @@ class Grid():
                     return 0
 
                 # queen
-                #case 1:
+                case 1:
+                    if move[1] in (self.line_search(1, 0, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(1, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(0, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, 0, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, -1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(0, -1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(1, -1, move[0])):
+                        return 1
+                    else: return 0
 
                 # rook
-                #case 2:
+                case 2:
+                    if move[1] in (self.line_search(1, 0, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(0, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, 0, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(0, -1, move[0])):
+                        return 1
+                    else: return 0
 
                 # bishop
-                #case 3:
+                case 3:
+                    if move[1] in (self.line_search(1, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, 1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(-1, -1, move[0])):
+                        return 1
+                    elif move[1] in (self.line_search(1, -1, move[0])):
+                        return 1
+                    else: return 0
 
                 # knight
-                #case 4:
+                case 4:
+                    if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
+                        if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
+                            return 1
+                    elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
+                        if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
+                            return 1
+                    else: return 0
 
                 # pawn
                 case 5:
