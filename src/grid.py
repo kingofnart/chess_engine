@@ -71,16 +71,8 @@ class Grid():
                         attacked_list.append(self.line_search(-1, 0, coord)) # pi
                         attacked_list.append(self.line_search(0, -1, coord)) # 3pi/2
 
-                    # bishop
-                    case 3:
-                        # only diagonals
-                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
-                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
-                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
-                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
-
                     # knight
-                    case 4:
+                    case 3:
                         # check for move 2 squares in one cardinal directrion
                         # then check for move 1 square perpendicular
                         if coord[0] >= 2: # move up
@@ -103,6 +95,15 @@ class Grid():
                                 attacked_list.append([coord[0] - 1, coord[1] + 2])
                             if coord[0] < 7:
                                 attacked_list.append([coord[0] + 1, coord[1] + 2])
+                    
+                    # bishop
+                    case 4:
+                        # only diagonals
+                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
+                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
+                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
+                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
+
                     # pawn
                     case 5:
                         if color: # black
@@ -180,8 +181,19 @@ class Grid():
                         return 1
                     else: return 0
 
-                # bishop
+                # knight
                 case 3:
+                    if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
+                        if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
+                            return 1
+                    elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
+                        if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
+                            return 1
+                    else: return 0
+
+                
+                # bishop
+                case 4:
                     if move[1] in (self.line_search(1, 1, move[0])):
                         return 1
                     elif move[1] in (self.line_search(-1, 1, move[0])):
@@ -190,16 +202,6 @@ class Grid():
                         return 1
                     elif move[1] in (self.line_search(1, -1, move[0])):
                         return 1
-                    else: return 0
-
-                # knight
-                case 4:
-                    if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
-                        if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
-                            return 1
-                    elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
-                        if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
-                            return 1
                     else: return 0
 
                 # pawn
