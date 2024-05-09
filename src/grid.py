@@ -4,21 +4,36 @@ from piece import Piece
 class Grid():
     def __init__(self):
         # color key: 0 = white, 1 = black
-        self.w_pcs = [Piece(0,0), Piece(0,1), Piece(0,2), Piece(0,2), Piece(0,3), Piece(0,3), Piece(0,4), Piece(0,4), Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5)]
-        self.b_pcs = [Piece(1,0), Piece(1,1), Piece(1,2), Piece(1,2), Piece(1,3), Piece(1,3), Piece(1,4), Piece(1,4), Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5)]
-        # coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
-        self.w_coords = np.array([[4,0], [3,0], [0,0], [7,0], [1,0], [6,0], [3,0], [5,0], [0,1], [1,1], [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]])
-        self.b_coords = np.array([[4,7], [3,7], [0,7], [7,7], [1,7], [6,7], [3,7], [5,7], [0,6], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]])
-        self.w_attacked_squares = np.array([[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]])
-        self.b_attacked_squares = np.array([[0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5]])
-        self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
+        self.w_pcs = [Piece(0,0), Piece(0,1), Piece(0,2), Piece(0,2), 
+                      Piece(0,3), Piece(0,3), Piece(0,4), Piece(0,4), 
+                      Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 
+                      Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5)]
+        self.b_pcs = [Piece(1,0), Piece(1,1), Piece(1,2), Piece(1,2), 
+                      Piece(1,3), Piece(1,3), Piece(1,4), Piece(1,4), 
+                      Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 
+                      Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5)]
+        # coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+        #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+        self.w_coords = np.array([[4,0], [3,0], [0,0], [7,0], [1,0], 
+                                  [6,0], [3,0], [5,0], [0,1], [1,1], 
+                                  [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]])
+        self.b_coords = np.array([[4,7], [3,7], [0,7], [7,7], [1,7], 
+                                  [6,7], [3,7], [5,7], [0,6], [1,6], 
+                                  [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]])
+        self.w_attacked_squares = np.array([[0,2], [1,2], [2,2], [3,2], 
+                                            [4,2], [5,2], [6,2], [7,2]])
+        self.b_attacked_squares = np.array([[0,5], [1,5], [2,5], [3,5], 
+                                            [4,5], [5,5], [6,5], [7,5]])
+        self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
+                      self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
                      self.w_pcs[8:], 
                      [0 for _ in range(8)], 
                      [0 for _ in range(8)], 
                      [0 for _ in range(8)], 
                      [0 for _ in range(8)], 
                      self.b_pcs[8:], 
-                     [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
+                     [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
+                      self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
 
     def attacked_squares(self, color):
         attacked_list = []
@@ -129,7 +144,8 @@ class Grid():
     def line_search(self, y, x, coord): # x, y = -1,0,1 to set search direction
         search = True
         lst = []
-        idx = [coord[0] + y, coord[1] + x] # don't set square piece is on to attacked, piece cant attack itself!
+        # don't set square piece is on to attacked, piece cant attack itself!
+        idx = [coord[0] + y, coord[1] + x] 
         # want to search in straight line until you find piece or edge of board
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
             lst.append(idx.copy())
