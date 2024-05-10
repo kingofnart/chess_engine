@@ -100,7 +100,42 @@ def test_vaild_move():
     assert board.valid_move(move24) == 0
 
 def test_attacked_squares():
-    # set grid with kings on e4 and e5
+    
+    # set grid to Fried Liver opening
+    board.grid = [[Piece(0,2), Piece(0,3), Piece(0,4), Piece(0,1), Piece(0,0), 0, 0, Piece(0,2)], 
+                  [Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 0, Piece(0,5), Piece(0,5), Piece(0,5)], 
+                  [0 for _ in range(8)], 
+                  [0, 0, Piece(0,4), 0, Piece(0,5), 0, 0, 0], 
+                  [0, 0, 0, 0, Piece(1,5), 0, Piece(0,3), 0], 
+                  [0, 0, Piece(1,3), 0, 0, Piece(1,3), 0, 0], 
+                  [Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 0, Piece(1,5), Piece(1,5), Piece(1,5)], 
+                  [Piece(1,2), 0, Piece(1,4), Piece(1,1), Piece(1,0), Piece(1,4), 0, Piece(1,2)]]
+# coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+#             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+    board.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                               [4,6], [0,2], [3,2], [1,0], [1,1], 
+                               [1,2], [1,3], [3,4], [1,5], [1,6], [1,7]])
+    board.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [5,2], 
+                               [5,5], [7,3], [7,5], [6,0], [6,1], 
+                               [6,2], [6,3], [4,4], [6,5], [6,6], [6,7]])
+    board.attacked_squares(0)
+    assert np.sum(np.array(board.w_attacked_squares) - np.array([[1, 4], [1, 3], [1, 5], [0, 3], [0, 5], 
+                                                                [0, 4], [2, 5], [3, 6], [4, 7], [1, 2], 
+                                                                [0, 2], [0, 1], [1, 0], [1, 7], [0, 6], 
+                                                                [2, 0], [2, 2], [2, 7], [6, 5], [6, 7], 
+                                                                [3, 4], [5, 4], [1, 1], [4, 3], [4, 1], 
+                                                                [5, 0], [2, 1], [2, 3], [2, 4], [4, 5], 
+                                                                [2, 6]])) == 0
+    board.attacked_squares(1)
+    assert np.sum(np.array(board.b_attacked_squares) - np.array([[6, 4], [6, 3], [6, 5], [7, 3], [7, 5], 
+                                                                 [7, 4], [7, 2], [6, 2], [5, 5], [7, 1], 
+                                                                 [6, 0], [7, 6], [6, 7], [3, 1], [3, 3], 
+                                                                 [4, 0], [4, 4], [3, 4], [3, 6], [4, 3], 
+                                                                 [4, 7], [5, 3], [4, 2], [2, 0], [6, 6], 
+                                                                 [5, 1], [5, 0], [5, 2], [5, 4], [3, 5], 
+                                                                 [5, 6], [5, 7]])) == 0
+    board.reset()
+    # set grid with kings on e4 and e5 
     board.grid = [[0 for _ in range(8)], 
                   [0 for _ in range(8)], 
                   [0 for _ in range(8)], 
@@ -116,13 +151,13 @@ def test_attacked_squares():
     # update king coordinates
     board.w_coords[0] = [4,3]
     board.b_coords[0] = [4,4]
-    assert np.sum(np.array(board.w_attacked_squares) - np.array([[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2]])) == 0
+    assert np.sum(np.array(board.w_attacked_squares) - np.array([])) == 0
     board.attacked_squares(0)
     assert np.sum(np.array(board.w_attacked_squares) - [np.array([3, 3]), np.array([3, 2]), 
                                                         np.array([3, 4]), np.array([5, 3]), 
                                                         np.array([5, 2]), np.array([5, 4]), 
                                                         np.array([4, 2]), np.array([4, 4])]) == 0
-    assert np.sum(np.array(board.b_attacked_squares) - np.array([[0,5], [1,5], [2,5], [3,5], [4,5], [5,5], [6,5], [7,5]])) == 0
+    assert np.sum(np.array(board.b_attacked_squares) - np.array([])) == 0
     board.attacked_squares(1)
     assert np.sum(np.array(board.b_attacked_squares) - [np.array([3, 4]), np.array([3, 3]), 
                                                         np.array([3, 5]), np.array([5, 4]), 
