@@ -1,6 +1,7 @@
 class Piece:
-    def __init__(self, color, id):
+    def __init__(self, color, type, id):
         self.color = color
+        self.type = type
         self.id = id
         self.captured = 0
         self.moved = 0

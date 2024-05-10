@@ -4,6 +4,9 @@ from grid import Grid
 from piece import Piece
 
 names = {0: "King", 1: "Queen", 2: "Rook", 3: "Bishop", 4: "Knight", 5: "Pawn"}
+# piece type key: 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
+# piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+#             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
 board = Grid()
 grid = board.grid
 # NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row  
@@ -35,6 +38,25 @@ move22 = [[4,6], [3,4]] # g5->e4
 move23 = [[0,3], [3,6]] # d1->g4
 move24 = [[0,3], [4,3]] # d1->d5
 
+def set_fried_liver(grd):
+    grd.grid =  [[grd.w_pcs[2], grd.w_pcs[4], grd.w_pcs[6], grd.w_pcs[1], 
+                  grd.w_pcs[0], 0, 0, grd.w_pcs[3]], 
+                  [grd.w_pcs[8], grd.w_pcs[9], grd.w_pcs[10], grd.w_pcs[11], 0, 
+                   grd.w_pcs[13], grd.w_pcs[14], grd.w_pcs[15]], 
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, grd.w_pcs[7], 0, grd.w_pcs[12], 0, 0, 0], 
+                  [0, 0, 0, 0, grd.b_pcs[12], 0, grd.w_pcs[5], 0], 
+                  [0, 0, grd.b_pcs[4], 0, 0, grd.b_pcs[5], 0, 0], 
+                  [grd.b_pcs[8], grd.b_pcs[9], grd.b_pcs[10], grd.b_pcs[11], 0, 
+                   grd.b_pcs[13], grd.b_pcs[14], grd.b_pcs[15]], 
+                  [grd.b_pcs[2], 0, grd.b_pcs[6], grd.b_pcs[1], 
+                   grd.b_pcs[0], grd.b_pcs[7], 0, grd.b_pcs[3]]]
+    grd.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                               [4,6], [0,2], [3,2], [1,0], [1,1], 
+                               [1,2], [1,3], [3,4], [1,5], [1,6], [1,7]])
+    grd.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [5,2], 
+                               [5,5], [7,3], [7,5], [6,0], [6,1], 
+                               [6,2], [6,3], [4,4], [6,5], [6,6], [6,7]])
 
 def test_vaild_move():
     # move0: (valid)
@@ -74,16 +96,9 @@ def test_vaild_move():
     # move17: (invalid move)
     assert board.valid_move(move17) == 0
 
-    # 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
     # set grid to Fried Liver opening
-    board.grid = [[Piece(0,2), Piece(0,3), Piece(0,4), Piece(0,1), Piece(0,0), 0, 0, Piece(0,2)], 
-                  [Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 0, Piece(0,5), Piece(0,5), Piece(0,5)], 
-                  [0 for _ in range(8)], 
-                  [0, 0, Piece(0,4), 0, Piece(0,5), 0, 0, 0], 
-                  [0, 0, 0, 0, Piece(1,5), 0, Piece(0,3), 0], 
-                  [0, 0, Piece(1,3), 0, 0, Piece(1,3), 0, 0], 
-                  [Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 0, Piece(1,5), Piece(1,5), Piece(1,5)], 
-                  [Piece(1,2), 0, Piece(1,4), Piece(1,1), Piece(1,0), Piece(1,4), 0, Piece(1,2)]]
+    set_fried_liver(board)
+
     # move18: (valid)
     assert board.valid_move(move18) == 1
     # move19: (valid)
@@ -99,25 +114,9 @@ def test_vaild_move():
     # move24: (invalid)
     assert board.valid_move(move24) == 0
 
-def test_attacked_squares():
-    
+def test_attacked_squares(): 
     # set grid to Fried Liver opening
-    board.grid = [[Piece(0,2), Piece(0,3), Piece(0,4), Piece(0,1), Piece(0,0), 0, 0, Piece(0,2)], 
-                  [Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 0, Piece(0,5), Piece(0,5), Piece(0,5)], 
-                  [0 for _ in range(8)], 
-                  [0, 0, Piece(0,4), 0, Piece(0,5), 0, 0, 0], 
-                  [0, 0, 0, 0, Piece(1,5), 0, Piece(0,3), 0], 
-                  [0, 0, Piece(1,3), 0, 0, Piece(1,3), 0, 0], 
-                  [Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 0, Piece(1,5), Piece(1,5), Piece(1,5)], 
-                  [Piece(1,2), 0, Piece(1,4), Piece(1,1), Piece(1,0), Piece(1,4), 0, Piece(1,2)]]
-# coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
-#             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
-    board.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
-                               [4,6], [0,2], [3,2], [1,0], [1,1], 
-                               [1,2], [1,3], [3,4], [1,5], [1,6], [1,7]])
-    board.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [5,2], 
-                               [5,5], [7,3], [7,5], [6,0], [6,1], 
-                               [6,2], [6,3], [4,4], [6,5], [6,6], [6,7]])
+    set_fried_liver(board)
     board.attacked_squares(0)
     assert np.sum(np.array(board.w_attacked_squares) - np.array([[1, 4], [1, 3], [1, 5], [0, 3], [0, 5], 
                                                                 [0, 4], [2, 5], [3, 6], [4, 7], [1, 2], 
@@ -139,8 +138,8 @@ def test_attacked_squares():
     board.grid = [[0 for _ in range(8)], 
                   [0 for _ in range(8)], 
                   [0 for _ in range(8)], 
-                  [0, 0, 0, 0, Piece(0,0), 0, 0, 0], 
-                  [0, 0, 0, 0, Piece(1,0), 0, 0, 0], 
+                  [0, 0, 0, 0, Piece(0,0,0), 0, 0, 0], 
+                  [0, 0, 0, 0, Piece(1,0,0), 0, 0, 0], 
                   [0 for _ in range(8)], 
                   [0 for _ in range(8)], 
                   [0 for _ in range(8)]]
