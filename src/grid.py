@@ -14,16 +14,14 @@ class Grid():
                       Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5)]
         # coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
         #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
-        self.w_coords = np.array([[4,0], [3,0], [0,0], [7,0], [1,0], 
-                                  [6,0], [3,0], [5,0], [0,1], [1,1], 
-                                  [2,1], [3,1], [4,1], [5,1], [6,1], [7,1]])
-        self.b_coords = np.array([[4,7], [3,7], [0,7], [7,7], [1,7], 
-                                  [6,7], [3,7], [5,7], [0,6], [1,6], 
-                                  [2,6], [3,6], [4,6], [5,6], [6,6], [7,6]])
-        self.w_attacked_squares = np.array([[0,2], [1,2], [2,2], [3,2], 
-                                            [4,2], [5,2], [6,2], [7,2]])
-        self.b_attacked_squares = np.array([[0,5], [1,5], [2,5], [3,5], 
-                                            [4,5], [5,5], [6,5], [7,5]])
+        self.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [1,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])
+        self.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])
+        self.w_attacked_squares = []
+        self.b_attacked_squares = []
         self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
                       self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
                      self.w_pcs[8:], 
@@ -34,6 +32,35 @@ class Grid():
                      self.b_pcs[8:], 
                      [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
                       self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
+        
+    def reset(self):
+        for piece in self.w_pcs:
+            piece.captured = 0
+            piece.enpassant = 0
+            piece.moved = 0
+        for piece in self.b_pcs:
+            piece.captured = 0
+            piece.enpassant = 0
+            piece.moved = 0
+        self.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [1,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])
+        self.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])
+        self.w_attacked_squares = []
+        self.b_attacked_squares = []
+        self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
+                      self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
+                     self.w_pcs[8:], 
+                     [0 for _ in range(8)], 
+                     [0 for _ in range(8)], 
+                     [0 for _ in range(8)], 
+                     [0 for _ in range(8)], 
+                     self.b_pcs[8:], 
+                     [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
+                      self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
+        
 
     def attacked_squares(self, color):
         attacked_list = []
@@ -51,40 +78,53 @@ class Grid():
                     case 0:
                         # only move one square, no moving off the board
                         if coord[0] != 0:
-                            attacked_list.append(coord + [-1,0])
+                            self.add_to_list(attacked_list, [(coord + [-1,0]).tolist()])
                             if coord[1] != 0:
-                                attacked_list.append(coord + [-1,-1])
+                                self.add_to_list(attacked_list, [(coord + [-1,-1]).tolist()])
                             if coord[1] != 7:
-                                attacked_list.append(coord + [-1,1])
+                                self.add_to_list(attacked_list, [(coord + [-1,1]).tolist()])
                         if coord[0] != 7:
-                            attacked_list.append(coord + [1,0])
+                            self.add_to_list(attacked_list, [(coord + [1,0]).tolist()])
                             if coord[1] != 0:
-                                attacked_list.append(coord + [1,-1])
+                                self.add_to_list(attacked_list, [(coord + [1,-1]).tolist()])
                             if coord[1] != 7:
-                                attacked_list.append(coord + [1,1])
+                                self.add_to_list(attacked_list, [(coord + [1,1]).tolist()])
                         if coord[1] != 0:
-                            attacked_list.append(coord + [0,-1])
+                            self.add_to_list(attacked_list, [(coord + [0,-1]).tolist()])
                         if coord[1] != 7:
-                            attacked_list.append(coord + [0,1])
+                            self.add_to_list(attacked_list, [(coord + [0,1]).tolist()])
+                    
                     # queen
                     case 1:
                         # just gonna search all 8 directions in order
-                        attacked_list.append(self.line_search(1, 0, coord)) # 0
-                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
-                        attacked_list.append(self.line_search(0, 1, coord)) # pi/2
-                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
-                        attacked_list.append(self.line_search(-1, 0, coord)) # pi
-                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
-                        attacked_list.append(self.line_search(0, -1, coord)) # 3pi/2
-                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
+                        lst = self.line_search(0, 1, coord) # 0
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(1, 1, coord) # pi/4
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(1, 0, coord) # pi/2
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(1, -1, coord) # 3pi/4
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(0, -1, coord) # pi
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(-1, -1, coord) # 5pi/4
+                        self.add_to_list(attacked_list, lst) 
+                        lst = self.line_search(-1, 0, coord) # 3pi/2
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(-1, 1, coord) # 7pi/4
+                        self.add_to_list(attacked_list, lst)
 
                     # rook
                     case 2:
                         # only horizontals & verticals
-                        attacked_list.append(self.line_search(1, 0, coord)) # 0
-                        attacked_list.append(self.line_search(0, 1, coord)) # pi/2
-                        attacked_list.append(self.line_search(-1, 0, coord)) # pi
-                        attacked_list.append(self.line_search(0, -1, coord)) # 3pi/2
+                        lst = self.line_search(0, 1, coord) # 0
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(1, 0, coord) # pi/2
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(0, -1, coord) # pi
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(-1, 0, coord) # 3pi/2
+                        self.add_to_list(attacked_list, lst)
 
                     # knight
                     case 3:
@@ -92,52 +132,65 @@ class Grid():
                         # then check for move 1 square perpendicular
                         if coord[0] >= 2: # move up
                             if coord[1] > 0:
-                                attacked_list.append([coord[0] - 2, coord[1] - 1])
+                                self.add_to_list(attacked_list, [[coord[0] - 2, coord[1] - 1]])
                             if coord[1] < 7:
-                                attacked_list.append([coord[0] - 2, coord[1] + 1])
+                                self.add_to_list(attacked_list, [[coord[0] - 2, coord[1] + 1]])
                         if coord[0] <= 5: # move down
                             if coord[1] > 0:
-                                attacked_list.append([coord[0] + 2, coord[1] - 1])
+                                self.add_to_list(attacked_list, [[coord[0] + 2, coord[1] - 1]])
                             if coord[1] < 7:
-                                attacked_list.append([coord[0] + 2, coord[1] + 1])
+                                self.add_to_list(attacked_list, [[coord[0] + 2, coord[1] + 1]])
                         if coord[1] >= 2: # move left
                             if coord[0] > 0:
-                                attacked_list.append([coord[0] - 1, coord[1] - 2])
+                                self.add_to_list(attacked_list, [[coord[0] - 1, coord[1] - 2]])
                             if coord[0] < 7:
-                                attacked_list.append([coord[0] + 1, coord[1] - 2])
+                                self.add_to_list(attacked_list, [[coord[0] + 1, coord[1] - 2]])
                         if coord[1] <= 5: # move right
                             if coord[0] > 0:
-                                attacked_list.append([coord[0] - 1, coord[1] + 2])
+                                self.add_to_list(attacked_list, [[coord[0] - 1, coord[1] + 2]])
                             if coord[0] < 7:
-                                attacked_list.append([coord[0] + 1, coord[1] + 2])
+                                self.add_to_list(attacked_list, [[coord[0] + 1, coord[1] + 2]])
                     
                     # bishop
                     case 4:
                         # only diagonals
-                        attacked_list.append(self.line_search(1, 1, coord)) # pi/4
-                        attacked_list.append(self.line_search(-1, 1, coord)) # 3pi/4
-                        attacked_list.append(self.line_search(-1, -1, coord)) # 5pi/4
-                        attacked_list.append(self.line_search(1, -1, coord)) # 7pi/4
+                        lst = self.line_search(1, 1, coord) # pi/4
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(1, -1, coord) # 3pi/4
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(-1, -1, coord) # 5pi/4
+                        self.add_to_list(attacked_list, lst)
+                        lst = self.line_search(-1, 1, coord) # 7pi/4
+                        self.add_to_list(attacked_list, lst)
 
                     # pawn
                     case 5:
                         if color: # black
                             if coord[1] > 0:
-                                attacked_list.append([coord[0] - 1, coord[1] - 1])
+                                self.add_to_list(attacked_list, [[coord[0] - 1, coord[1] - 1]])
                             if coord[1] < 7:
-                                attacked_list.append([coord[0] - 1, coord[1] + 1])
+                                self.add_to_list(attacked_list, [[coord[0] - 1, coord[1] + 1]])
                         else:
                             if coord[1] > 0:
-                                attacked_list.append([coord[0] + 1, coord[1] - 1])
+                                self.add_to_list(attacked_list, [[coord[0] + 1, coord[1] - 1]])
                             if coord[1] < 7:
-                                attacked_list.append([coord[0] + 1, coord[1] + 1])
+                                self.add_to_list(attacked_list, [[coord[0] + 1, coord[1] + 1]])
                     
                     case _:
                         raise Exception("Invalid piece id")
+        
         # update correct list
         if color:
             self.b_attacked_squares = attacked_list
         else: self.w_attacked_squares = attacked_list
+
+    # helper function for attacked_squares to add each element of list only if it's unique
+    # might want to change attacked_squares to set of tuples instead of list of lists
+    def add_to_list(self, old, new):
+        if len(new) > 0:
+            for x in new:
+                if x not in old:
+                    old.append(x)
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
