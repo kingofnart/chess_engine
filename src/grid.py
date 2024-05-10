@@ -4,15 +4,15 @@ from piece import Piece
 class Grid():
     def __init__(self):
         # color key: 0 = white, 1 = black
-        self.w_pcs = [Piece(0,0), Piece(0,1), Piece(0,2), Piece(0,2), 
-                      Piece(0,3), Piece(0,3), Piece(0,4), Piece(0,4), 
-                      Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5), 
-                      Piece(0,5), Piece(0,5), Piece(0,5), Piece(0,5)]
-        self.b_pcs = [Piece(1,0), Piece(1,1), Piece(1,2), Piece(1,2), 
-                      Piece(1,3), Piece(1,3), Piece(1,4), Piece(1,4), 
-                      Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5), 
-                      Piece(1,5), Piece(1,5), Piece(1,5), Piece(1,5)]
-        # coord key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+        self.w_pcs = [Piece(0,0,0), Piece(0,1,1), Piece(0,2,2), Piece(0,2,3), 
+                      Piece(0,3,4), Piece(0,3,5), Piece(0,4,6), Piece(0,4,7), 
+                      Piece(0,5,8), Piece(0,5,9), Piece(0,5,10), Piece(0,5,11), 
+                      Piece(0,5,12), Piece(0,5,13), Piece(0,5,14), Piece(0,5,15)]
+        self.b_pcs = [Piece(1,0,0), Piece(1,1,1), Piece(1,2,2), Piece(1,2,3), 
+                      Piece(1,3,4), Piece(1,3,5), Piece(1,4,6), Piece(1,4,7), 
+                      Piece(1,5,8), Piece(1,5,9), Piece(1,5,10), Piece(1,5,11), 
+                      Piece(1,5,12), Piece(1,5,13), Piece(1,5,14), Piece(1,5,15)]
+        # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
         #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
         self.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
                                   [0,6], [0,2], [0,5], [1,0], [1,1], 
@@ -73,7 +73,7 @@ class Grid():
             coords = self.w_coords
         for piece, coord in zip(pieces, coords):
             if not piece.captured:
-                match piece.id:
+                match piece.type:
                     # king
                     case 0:
                         # only move one square, no moving off the board
@@ -217,7 +217,7 @@ class Grid():
             if piece2:
                 if piece2.color == piece.color:
                     return 0
-            match piece.id:
+            match piece.type:
                 
                 # king
                 case 0:
@@ -291,6 +291,7 @@ class Grid():
                         if move[0][0] + sign != move[1][0]: # invalid move
                             return 0
                         elif self.grid[move[1][0]][move[1][1]] == 0: # no piece forward-diagonal from pawn
+                            # not dealing with en passant yet --- need to fix this
                             if self.grid[move[1][0] + 1][move[1][1]] != 0: # en pesant?
                                 pawn2 = self.grid[move[1][0] + 1][move[1][1]]
                                 if pawn2.enpassant:
@@ -315,3 +316,42 @@ class Grid():
                     return -2
         else: # not piece
             return -1
+        
+    # function to reset enpassant for all pawns (also all pieces but only pawns matter)
+    def unenpassant(self, color):
+        if color:
+            pcs = self.b_pcs
+        else:
+            pcs = self.w_pcs
+        for piece in pcs:
+            piece.enpassant = 0
+
+    # function to check if king is attacked after applying a move
+    def king_safety(self, opp_color):
+        # color is color of pieces to check
+        if opp_color: # opp_color = black
+            king_pos = self.w_coords[0]
+        else: # opp_color = white
+            king_pos = self.b_coords[0]
+        if king_pos in self.attacked_squares(opp_color):
+            return 0
+        else:
+            return 1
+            
+    # function to apply move
+    def apply_move(self, move, color):
+        piece = self.grid[move[0][0]][move[0][1]]
+        if piece.moved == 0:
+                piece.set_moved(1)
+        piece2 = self.grid[move[1][0]][move[1][1]]
+        self.grid[move[1][0]][move[1][1]] = piece
+        if color: # color = black
+            self.b_coords[piece.id] = move[1]
+            if piece2 != 0:
+                piece2.set_captured(1)
+                self.w_coords[piece2.id] = None
+        else: # color = white
+            self.w_coords[piece.id] = move[1]
+            if piece2 != 0:
+                piece2.set_captured(1)
+                self.b_coords[piece2.id] = None
