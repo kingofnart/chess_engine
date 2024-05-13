@@ -204,7 +204,7 @@ def test_apply_move():
     # a3
     board.reset()
     #print_board(board)
-    board.apply_move(move0, 0)
+    board.apply_move(move0, 0) # apply move0 to black
     assert board.grid[move0[0][0]][move0[0][1]] == 0
     assert board.grid[move0[1][0]][move0[1][1]] == board.w_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -217,7 +217,7 @@ def test_apply_move():
     # a4
     board.reset()
     #print_board(board)
-    board.apply_move(move1, 0)
+    board.apply_move(move1, 0) # apply move1 to black
     assert board.grid[move1[0][0]][move1[0][1]] == 0
     assert board.grid[move1[1][0]][move1[1][1]] == board.w_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -225,5 +225,31 @@ def test_apply_move():
                                   [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])) == 0
     assert np.sum(board.b_coords - np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
                                   [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
+    #print_board(board)
+        # a4
+    board.reset()
+    #print_board(board)
+    board.apply_move(move4, 1) # apply move5 to black
+    assert board.grid[move4[0][0]][move4[0][1]] == 0
+    assert board.grid[move4[1][0]][move4[1][1]] == board.b_pcs[8]
+    assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [1,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])) == 0
+    assert np.sum(board.b_coords - np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [5,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
+    #print_board(board)
+        # a4
+    board.reset()
+    #print_board(board)
+    board.apply_move(move5, 1) # apply move6 to black
+    assert board.grid[move5[0][0]][move5[0][1]] == 0
+    assert board.grid[move5[1][0]][move5[1][1]] == board.b_pcs[8]
+    assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [1,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])) == 0
+    assert np.sum(board.b_coords - np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [4,0], [6,1], 
                                   [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
     #print_board(board)
