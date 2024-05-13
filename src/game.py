@@ -1,4 +1,3 @@
-import numpy as np
 import copy
 from grid import Grid
 
@@ -9,9 +8,9 @@ class Game():
         while True:
             move = [[0,0],[0,1]] # gui.get_move()
             if self.board.valid_move(move):
-                tmp = copy.deepcopy(self.board)
-                tmp.board.apply_move(move)
-                # check other opponents attacked squares for check
-                if(tmp.king_safety(self.turn)):
+                tmp_board = copy.deepcopy(self.board)
+                tmp_board.apply_move(move)
+                # check opponents attacked squares for check
+                if(tmp_board.king_safety(self.turn)):
                     self.board.apply_move(move)
                     self.turn = not self.turn
