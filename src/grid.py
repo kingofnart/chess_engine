@@ -342,7 +342,6 @@ class Grid():
                 return 0
             else:
                 return 1
-
             
     # function to apply move
     def apply_move(self, move, color):
@@ -351,6 +350,7 @@ class Grid():
                 piece.set_moved(1)
         piece2 = self.grid[move[1][0]][move[1][1]]
         self.grid[move[1][0]][move[1][1]] = piece
+        self.grid[move[0][0]][move[0][1]] = 0
         if color: # color = black
             self.b_coords[piece.id] = move[1]
             if piece2 != 0:

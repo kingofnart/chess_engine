@@ -3,7 +3,8 @@ sys.path.append('src')
 from grid import Grid
 from piece import Piece
 
-names = {0: "King", 1: "Queen", 2: "Rook", 3: "Bishop", 4: "Knight", 5: "Pawn"}
+names = {0: "King  ", 1: "Queen ", 2: "Rook  ", 3: "Bishop", 4: "Knight", 5: "Pawn  "}
+colors = {0: "W", 1: "B"}
 # piece type key: 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
 # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
 #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
@@ -38,6 +39,19 @@ move22 = [[4,6], [3,4]] # g5->e4
 move23 = [[0,3], [3,6]] # d1->g4
 move24 = [[0,3], [4,3]] # d1->d5
 
+# just for testing
+def print_board(grd):
+    print("\n\n")
+    for row in grd.grid:
+        print("|", end="")
+        for e in row:
+            if e != 0:
+                print(names[e.type], colors[e.color], end="|")
+            else:
+                print("[      ]", end="|")
+        print("\n_________________________________________________________________________")
+
+# just for testing
 def set_fried_liver(grd):
     grd.grid =  [[grd.w_pcs[2], grd.w_pcs[4], grd.w_pcs[6], grd.w_pcs[1], 
                   grd.w_pcs[0], 0, 0, grd.w_pcs[3]], 
@@ -187,4 +201,29 @@ def test_king_safety():
     assert board.king_safety(1) == 1
 
 def test_apply_move():
-    print("hello")
+    # a3
+    board.reset()
+    #print_board(board)
+    board.apply_move(move0, 0)
+    assert board.grid[move0[0][0]][move0[0][1]] == 0
+    assert board.grid[move0[1][0]][move0[1][1]] == board.w_pcs[8]
+    assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [2,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])) == 0
+    assert np.sum(board.b_coords - np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
+    #print_board(board)
+    # a4
+    board.reset()
+    #print_board(board)
+    board.apply_move(move1, 0)
+    assert board.grid[move1[0][0]][move1[0][1]] == 0
+    assert board.grid[move1[1][0]][move1[1][1]] == board.w_pcs[8]
+    assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [3,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])) == 0
+    assert np.sum(board.b_coords - np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
+    #print_board(board)
