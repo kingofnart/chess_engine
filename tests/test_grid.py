@@ -162,3 +162,29 @@ def test_attacked_squares():
                                                         np.array([3, 5]), np.array([5, 4]), 
                                                         np.array([5, 3]), np.array([5, 5]), 
                                                         np.array([4, 3]), np.array([4, 5])]) == 0
+def test_king_safety():
+    board.reset()
+    board.grid = [[0, 0, 0, 0, Piece(0,0,0), 0, 0, 0], 
+                [0 for _ in range(8)], 
+                [0 for _ in range(8)], 
+                [0, 0, 0, 0, Piece(0,1,1), 0, 0, 0], 
+                [0, 0, 0, Piece(1,1,1), 0, 0, 0, 0], 
+                [0 for _ in range(8)], 
+                [0 for _ in range(8)], 
+                [0, 0, 0, 0, Piece(1,0,0), 0, 0, 0]]
+    for i in range(2, 16):
+        board.w_pcs[i].captured = 1
+        board.b_pcs[i].captured = 1
+    
+    # update king coordinates
+    board.w_coords[0] = [0,4]
+    board.w_coords[1] = [3,4]
+    board.b_coords[0] = [7,4]
+    board.b_coords[1] = [4,3]
+    # opp color = white => black king attacked => should be false
+    assert board.king_safety(0) == 0
+    # opp color = white => white king safe => should be true
+    assert board.king_safety(1) == 1
+
+def test_apply_move():
+    print("hello")

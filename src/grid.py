@@ -328,15 +328,21 @@ class Grid():
 
     # function to check if king is attacked after applying a move
     def king_safety(self, opp_color):
-        # color is color of pieces to check
+        self.attacked_squares(opp_color)
+        # color is color of pieces to check attacked squares of
         if opp_color: # opp_color = black
             king_pos = self.w_coords[0]
+            if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.b_attacked_squares):
+                return 0
+            else:
+                return 1
         else: # opp_color = white
             king_pos = self.b_coords[0]
-        if king_pos in self.attacked_squares(opp_color):
-            return 0
-        else:
-            return 1
+            if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.w_attacked_squares):
+                return 0
+            else:
+                return 1
+
             
     # function to apply move
     def apply_move(self, move, color):
