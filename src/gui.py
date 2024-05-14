@@ -43,12 +43,7 @@ class ChessBoard:
             self.first_click = pos
             button.config(relief=SUNKEN) # let them know it's clicked
         elif self.first_click != pos: # can't move to same square
-            print("input: ", self.first_click, pos)
-            print("pre w coords: ", self.wc)
-            print("pre b coords: ", self.bc)
             self.wc, self.bc = self.callback(self.first_click, pos) # send (move0, move1) to play class
-            print("post w coords: ", self.wc)
-            print("post b coords: ", self.bc)
             self.update()
 
     def update(self):

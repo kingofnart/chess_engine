@@ -4,7 +4,7 @@ class Piece:
         self.type = type
         self.id = id
         self.captured = 0
-        self.moved = 0
+        self.moved = False
         self.enpassant = 0
     
     def set_captured(self, val):
