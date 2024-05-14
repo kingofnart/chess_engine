@@ -209,77 +209,108 @@ class Grid():
         return lst
     
     def valid_move(self, move):
+        
         # move = [[x1, y1], [x2, y2]]
         piece = self.grid[move[0][0]][move[0][1]]
         if piece:
+            print("piece found! id/color: ", piece.id, piece.color)
             # first make sure you're not capturing your own piece
             piece2 = self.grid[move[1][0]][move[1][1]]
             if piece2:
                 if piece2.color == piece.color:
+                    print("can't capture your own piece")
                     return 0
+                print("making a capture! piece capturing: ", piece2.id, piece2.color)
             match piece.type:
                 
                 # king
                 case 0:
                     if np.sqrt((move[0][0]-move[1][0])**2 + (move[1][0]-move[1][1])**2) <= np.sqrt(2):
                         if move[1][0] >= 0 and move[1][0] <= 7 and move[1][1] >= 0 and move[1][1] <= 7:
+                            print("valid king move! applying...")
                             return 1
+                    print("invalid king move! not applying...")
                     return 0
 
                 # queen
                 case 1:
                     if move[1] in (self.line_search(1, 0, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(1, 1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(0, 1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, 1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, 0, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, -1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(0, -1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
                     elif move[1] in (self.line_search(1, -1, move[0])):
+                        print("valid queen move! applying...")
                         return 1
-                    else: return 0
+                    else: 
+                        print("invalid queen move! not applying...")
+                        return 0
 
                 # rook
                 case 2:
                     if move[1] in (self.line_search(1, 0, move[0])):
+                        print("valid rook move! applying...")
                         return 1
                     elif move[1] in (self.line_search(0, 1, move[0])):
+                        print("valid rook move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, 0, move[0])):
+                        print("valid rook move! applying...")
                         return 1
                     elif move[1] in (self.line_search(0, -1, move[0])):
+                        print("valid rook move! applying...")
                         return 1
-                    else: return 0
+                    else: 
+                        print("invalid rook move! not applying...")
+                        return 0
 
                 # knight
                 case 3:
                     if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
                         if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
+                            print("valid knight move! applying...")
                             return 1
                     elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
                         if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
+                            print("valid knight move! applying...")
                             return 1
-                    else: return 0
+                    else: 
+                        print("invalid knight move! not applying...")
+                        return 0
 
-                
                 # bishop
                 case 4:
                     if move[1] in (self.line_search(1, 1, move[0])):
+                        print("valid bishop move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, 1, move[0])):
+                        print("valid bishop move! applying...")
                         return 1
                     elif move[1] in (self.line_search(-1, -1, move[0])):
+                        print("valid bishop move! applying...")
                         return 1
                     elif move[1] in (self.line_search(1, -1, move[0])):
+                        print("valid bishop move! applying...")
                         return 1
-                    else: return 0
+                    else: 
+                        print("invalid bishop move! not applying...")
+                        return 0
 
                 # pawn
                 case 5:
@@ -287,34 +318,65 @@ class Grid():
                         sign = 1 
                     else: # black
                         sign = -1 
-                    if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # capture
+                    # moving left/right by one
+                    if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
+                        # make sure move is diagonal
                         if move[0][0] + sign != move[1][0]: # invalid move
+                            print("invalid pawn move! not applying...")
                             return 0
+                        # En Passant
                         elif self.grid[move[1][0]][move[1][1]] == 0: # no piece forward-diagonal from pawn
-                            # not dealing with en passant yet --- need to fix this
+                            # en passant requirements: pawn left or right of current pawn
+                            # that pawn has enpassant flag (just made first move of two squares)
                             if self.grid[move[1][0] + 1][move[1][1]] != 0: # en pesant?
                                 pawn2 = self.grid[move[1][0] + 1][move[1][1]]
                                 if pawn2.enpassant:
+                                    print("EN PASSANT right!")
                                     pawn2.set_captured(1)
+                                    if piece2.color: # white capturing black
+                                        self.b_coords[piece2.id] = None
+                                    else: # black capturing white
+                                        self.w_coords[piece2.id] = None
+                                    print("valid pawn move! applying...")
                                     return 1
                             elif self.grid[move[1][0] - 1][move[1][1]] != 0:
                                 pawn2 = self.grid[move[1][0] - 1][move[1][1]]
                                 if pawn2.enpassant:
+                                    print("EN PASSANT left!")
                                     pawn2.set_captured(1)
+                                    if piece2.color: # white capturing black
+                                        self.b_coords[piece2.id] = None
+                                    else: # black capturing white
+                                        self.w_coords[piece2.id] = None
+                                    print("valid pawn move! applying...")
                                     return 1
-                            else: return 0
-                        else: # valid move
+                            else: 
+                                print("invalid en passant attempt! not applying...")
+                                return 0
+                        elif self.grid[move[1][0]][move[1][1]] != 0: # valid move
+                            print("valid pawn move! applying...")
                             return 1
-                    if move[0][0] + sign == move[1][0]: # valid move
-                        return 1    
-                    elif move[0][0] + 2*sign == move[1][0] and piece.moved == 0: # valid move
-                        piece.enpassant = 1
-                        return 1
+                    elif move[0][1] == move[1][1]: # pawns only move forward unless capturing
+                        if move[0][0] + sign == move[1][0]: # valid move
+                            print("valid pawn move! applying...")
+                            return 1    
+                        elif move[0][0] + 2*sign == move[1][0] and not piece.moved: # valid move
+                            print("valid pawn move! applying...")
+                            piece.enpassant = 1
+                            print("pawn can now be en passanted")
+                            return 1
+                        else: # invalid move
+                            print("invalid pawn move! not applying...")
+                            return 0
                     else: # invalid move
-                        return 0
+                            print("invalid pawn move! not applying...")
+                            return 0
+                
                 case _: # invalid piece id
                     return 0
+        
         else: # not piece
+            print("invalid move! must select piece!! not applying...")
             return 0
         
     # function to reset enpassant for all pawns (also all pieces but only pawns matter)
@@ -324,7 +386,9 @@ class Grid():
         else:
             pcs = self.w_pcs
         for piece in pcs:
-            piece.enpassant = 0
+            if piece.enpassant:
+                print("Pawn ", piece.id, " of color ", piece.color, " has be unenpassanted.")
+                piece.enpassant = 0
 
     # function to check if king is attacked after applying a move
     def king_safety(self, opp_color):
@@ -333,31 +397,44 @@ class Grid():
         if opp_color: # opp_color = black
             king_pos = self.w_coords[0]
             if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.b_attacked_squares):
+                print("king is put in check by that move! invalid, not applying...")
                 return 0
             else:
+                print("move retains king safety. valid, applying...")
                 return 1
         else: # opp_color = white
             king_pos = self.b_coords[0]
             if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.w_attacked_squares):
+                print("king is put in check by that move! invalid, not applying...")
                 return 0
             else:
+                print("move retains king safety. valid, applying...")
                 return 1
             
     # function to apply move
     def apply_move(self, move, color):
+        print("board at pos1: ", self.grid[move[0][0]][move[0][1]])
+        print("board at pos2: ", self.grid[move[1][0]][move[1][1]])
         piece = self.grid[move[0][0]][move[0][1]]
-        if piece.moved == 0:
-                piece.set_moved(1)
+        print("moving piece id/color: ", piece.id, piece.color)
+        if not piece.moved:
+            piece.set_moved(True)
         piece2 = self.grid[move[1][0]][move[1][1]]
         self.grid[move[1][0]][move[1][1]] = piece
         self.grid[move[0][0]][move[0][1]] = 0
         if color: # color = black
             self.b_coords[piece.id] = move[1]
             if piece2 != 0:
+                print("capturing white piece! id/color: ", piece2.id, piece2.color)
                 piece2.set_captured(1)
-                self.w_coords[piece2.id] = None
+                print("piece2.id: ", piece2.id, "type: ", type(piece2.id))
+                self.w_coords[piece2.id] = [-1,-1]
         else: # color = white
             self.w_coords[piece.id] = move[1]
             if piece2 != 0:
+                print("capturing black piece! id/color: ", piece2.id, piece2.color)
                 piece2.set_captured(1)
-                self.b_coords[piece2.id] = None
+                print("piece2.id: ", piece2.id, "type: ", type(piece2.id))
+                self.b_coords[piece2.id] = [-1,-1]
+        print("board at pos1: ", self.grid[move[0][0]][move[0][1]])
+        print("board at pos2: ", self.grid[move[1][0]][move[1][1]])
