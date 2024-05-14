@@ -313,9 +313,9 @@ class Grid():
                     else: # invalid move
                         return 0
                 case _: # invalid piece id
-                    return -2
+                    return 0
         else: # not piece
-            return -1
+            return 0
         
     # function to reset enpassant for all pawns (also all pieces but only pawns matter)
     def unenpassant(self, color):

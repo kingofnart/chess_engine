@@ -3,14 +3,17 @@ sys.path.append('src')
 from grid import Grid
 from piece import Piece
 
-names = {0: "King  ", 1: "Queen ", 2: "Rook  ", 3: "Bishop", 4: "Knight", 5: "Pawn  "}
-colors = {0: "W", 1: "B"}
 # piece type key: 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
 # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
 #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+
+# globals:
+names = {0: "King  ", 1: "Queen ", 2: "Rook  ", 3: "Bishop", 4: "Knight", 5: "Pawn  "}
+colors = {0: "W", 1: "B"}
 board = Grid()
 grid = board.grid
-# NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row  
+
+# NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row
 # opening moves
 move0 = [[1,0], [2,0]] # a2->a3
 move1 = [[1,0], [3,0]] # a2->a4
@@ -53,6 +56,7 @@ def print_board(grd):
 
 # just for testing
 def set_fried_liver(grd):
+
     grd.grid =  [[grd.w_pcs[2], grd.w_pcs[4], grd.w_pcs[6], grd.w_pcs[1], 
                   grd.w_pcs[0], 0, 0, grd.w_pcs[3]], 
                   [grd.w_pcs[8], grd.w_pcs[9], grd.w_pcs[10], grd.w_pcs[11], 0, 
@@ -73,6 +77,7 @@ def set_fried_liver(grd):
                                [6,2], [6,3], [4,4], [6,5], [6,6], [6,7]])
 
 def test_vaild_move():
+
     # move0: (valid)
     assert board.valid_move(move0) == 1
     # move1: (valid move)
@@ -80,7 +85,7 @@ def test_vaild_move():
     # move2: (invalid move)
     assert board.valid_move(move2) == 0
     # move3: (invalid piece)
-    assert board.valid_move(move3) == -1
+    assert board.valid_move(move3) == 0
     # move4: (valid)
     assert board.valid_move(move4) == 1
     # move5: (valid move)
@@ -129,6 +134,7 @@ def test_vaild_move():
     assert board.valid_move(move24) == 0
 
 def test_attacked_squares(): 
+
     # set grid to Fried Liver opening
     set_fried_liver(board)
     board.attacked_squares(0)
@@ -177,6 +183,7 @@ def test_attacked_squares():
                                                         np.array([5, 3]), np.array([5, 5]), 
                                                         np.array([4, 3]), np.array([4, 5])]) == 0
 def test_king_safety():
+
     board.reset()
     board.grid = [[0, 0, 0, 0, Piece(0,0,0), 0, 0, 0], 
                 [0 for _ in range(8)], 
@@ -201,6 +208,7 @@ def test_king_safety():
     assert board.king_safety(1) == 1
 
 def test_apply_move():
+
     # a3
     board.reset()
     #print_board(board)
@@ -227,7 +235,7 @@ def test_apply_move():
                                   [7,6], [7,2], [7,5], [6,0], [6,1], 
                                   [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
     #print_board(board)
-        # a4
+    # a7
     board.reset()
     #print_board(board)
     board.apply_move(move4, 1) # apply move5 to black
@@ -240,7 +248,7 @@ def test_apply_move():
                                   [7,6], [7,2], [7,5], [5,0], [6,1], 
                                   [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])) == 0
     #print_board(board)
-        # a4
+    # a6
     board.reset()
     #print_board(board)
     board.apply_move(move5, 1) # apply move6 to black
