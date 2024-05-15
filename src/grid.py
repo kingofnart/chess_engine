@@ -445,11 +445,6 @@ class Grid():
                                 pawn2 = self.grid[move[0][0]][move[1][1]]
                                 if pawn2 != 0: # en pesant?
                                     if pawn2.enpassant: # yes en pesant
-                                        # pawn2.set_captured(1)
-                                        # if piece.color: # white capturing black
-                                        #     self.b_coords[pawn2.id] = [-1,-1]
-                                        # else: # black capturing white
-                                        #     self.w_coords[pawn2.id] = [-1,-1]
                                         print("Valid pawn en passant. Applying...")
                                         self.enspassant = 1
                                         return 1
@@ -540,36 +535,44 @@ class Grid():
         piece.set_moved(True)
         if self.get_castle_kingside():
             if color: # black to move
-                king = self.grid[7][4] # king on e8, hasn't moved
+                # king on e8, hasn't moved
                 rook = self.grid[7][7] # black h rook, hasn't moved
-                self.grid[7][6] = king
+                self.grid[7][6] = piece
                 self.grid[7][5] = rook
-                self.b_coords[0] = [7,6]
-                self.b_coords[3] = [7,5]
+                self.grid[7][4] = 0 # don't forget to remove old reference to king
+                self.grid[7][7] = 0 # and the old reference to the rook
+                self.b_coords[piece.id] = [7,6]
+                self.b_coords[rook.id] = [7,5]
             else: # white to move
-                king = self.grid[0][4] # king on e1, hasn't moved
+                # king on e1, hasn't moved
                 rook = self.grid[0][7] # white h rook, hasn't moved
-                self.grid[0][6] = king
+                self.grid[0][6] = piece
                 self.grid[0][5] = rook
-                self.w_coords[0] = [0,6]
-                self.w_coords[3] = [0,5]
+                self.grid[0][4] = 0
+                self.grid[0][7] = 0
+                self.w_coords[piece.id] = [0,6]
+                self.w_coords[rook.id] = [0,5]
             rook.set_moved(True)
             self.set_castle_kingside(0)
         elif self.get_castle_queenside():
             if color: # black to move
-                king = self.grid[7][4] # king on e8, hasn't moved
+                # king on e8, hasn't moved
                 rook = self.grid[7][0] # black a rook, hasn't moved
-                self.grid[7][2] = king
+                self.grid[7][2] = piece
                 self.grid[7][3] = rook
-                self.b_coords[0] = [7,2]
-                self.b_coords[3] = [7,3]
+                self.grid[7][4] = 0
+                self.grid[7][7] = 0
+                self.b_coords[piece.id] = [7,2]
+                self.b_coords[rook.id] = [7,3]
             else: # white to move
-                king = self.grid[0][4] # king on e1, hasn't moved
+                # king on e1, hasn't moved
                 rook = self.grid[0][7] # white a rook, hasn't moved
-                self.grid[0][2] = king
+                self.grid[0][2] = piece
                 self.grid[0][3] = rook
-                self.w_coords[0] = [0,2]
-                self.w_coords[3] = [0,3]
+                self.grid[0][4] = 0
+                self.grid[0][7] = 0
+                self.w_coords[piece.id] = [0,2]
+                self.w_coords[rook.id] = [0,3]
             rook.set_moved(True)
             self.set_castle_queenside(0)
         elif self.get_enpassant():
