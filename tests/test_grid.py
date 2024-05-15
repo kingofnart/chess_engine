@@ -79,59 +79,59 @@ def set_fried_liver(grd):
 def test_vaild_move():
 
     # move0: (valid)
-    assert board.valid_move(move0) == 1
+    assert board.valid_move(move0, 0) == 1
     # move1: (valid move)
-    assert board.valid_move(move1) == 1
+    assert board.valid_move(move1, 0) == 1
     # move2: (invalid move)
-    assert board.valid_move(move2) == 0
+    assert board.valid_move(move2, 0) == 0
     # move3: (invalid piece)
-    assert board.valid_move(move3) == 0
+    assert board.valid_move(move3, 0) == 0
     # move4: (valid)
-    assert board.valid_move(move4) == 1
+    assert board.valid_move(move4, 1) == 1
     # move5: (valid move)
-    assert board.valid_move(move5) == 1
+    assert board.valid_move(move5, 1) == 1
     # move6: (invalid move)
-    assert board.valid_move(move6) == 0
+    assert board.valid_move(move6, 0) == 0
     # move7: (invalid move)
-    assert board.valid_move(move7) == 0
+    assert board.valid_move(move7, 1) == 0
     # move8: (valid move)
-    assert board.valid_move(move8) == 1
+    assert board.valid_move(move8, 0) == 1
     # move9: (valid move)
-    assert board.valid_move(move9) == 1
+    assert board.valid_move(move9, 1) == 1
     # move10: (invalid move)
-    assert board.valid_move(move10) == 0
+    assert board.valid_move(move10, 0) == 0
     # move11: (invalid move)
-    assert board.valid_move(move11) == 0
+    assert board.valid_move(move11, 0) == 0
     # move12: (invalid move)
-    assert board.valid_move(move12) == 0
+    assert board.valid_move(move12, 0) == 0
     # move13: (invalid move)
-    assert board.valid_move(move13) == 0
+    assert board.valid_move(move13, 0) == 0
     # move14: (invalid move)
-    assert board.valid_move(move14) == 0
+    assert board.valid_move(move14, 1) == 0
     # move15: (invalid move)
-    assert board.valid_move(move15) == 0
+    assert board.valid_move(move15, 1) == 0
     # move16: (invalid move)
-    assert board.valid_move(move16) == 0
+    assert board.valid_move(move16, 1) == 0
     # move17: (invalid move)
-    assert board.valid_move(move17) == 0
+    assert board.valid_move(move17, 1) == 0
 
     # set grid to Fried Liver opening
     set_fried_liver(board)
 
     # move18: (valid)
-    assert board.valid_move(move18) == 1
+    assert board.valid_move(move18, 0) == 1
     # move19: (valid)
-    assert board.valid_move(move19) == 1
+    assert board.valid_move(move19, 1) == 1
     # move20: (valid)
-    assert board.valid_move(move20) == 1
+    assert board.valid_move(move20, 1) == 1
     # move21: (valid)
-    assert board.valid_move(move21) == 1
+    assert board.valid_move(move21, 1) == 1
     # move22: (invalid)
-    assert board.valid_move(move22) == 0
+    assert board.valid_move(move22, 0) == 0
     # move23: (valid)
-    assert board.valid_move(move23) == 1
+    assert board.valid_move(move23, 0) == 1
     # move24: (invalid)
-    assert board.valid_move(move24) == 0
+    assert board.valid_move(move24, 0) == 0
 
 def test_attacked_squares(): 
 
