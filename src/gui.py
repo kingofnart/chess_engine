@@ -31,6 +31,7 @@ class ChessBoard:
             self.images[name + 'b'] = tk.PhotoImage(file=f'resources/{name}b.png')
         # also add empty image to images dictionary
         self.images['_'] = tk.PhotoImage(width=135, height=135)
+    
     # function that creates all the button widgets and puts them in the correct spot
     # with the correct command function
     def create_board(self):
@@ -59,8 +60,15 @@ class ChessBoard:
             self.first_click = pos
             button.config(relief=SUNKEN) # let them know it's clicked
         elif self.first_click != pos: # can't move to same square
+            # got both clicks, now call input function (make_move) with clicks as input
+            # save new coordinates & update gui to display the move
             self.wc, self.bc = self.callback(self.first_click, pos) # send (move0, move1) to play class
-            self.update()
+            # worst case this has to be two kings and still that is a draw
+            if len(self.wc) == 1 and len(self.bc) == 1:
+                print("Destroying window...")
+                self.root.destroy()
+            else:
+                self.update()
 
     def update(self):
         # resetting sunken button and first click
