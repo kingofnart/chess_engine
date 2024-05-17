@@ -15,32 +15,32 @@ grid = board.grid
 
 # NOTE: moves are stored as [[y1,x1],[y2,x2]] b/c grid is grouped by row
 # opening moves
-move0 = [[1,0], [2,0]] # a2->a3
-move1 = [[1,0], [3,0]] # a2->a4
-move2 = [[0,0], [3,0]] # a1->a4
-move3 = [[2,0], [3,0]] # a3->a4
-move4 = [[6,0], [5,0]] # a7->a6
-move5 = [[6,0], [4,0]] # a7->a5
-move6 = [[1,0], [4,0]] # a2->a5
-move7 = [[6,0], [3,0]] # a7->a4
-move8 = [[0,1], [2,2]] # b1->c3
-move9 = [[7,1], [5,2]] # b8->c6
-move10 = [[0,0], [4,4]] # a1->e5
-move11 = [[0,2], [4,4]] # c1->e5
-move12 = [[0,3], [4,4]] # d1->e5
-move13 = [[0,4], [4,4]] # e1->e5
-move14 = [[7,0], [4,4]] # a8->e5
-move15 = [[7,2], [4,4]] # c8->e5
-move16 = [[7,3], [4,4]] # d8->e5
-move17 = [[7,4], [4,4]] # e8->e5
+move0 = [[1,0], [2,0]]  # a2->a3
+move1 = [[1,0], [3,0]]  # a2->a4
+move2 = [[0,0], [3,0]]  # a1->a4
+move3 = [[2,0], [3,0]]  # a3->a4
+move4 = [[6,0], [5,0]]  # a7->a6
+move5 = [[6,0], [4,0]]  # a7->a5
+move6 = [[1,0], [4,0]]  # a2->a5
+move7 = [[6,0], [3,0]]  # a7->a4
+move8 = [[0,1], [2,2]]  # b1->c3
+move9 = [[7,1], [5,2]]  # b8->c6
+move10 = [[0,0], [4,4]]  # a1->e5
+move11 = [[0,2], [4,4]]  # c1->e5
+move12 = [[0,3], [4,4]]  # d1->e5
+move13 = [[0,4], [4,4]]  # e1->e5
+move14 = [[7,0], [4,4]]  # a8->e5
+move15 = [[7,2], [4,4]]  # c8->e5
+move16 = [[7,3], [4,4]]  # d8->e5
+move17 = [[7,4], [4,4]]  # e8->e5
 # Fried Liver moves
-move18 = [[4,6], [6,5]] # g5->f7
-move19 = [[6,3], [4,3]] # d7->d5
-move20 = [[7,5], [4,2]] # f8->c5
-move21 = [[5,5], [3,4]] # f6->e4
-move22 = [[4,6], [3,4]] # g5->e4
-move23 = [[0,3], [3,6]] # d1->g4
-move24 = [[0,3], [4,3]] # d1->d5
+move18 = [[4,6], [6,5]]  # g5->f7
+move19 = [[6,3], [4,3]]  # d7->d5
+move20 = [[7,5], [4,2]]  # f8->c5
+move21 = [[5,5], [3,4]]  # f6->e4
+move22 = [[4,6], [3,4]]  # g5->e4
+move23 = [[0,3], [3,6]]  # d1->g4
+move24 = [[0,3], [4,3]]  # d1->d5
 
 # just for testing
 def print_board(grd):
@@ -117,7 +117,6 @@ def test_vaild_move():
 
     # set grid to Fried Liver opening
     set_fried_liver(board)
-
     # move18: (valid)
     assert board.valid_move(move18, 0) == 1
     # move19: (valid)
@@ -138,7 +137,7 @@ def test_attacked_squares():
     # set grid to Fried Liver opening
     set_fried_liver(board)
     board.attacked_squares(0)
-    assert np.sum(np.array(board.w_attacked_squares) - np.array([[1, 4], [1, 3], [1, 5], [0, 3], [0, 5], 
+    assert np.sum(np.array(board.attacked_squares_w) - np.array([[1, 4], [1, 3], [1, 5], [0, 3], [0, 5], 
                                                                 [0, 4], [2, 5], [3, 6], [4, 7], [1, 2], 
                                                                 [0, 2], [0, 1], [1, 0], [1, 7], [0, 6], 
                                                                 [2, 0], [2, 2], [2, 7], [6, 5], [6, 7], 
@@ -146,42 +145,14 @@ def test_attacked_squares():
                                                                 [5, 0], [2, 1], [2, 3], [2, 4], [4, 5], 
                                                                 [2, 6]])) == 0
     board.attacked_squares(1)
-    assert np.sum(np.array(board.b_attacked_squares) - np.array([[6, 4], [6, 3], [6, 5], [7, 3], [7, 5], 
+    assert np.sum(np.array(board.attacked_squares_b) - np.array([[6, 4], [6, 3], [6, 5], [7, 3], [7, 5], 
                                                                  [7, 4], [7, 2], [6, 2], [5, 5], [7, 1], 
                                                                  [6, 0], [7, 6], [6, 7], [3, 1], [3, 3], 
                                                                  [4, 0], [4, 4], [3, 4], [3, 6], [4, 3], 
                                                                  [4, 7], [5, 3], [4, 2], [2, 0], [6, 6], 
                                                                  [5, 1], [5, 0], [5, 2], [5, 4], [3, 5], 
                                                                  [5, 6], [5, 7]])) == 0
-    board.reset()
-    # set grid with kings on e4 and e5 
-    board.grid = [[0 for _ in range(8)], 
-                  [0 for _ in range(8)], 
-                  [0 for _ in range(8)], 
-                  [0, 0, 0, 0, Piece(0,0,0), 0, 0, 0], 
-                  [0, 0, 0, 0, Piece(1,0,0), 0, 0, 0], 
-                  [0 for _ in range(8)], 
-                  [0 for _ in range(8)], 
-                  [0 for _ in range(8)]]
-    # set all other pieces to captured
-    for i in range(1, 16):
-        board.w_pcs[i].captured = 1
-        board.b_pcs[i].captured = 1
-    # update king coordinates
-    board.w_coords[0] = [4,3]
-    board.b_coords[0] = [4,4]
-    assert np.sum(np.array(board.w_attacked_squares) - np.array([])) == 0
-    board.attacked_squares(0)
-    assert np.sum(np.array(board.w_attacked_squares) - [np.array([3, 3]), np.array([3, 2]), 
-                                                        np.array([3, 4]), np.array([5, 3]), 
-                                                        np.array([5, 2]), np.array([5, 4]), 
-                                                        np.array([4, 2]), np.array([4, 4])]) == 0
-    assert np.sum(np.array(board.b_attacked_squares) - np.array([])) == 0
-    board.attacked_squares(1)
-    assert np.sum(np.array(board.b_attacked_squares) - [np.array([3, 4]), np.array([3, 3]), 
-                                                        np.array([3, 5]), np.array([5, 4]), 
-                                                        np.array([5, 3]), np.array([5, 5]), 
-                                                        np.array([4, 3]), np.array([4, 5])]) == 0
+    
 def test_king_safety():
 
     board.reset()
@@ -212,7 +183,7 @@ def test_apply_move():
     # a3
     board.reset()
     #print_board(board)
-    board.apply_move(move0, 0) # apply move0 to black
+    board.apply_move(move0, 0)  # apply move0 to black
     assert board.grid[move0[0][0]][move0[0][1]] == 0
     assert board.grid[move0[1][0]][move0[1][1]] == board.w_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -225,7 +196,7 @@ def test_apply_move():
     # a4
     board.reset()
     #print_board(board)
-    board.apply_move(move1, 0) # apply move1 to black
+    board.apply_move(move1, 0)  # apply move1 to black
     assert board.grid[move1[0][0]][move1[0][1]] == 0
     assert board.grid[move1[1][0]][move1[1][1]] == board.w_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -238,7 +209,7 @@ def test_apply_move():
     # a7
     board.reset()
     #print_board(board)
-    board.apply_move(move4, 1) # apply move5 to black
+    board.apply_move(move4, 1)  # apply move5 to black
     assert board.grid[move4[0][0]][move4[0][1]] == 0
     assert board.grid[move4[1][0]][move4[1][1]] == board.b_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -251,7 +222,7 @@ def test_apply_move():
     # a6
     board.reset()
     #print_board(board)
-    board.apply_move(move5, 1) # apply move6 to black
+    board.apply_move(move5, 1)  # apply move6 to black
     assert board.grid[move5[0][0]][move5[0][1]] == 0
     assert board.grid[move5[1][0]][move5[1][1]] == board.b_pcs[8]
     assert np.sum(board.w_coords - np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 

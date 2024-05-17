@@ -52,17 +52,17 @@ class ChessBoard:
                 btn = tk.Button(self.mainframe, image=img, bg=color)
                 btn.grid(row=nrow, column=ncol)
                 btn.config(command=partial(self.handle_click, ncol, 7-nrow, btn))
-                btn.image = img # make reference, avoid garbage collection
+                btn.image = img  # make reference, avoid garbage collection
 
     def handle_click(self, col, row, button):
         pos = (row, col)
-        if self.first_click is None: # need to get two clicks
+        if self.first_click is None:  # need to get two clicks
             self.first_click = pos
-            button.config(relief=SUNKEN) # let them know it's clicked
-        elif self.first_click != pos: # can't move to same square
+            button.config(relief=SUNKEN)  # let them know it's clicked
+        elif self.first_click != pos:  # can't move to same square
             # got both clicks, now call input function (make_move) with clicks as input
             # save new coordinates & update gui to display the move
-            self.wc, self.bc = self.callback(self.first_click, pos) # send (move0, move1) to play class
+            self.wc, self.bc = self.callback(self.first_click, pos)  # send (move0, move1) to play class
             # worst case this has to be two kings and still that is a draw
             if len(self.wc) == 1 and len(self.bc) == 1:
                 print("Destroying window...")
@@ -74,7 +74,7 @@ class ChessBoard:
         # resetting sunken button and first click
         self.first_click = None
         for child in self.mainframe.winfo_children():
-            if isinstance(child, tk.Button): # safety
+            if isinstance(child, tk.Button):  # safety
                 child.config(relief=RAISED)
                 row = child.grid_info()['row']
                 col = child.grid_info()['column']
