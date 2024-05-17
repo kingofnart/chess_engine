@@ -5,6 +5,7 @@ from piece import Piece
 class Grid():
     
     def __init__(self):
+        
         # color key: 0 = white, 1 = black
         self.names = {0: "White", 1: "Black"}
         self.w_pcs = [Piece(0,0,0), Piece(0,1,1), Piece(0,2,2), Piece(0,2,3), 
@@ -43,6 +44,7 @@ class Grid():
         self.someone_attempting_enpassant_move = False
         self.castle_queenside = 0
         self.castle_kingside = 0
+        self.queening = None  # NOTE: = None for not queening, piece object (the pawn) otherwise
         # popluate attacked_squares and valid_moves for white and black
         self.attacked_squares(0, validation=1)
         self.attacked_squares(1, validation=1)
@@ -57,6 +59,9 @@ class Grid():
         return self.castle_kingside
     def get_castle_queenside(self):
         return self.castle_queenside
+    def get_queening(self):
+        return self.queening
+    
     # setters
     def set_someone_attempting_enpassant_move(self, input):
        self.someone_attempting_enpassant_move = input
@@ -64,9 +69,12 @@ class Grid():
         self.castle_kingside = input
     def set_castle_queenside(self, input):
         self.castle_queenside = input
+    def set_queening(self, input):
+        self.queening = input
 
     # function to reset board to starting position  
     def reset(self):
+        
         for piece in self.w_pcs:
             piece.set_captured(0)
             piece.set_enpassant(0)
@@ -102,6 +110,7 @@ class Grid():
     # validation flag is if you want to store all valid moves
     # don't want to validate if im checking attacked squares on tmp grid for king safety
     def attacked_squares(self, color, validation=0):
+        
         attacked_list = []
         # get references to correct lists
         if color:
@@ -302,6 +311,7 @@ class Grid():
     # helper function for attacked_squares to add each element of list only if it's unique
     # might want to change attacked_squares to set of tuples instead of list of lists
     def add_to_list(self, old, new):
+        
         if len(new) > 0:
             for x in new:
                 if x not in old:
@@ -310,6 +320,7 @@ class Grid():
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
     def line_search(self, y, x, coord, get_valid = False): # x, y = -1,0,1 to set search direction
+        
         search = True
         lst = []
         # don't set square piece is on to attacked, piece cant attack itself!
@@ -599,6 +610,7 @@ class Grid():
         
     # function to reset enpassant for all pawns (also all pieces but only pawns matter)
     def unenpassant(self, color):
+        
         if color:
             pcs = self.b_pcs
         else:
@@ -610,6 +622,7 @@ class Grid():
 
     # function to check if king is attacked after applying a move
     def king_safety(self, opp_color):
+        
         self.attacked_squares(opp_color)
         # color is color of pieces to check attacked squares of
         if opp_color:  # opp_color = black
@@ -631,6 +644,7 @@ class Grid():
             
     # function to apply move
     def apply_move(self, move, color):
+        
         piece = self.grid[move[0][0]][move[0][1]]
         #print("Moving piece (id,color): ", piece.id, piece.color)
         piece.set_moved(True)
@@ -712,16 +726,27 @@ class Grid():
                     #print("Capturing black piece (id,color): ", piece2.id, piece2.color)
                     piece2.set_captured(1)
                     self.b_coords[piece2.id] = [-1,-1]
-        # finally check if pawn moved 2 squares and set it's en passant flag
+        # check if pawn moved 2 squares and set it's en passant flag
+        # also check if pawn has reach the opponents back rank and make it a queen
         if color:
             sign = -2
-        else: sign = 2
-        if piece.type == 5 and move[0][0] + sign == move[1][0] and move[0][1] == move[1][1]:
-            piece.set_enpassant(1)
-            # print("Pawn ({},{}) can now be en passanted".format(piece.id, piece.color))
+            rank = 0
+        else:
+            sign = 2
+            rank = 7
+        if piece.type == 5:
+            if move[0][0] + sign == move[1][0] and move[0][1] == move[1][1]:
+                piece.set_enpassant(1)
+                # print("Pawn ({},{}) can now be en passanted".format(piece.id, piece.color))
+            elif move[1][0] == rank: # pawn has reached opponent's back rank
+                piece.make_queen()
+                self.set_queening(piece)
+
+        
 
     # function to add boardstate to history list to check for threefold repetition
     def update_history(self):
+        
         lst = []
         for row in range(8):
             for col in range(8):
@@ -734,6 +759,7 @@ class Grid():
 
     # function to check for a threefold repetition => draw
     def check_threefold(self):
+        
         cnt = 0
         curr = self.board_history[-1]
         for lst in self.board_history:
@@ -746,6 +772,7 @@ class Grid():
     
     # function to check if king is mated or stalemated
     def check_mate(self, color):
+        
         # color = side that just moved => about to be not color's turn
         # not color might be check mated or in stalemate
         # need to check if not color's king is in color's attacked squares
@@ -779,7 +806,9 @@ class Grid():
                     return 1
             else: return 0
 
+    # function to add valid moves to valid_lst for color iff move is valid
     def update_validmoves_lst(self, move, color, valid_lst):
+       
         if self.valid_move(move, color):
             tmp_board = copy.deepcopy(self)
             #print("Checking move retains king safety...")

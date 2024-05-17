@@ -13,16 +13,18 @@ class ChessBoard:
         self.bc = black_coords
 # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
 #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
-        self.names = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
+        self.names_w = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
+                      8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
+        self.names_b = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
                       8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
         root.title("Chess")
         self.first_click = None
         self.mainframe = ttk.Frame(self.root)
         self.mainframe.grid(column=0, row=0)
-        self.load_images()
-        self.create_board()
+        self.load_images()  # first load images
+        self.create_board()  # then create board
 
-    # function to load in all the piece images for efficiency
+    # function to preload in all the piece images
     def load_images(self):
         # make image dictionary to store piece images
         self.images = {}
@@ -35,8 +37,9 @@ class ChessBoard:
     # function that creates all the button widgets and puts them in the correct spot
     # with the correct command function
     def create_board(self):
-        color1 = "#F5D7A4"  # Light brown
-        color2 = "#694507"  # Dark brown
+        color1 = "#F5D7A4"  # light brown/tan
+        color2 = "#694507"  # dark brown
+        # maybe allow different color schemes?
         for nrow in range(8):
             for ncol in range(8):
                 # colors for checkerboard pattern
@@ -44,16 +47,19 @@ class ChessBoard:
                 img = self.images['_']
                 for i in range(16):
                     if 7-nrow == self.wc[i][0] and ncol == self.wc[i][1]:
-                        img = self.images[self.names[i] + 'w']
+                        img = self.images[self.names_w[i] + 'w']
                         break
                     elif 7-nrow == self.bc[i][0] and ncol == self.bc[i][1]:
-                        img = self.images[self.names[i] + 'b']
+                        img = self.images[self.names_b[i] + 'b']
                         break
                 btn = tk.Button(self.mainframe, image=img, bg=color)
                 btn.grid(row=nrow, column=ncol)
                 btn.config(command=partial(self.handle_click, ncol, 7-nrow, btn))
                 btn.image = img  # make reference, avoid garbage collection
 
+    # function to get user input
+    # user input must be two clicks of different locations
+    # call function from Game class when input is received
     def handle_click(self, col, row, button):
         pos = (row, col)
         if self.first_click is None:  # need to get two clicks
@@ -70,6 +76,7 @@ class ChessBoard:
             else:
                 self.update()
 
+    # function to update images on buttons for piece locations
     def update(self):
         # resetting sunken button and first click
         self.first_click = None
@@ -81,10 +88,17 @@ class ChessBoard:
                 # updating piece locations
                 for i in range(16):
                     if 7-row == self.wc[i][0] and col == self.wc[i][1]:
-                        child.config(image=self.images[self.names[i] + 'w'])
+                        child.config(image=self.images[self.names_w[i] + 'w'])
                         break
                     elif 7-row == self.bc[i][0] and col == self.bc[i][1]:
-                        child.config(image=self.images[self.names[i] + 'b'])
+                        child.config(image=self.images[self.names_b[i] + 'b'])
                         break
                     else:
                         child.config(image=self.images['_'])
+
+    # function to change name of queened pawn
+    def queen(self, piece):
+        if piece.get_color():  # black 
+            self.names_b[piece.id] = 'Q'
+        else:  # white
+            self.names_w[piece.id] = 'Q'
