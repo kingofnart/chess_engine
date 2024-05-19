@@ -18,7 +18,14 @@ class Game():
 
         print("Game starting! It is white to move.")
         print("-----------------------------------------------------------------")
-        self.root.mainloop()
+        while self.gui_board.white_timer.has_time and self.gui_board.black_timer.has_time:
+            self.root.mainloop()
+        if not self.gui_board.white_timer.has_time:
+            print("White ran out of time! Black wins. Game over.")
+        elif not self.gui_board.black_timer.has_time:
+            print("Black ran out of time! White wins. Game over.")
+        print("Destroying window...")
+        self.root.destroy()  # same root as in gui class
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, sq1, sq2):
@@ -46,6 +53,8 @@ class Game():
                 else:  # proceed with game
                     self.turn = not self.turn
                     self.board.unenpassant(self.turn)
+                    self.gui_board.white_timer.toggle()
+                    self.gui_board.black_timer.toggle()
                     print("It is now {}'s turn.".format(colors[self.turn]))
                     print("-----------------------------------------------------------------")
         else:

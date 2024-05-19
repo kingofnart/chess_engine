@@ -1,6 +1,5 @@
-from tkinter import *
+from timer import Timer
 import tkinter as tk
-from tkinter import ttk
 from functools import partial
 
 class ChessBoard:
@@ -19,8 +18,10 @@ class ChessBoard:
                       8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
         root.title("Chess")
         self.first_click = None
-        self.mainframe = ttk.Frame(self.root)
+        self.mainframe = tk.Frame(self.root)
         self.mainframe.grid(column=0, row=0)
+        self.white_timer = Timer(self.mainframe)
+        self.black_timer = Timer(self.mainframe)
         self.load_images()  # first load images
         self.create_board()  # then create board
 
@@ -37,9 +38,13 @@ class ChessBoard:
     # function that creates all the button widgets and puts them in the correct spot
     # with the correct command function
     def create_board(self):
+        # want to give extra space for the timers
+        self.root.grid_rowconfigure(0, weight = 1)
+        self.root.grid_rowconfigure(9, weight = 1)
         color1 = "#F5D7A4"  # light brown/tan
         color2 = "#694507"  # dark brown
         # maybe allow different color schemes?
+        self.white_timer.timer_label.grid(row=0, column=5, columnspan=3)
         for nrow in range(8):
             for ncol in range(8):
                 # colors for checkerboard pattern
@@ -52,10 +57,12 @@ class ChessBoard:
                     elif 7-nrow == self.bc[i][0] and ncol == self.bc[i][1]:
                         img = self.images[self.names_b[i] + 'b']
                         break
-                btn = tk.Button(self.mainframe, image=img, bg=color)
-                btn.grid(row=nrow, column=ncol)
+                btn_size = 75
+                btn = tk.Button(self.mainframe, image=img, bg=color, width=btn_size, height=btn_size)
+                btn.grid(row=nrow+1, column=ncol)
                 btn.config(command=partial(self.handle_click, ncol, 7-nrow, btn))
                 btn.image = img  # make reference, avoid garbage collection
+        self.black_timer.timer_label.grid(row=9, column=5, columnspan=3)
 
     # function to get user input
     # user input must be two clicks of different locations
@@ -64,7 +71,7 @@ class ChessBoard:
         pos = (row, col)
         if self.first_click is None:  # need to get two clicks
             self.first_click = pos
-            button.config(relief=SUNKEN)  # let them know it's clicked
+            button.config(relief=tk.SUNKEN)  # let them know it's clicked
         elif self.first_click != pos:  # can't move to same square
             # got both clicks, now call input function (make_move) with clicks as input
             # save new coordinates & update gui to display the move
@@ -82,15 +89,15 @@ class ChessBoard:
         self.first_click = None
         for child in self.mainframe.winfo_children():
             if isinstance(child, tk.Button):  # safety
-                child.config(relief=RAISED)
+                child.config(relief=tk.RAISED)
                 row = child.grid_info()['row']
                 col = child.grid_info()['column']
                 # updating piece locations
                 for i in range(16):
-                    if 7-row == self.wc[i][0] and col == self.wc[i][1]:
+                    if 8-row == self.wc[i][0] and col == self.wc[i][1]:
                         child.config(image=self.images[self.names_w[i] + 'w'])
                         break
-                    elif 7-row == self.bc[i][0] and col == self.bc[i][1]:
+                    elif 8-row == self.bc[i][0] and col == self.bc[i][1]:
                         child.config(image=self.images[self.names_b[i] + 'b'])
                         break
                     else:
