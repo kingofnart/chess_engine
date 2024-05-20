@@ -1,5 +1,6 @@
 from timer import Timer
 import tkinter as tk
+from tkinter import *
 from functools import partial
 
 class ChessBoard:
@@ -19,20 +20,27 @@ class ChessBoard:
                       8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
         root.title("Chess")
         self.first_click = None
-        self.mainframe = tk.Frame(self.root)
+        self.mainframe = Frame(self.root, bg="#b3b1b1")
         self.mainframe.grid(column=0, row=0)
-        self.white_timer = Timer(self.mainframe, "#dbdbdb", "#1a1a1a")
+        self.white_timer = Timer(self.mainframe, "#ededed", "#1a1a1a")
         self.black_timer = Timer(self.mainframe, "#404040", "#f5f5f5")
+        self.color2name = {0: "White", 1: "Black"}
+        self.num2colors = {0: ["#ffffff", "#000000"], 1: ["#000000", "#ffffff"]}
+        self.turn_label = Label(self.mainframe, text="{} to move".format(self.color2name[0]),
+                                   width=15, height=2, bg=self.num2colors[0][0], 
+                                   fg=self.num2colors[0][1], font=("Arial", "16"))
         self.load_images()  # first load images
         self.create_board()  # then create board
+        self.starting_popup()  # then run starting popup
+        # then wait for user input and eventually game end
 
     # function to preload in all the piece images
     def load_images(self):
         # make image dictionary to store piece images
         self.images = {}
         for name in ['K', 'Q', 'R', 'N', 'B', 'P']:
-            self.images[name + 'w'] = tk.PhotoImage(file=f'resources/{name}w.png')
-            self.images[name + 'b'] = tk.PhotoImage(file=f'resources/{name}b.png')
+            self.images[name + 'w'] = PhotoImage(file=f'resources/{name}w.png')
+            self.images[name + 'b'] = PhotoImage(file=f'resources/{name}b.png')
         # also add empty image to images dictionary
         self.images['_'] = tk.PhotoImage(width=135, height=135)
     
@@ -42,9 +50,10 @@ class ChessBoard:
         # want to give extra space for the timers
         self.root.grid_rowconfigure(0, weight = 1)
         self.root.grid_rowconfigure(9, weight = 1)
-        color1 = "#F5D7A4"  # light brown/tan
-        color2 = "#694507"  # dark brown
+        color1 = "#F5D7A4"  # light squares
+        color2 = "#694507"  # dark squares
         # maybe allow different color schemes?
+        self.turn_label.grid(row=0, column=0, columnspan=3, sticky='E')
         self.black_timer.timer_label.grid(row=0, column=5, columnspan=3, sticky='E')
         for nrow in range(8):
             for ncol in range(8):
@@ -59,7 +68,7 @@ class ChessBoard:
                         img = self.images[self.names_b[i] + 'b']
                         break
                 btn_size = 75
-                btn = tk.Button(self.mainframe, image=img, bg=color, width=btn_size, height=btn_size)
+                btn = Button(self.mainframe, image=img, bg=color, activebackground="#90941f", width=btn_size, height=btn_size)
                 btn.grid(row=nrow+1, column=ncol)
                 btn.config(command=partial(self.handle_click, ncol, 7-nrow, btn))
                 btn.image = img  # make reference, avoid garbage collection
@@ -83,6 +92,7 @@ class ChessBoard:
     def update(self):
         # resetting sunken button and first click
         self.first_click = None
+        
         for child in self.mainframe.winfo_children():
             if isinstance(child, tk.Button):  # safety
                 child.config(relief=tk.RAISED)
@@ -108,11 +118,51 @@ class ChessBoard:
 
     # function to show popup of how game ended
     def ending_popup(self, txt):
-        popup = tk.Toplevel(self.mainframe)
-        popup.geometry("300x200")
+        popup = Toplevel(self.mainframe, bg="#354d52")
         popup.title("Game Outcome")
-        tk.Label(popup, text=txt, font=('Arial 16')).grid(row=0, column=0)
-        tk.Button(popup, text="New Game", command=partial(self.newgame_click, popup)).grid(row=1, column=0)
+        label = Label(popup, text=txt, font=("OCR A EXTENDED", 16), bg="#d42202")
+        label.grid(row=0, column=0)
+        popup.config(width=label.winfo_width())
+        Button(popup, text="New Game", font=('ALGERIAN 15'), command=partial(self.tmp_fn_idk_why, popup), 
+                  bg="#759956", width=10, height=2, activebackground="#078c0e").grid(row=1, column=0, pady=20)
 
-    def newgame_click(self, win):
-        self.end_callback(win)
+    # need this for new game button to show up
+    def tmp_fn_idk_why(self, popup):
+        self.end_callback(popup)
+
+    # function to update timers and turn indicator after move has been applied
+    def update_turn(self, turn):
+        self.white_timer.toggle()
+        self.black_timer.toggle()
+        self.turn_label.config(text="{} to move".format(self.color2name[turn]), 
+                               bg=self.num2colors[turn][0], fg=self.num2colors[turn][1])
+
+    # function to give countdown for game start
+    def starting_popup(self):
+        # need these to be attributes to be used in countdown()
+        self.start_popup = Toplevel(self.mainframe, bg="#88b9ba")
+        self.start_popup.transient(self.root)
+        self.start_popup.lift(self.root)
+        self.start_popup.grab_set()  # don't let user play yet
+        self.start_popup.geometry("500x100")
+        self.count = 5  
+        self.label = tk.Label(self.start_popup, text="Game starting in {}...".format(self.count), 
+                         font=("OCR A EXTENDED", 25), bg="#ff3c00", fg="#01001f")
+        self.label.pack(expand=True)
+        self.countdown()
+
+    # function to recursively count down + wait second then destroy
+    def countdown(self):
+        if self.count > 0:
+            self.label.config(text="Game starting in {}...".format(self.count))
+            self.count -= 1
+            self.root.after(1000, self.countdown)
+        else:
+            self.label.config(text="Commence battle!", font=("Eras Demi ITC", 30), bg="#12d400")
+            self.root.after(1000, self.destroy_popup)
+
+    # function to make sure popup is destroyed first then whites clock starts and the board isnt minimized
+    def destroy_popup(self):
+        self.start_popup.destroy()
+        self.white_timer.toggle()  # Start white's clock
+        self.root.deiconify()  # Ensure main window is not minimized
