@@ -8,6 +8,7 @@ class ChessBoard:
         
         self.root = root
         self.callback = make_move
+        self.end_callback = end_da_game
         self.wc = white_coords
         self.bc = black_coords
 # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
@@ -20,8 +21,8 @@ class ChessBoard:
         self.first_click = None
         self.mainframe = tk.Frame(self.root)
         self.mainframe.grid(column=0, row=0)
-        self.white_timer = Timer(self.mainframe, end_da_game, "#dbdbdb", "#1a1a1a")
-        self.black_timer = Timer(self.mainframe, end_da_game, "#404040", "#f5f5f5")
+        self.white_timer = Timer(self.mainframe, "#dbdbdb", "#1a1a1a")
+        self.black_timer = Timer(self.mainframe, "#404040", "#f5f5f5")
         self.load_images()  # first load images
         self.create_board()  # then create board
 
@@ -76,12 +77,7 @@ class ChessBoard:
             # got both clicks, now call input function (make_move) with clicks as input
             # save new coordinates & update gui to display the move
             self.wc, self.bc = self.callback(self.first_click, pos)  # send (move0, move1) to play class
-            # worst case this has to be two kings and still that is a draw
-            if len(self.wc) == 1 and len(self.bc) == 1:
-                print("Destroying window...")
-                self.root.destroy()
-            else:
-                self.update()
+            self.update()
 
     # function to update images on buttons for piece locations
     def update(self):
@@ -109,3 +105,14 @@ class ChessBoard:
             self.names_b[piece.id] = 'Q'
         else:  # white
             self.names_w[piece.id] = 'Q'
+
+    # function to show popup of how game ended
+    def ending_popup(self, txt):
+        popup = tk.Toplevel(self.mainframe)
+        popup.geometry("300x200")
+        popup.title("Game Outcome")
+        tk.Label(popup, text=txt, font=('Arial 16')).grid(row=0, column=0)
+        tk.Button(popup, text="New Game", command=partial(self.newgame_click, popup)).grid(row=1, column=0)
+
+    def newgame_click(self, win):
+        self.end_callback(win)
