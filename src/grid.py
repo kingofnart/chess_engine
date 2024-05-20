@@ -40,6 +40,8 @@ class Grid():
         self.attacked_squares_b = []
         self.valid_moves_w = []
         self.valid_moves_b = []
+        # want to save initial board state to history as well
+        self.update_history()
         # special move flags
         self.someone_attempting_enpassant_move = False
         self.castle_queenside = 0
@@ -103,6 +105,7 @@ class Grid():
         self.castle_queenside = 0
         self.castle_kingside = 0
         self.board_history = []
+        self.update_history()
         self.valid_moves_w = self.attacked_squares(0, validation=1) # also sets attacked_squares_w
         self.valid_moves_b = self.attacked_squares(1, validation=1) # also sets attacked_squares_b
     
@@ -754,7 +757,7 @@ class Grid():
                 if p != 0:
                     # 0-15: white; 16-31: black
                     lst.append(p.id + 16*p.color)
-                else: lst.append(-1)
+                else: lst.append(-1)  # -1=no piece
         self.board_history.append(lst)
 
     # function to check for a threefold repetition => draw
@@ -770,7 +773,9 @@ class Grid():
             return 1
         return 0
     
-    # function to check if king is mated or stalemated
+    # function to check if king of color is mated or stalemated
+    # returns tuple (color that ended game, x) where x = 0 for checkmate, x = 1 for stalemate
+    # returns (-1, -1) if game not ended yet
     def check_mate(self, color):
         
         # color = side that just moved => about to be not color's turn
@@ -785,12 +790,12 @@ class Grid():
                 if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_b):
                     # white has no moves and is in check => checkmate
                     print("Black has checkmated White. Black wins. Game over.")
-                    return 1
+                    return (1,0)
                 else:
                     # white has no moves and is not in check => stalemate
                     print("Black has stalemated White. It's a draw. Game over.")
-                    return 1
-            else: return 0
+                    return (1,1)
+            else: return (-1,-1)
         # checking if white is checkmating black
         else: 
             if len(self.valid_moves_b) == 0:
@@ -799,12 +804,12 @@ class Grid():
                 if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_w):
                     # black has no moves and is in check => checkmate
                     print("White has checkmated Black. White wins. Game over.")
-                    return 1
+                    return (0,0)
                 else:
                     # black has no moves and is not in check => stalemate
                     print("White has stalemated Black. It's a draw. Game over.")
-                    return 1
-            else: return 0
+                    return (0,1)
+            else: return (-1,-1)
 
     # function to add valid moves to valid_lst for color iff move is valid
     def update_validmoves_lst(self, move, color, valid_lst):
