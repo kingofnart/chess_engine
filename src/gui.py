@@ -4,7 +4,7 @@ from functools import partial
 
 class ChessBoard:
 
-    def __init__(self, root, make_move, white_coords, black_coords):
+    def __init__(self, root, make_move, end_da_game, white_coords, black_coords):
         
         self.root = root
         self.callback = make_move
@@ -20,8 +20,8 @@ class ChessBoard:
         self.first_click = None
         self.mainframe = tk.Frame(self.root)
         self.mainframe.grid(column=0, row=0)
-        self.white_timer = Timer(self.mainframe)
-        self.black_timer = Timer(self.mainframe)
+        self.white_timer = Timer(self.mainframe, end_da_game, "#dbdbdb", "#1a1a1a")
+        self.black_timer = Timer(self.mainframe, end_da_game, "#404040", "#f5f5f5")
         self.load_images()  # first load images
         self.create_board()  # then create board
 
@@ -44,7 +44,7 @@ class ChessBoard:
         color1 = "#F5D7A4"  # light brown/tan
         color2 = "#694507"  # dark brown
         # maybe allow different color schemes?
-        self.white_timer.timer_label.grid(row=0, column=5, columnspan=3)
+        self.black_timer.timer_label.grid(row=0, column=5, columnspan=3, sticky='E')
         for nrow in range(8):
             for ncol in range(8):
                 # colors for checkerboard pattern
@@ -62,7 +62,7 @@ class ChessBoard:
                 btn.grid(row=nrow+1, column=ncol)
                 btn.config(command=partial(self.handle_click, ncol, 7-nrow, btn))
                 btn.image = img  # make reference, avoid garbage collection
-        self.black_timer.timer_label.grid(row=9, column=5, columnspan=3)
+        self.white_timer.timer_label.grid(row=9, column=5, columnspan=3, sticky='E')
 
     # function to get user input
     # user input must be two clicks of different locations

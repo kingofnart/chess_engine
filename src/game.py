@@ -9,7 +9,7 @@ class Game():
 
         self.board = Grid()
         self.root = Tk()
-        self.gui_board = ChessBoard(self.root, self.make_move, self.board.w_coords, self.board.b_coords)
+        self.gui_board = ChessBoard(self.root, self.make_move, self.endgame, self.board.w_coords, self.board.b_coords)
         self.turn = 0  # 0 = white, 1 = black
         self.board_history = []
         self.stop = False
@@ -18,14 +18,9 @@ class Game():
 
         print("Game starting! It is white to move.")
         print("-----------------------------------------------------------------")
-        while self.gui_board.white_timer.has_time and self.gui_board.black_timer.has_time:
-            self.root.mainloop()
-        if not self.gui_board.white_timer.has_time:
-            print("White ran out of time! Black wins. Game over.")
-        elif not self.gui_board.black_timer.has_time:
-            print("Black ran out of time! White wins. Game over.")
-        print("Destroying window...")
-        self.root.destroy()  # same root as in gui class
+        self.gui_board.white_timer.toggle()
+        self.root.mainloop()
+        
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, sq1, sq2):
@@ -51,6 +46,12 @@ class Game():
                 elif self.board.check_mate(self.turn):
                     self.stop = True
                 else:  # proceed with game
+                    # if self.turn:  # black
+                    #     self.gui_board.black_timer.stop()
+                    #     self.gui_board.white_timer.start()
+                    # else:
+                    #     self.gui_board.white_timer.stop()
+                    #     self.gui_board.black_timer.start()
                     self.turn = not self.turn
                     self.board.unenpassant(self.turn)
                     self.gui_board.white_timer.toggle()
@@ -63,3 +64,10 @@ class Game():
             return [420], [69]
         return self.board.w_coords, self.board.b_coords  # to update ChessBoard
     
+    def endgame(self):
+        if self.gui_board.white_timer.time_remaining <= 0:
+            print("White ran out of time! Black wins. Game over.")
+        elif self.gui_board.black_timer.time_remaining <= 0:
+            print("Black ran out of time! White wins. Game over.")
+        print("Destroying window...")
+        self.root.destroy()  # same root as in gui class
