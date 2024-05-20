@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 from tkinter import *
 from grid import Grid
 from gui import ChessBoard
@@ -18,10 +19,8 @@ class Game():
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
 
     def play(self):
-
         print("Game starting! It is white to move.")
         print("-----------------------------------------------------------------")
-        self.gui_board.white_timer.toggle()
         self.root.mainloop()
         
 
@@ -63,19 +62,21 @@ class Game():
                     else:  # proceed with game
                         self.turn = not self.turn
                         self.board.unenpassant(self.turn)
-                        self.gui_board.white_timer.toggle()
-                        self.gui_board.black_timer.toggle()
+                        self.gui_board.update_turn(self.turn)
                         print("It is now {}'s turn.".format(colors[self.turn]))
                         print("-----------------------------------------------------------------")
         else:
             print("*** Invalid move, try again. ***")
         if self.stop:
-            self.gui_board.white_timer.stop()
-            self.gui_board.black_timer.stop()
             self.endgame()
         return self.board.w_coords, self.board.b_coords  # to update ChessBoard
     
     def endgame(self):
+        # show last move of game on gui
+        self.gui_board.wc, self.gui_board.bc = self.board.w_coords, self.board.b_coords  
+        self.gui_board.update()
+        self.gui_board.white_timer.stop()
+        self.gui_board.black_timer.stop()
         if self.gui_board.white_timer.time_remaining <= 0:
             print("White ran out of time! Black wins. Game over.")
             self.stop_condition = 0
@@ -94,11 +95,16 @@ class Game():
 
     def reset_game(self, win):
         self.board.reset()
-        self.gui_board.wc = self.board.w_coords
-        self.gui_board.wc = self.board.w_coords
+        self.gui_board.wc = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
+                                  [0,6], [0,2], [0,5], [1,0], [1,1], 
+                                  [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])
+        self.gui_board.bc = np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
+                                  [7,6], [7,2], [7,5], [6,0], [6,1], 
+                                  [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])
+        self.gui_board.update()
+        self.gui_board.update_turn(0)
         self.gui_board.white_timer.reset()
         self.gui_board.black_timer.reset()
-        self.gui_board.update()
         win.destroy()
         self.stop = False
         self.turn = 0
