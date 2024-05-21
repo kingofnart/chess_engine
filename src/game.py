@@ -18,13 +18,16 @@ class Game():
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
 
+
+    # call gui mainloop
     def play(self):
         print("Game starting! It is white to move.")
-        print("-----------------------------------------------------------------")
+        print("-------------------------------------")
         self.root.mainloop()
         
 
     # ChessBoard class will call this when it gets two clicks input
+    # used to validate and apply a move, and update the data structures & gui accordingly
     def make_move(self, sq1, sq2):
 
         colors = {0: "White", 1: "Black"}
@@ -64,13 +67,15 @@ class Game():
                         self.board.unenpassant(self.turn)
                         self.gui_board.update_turn(self.turn)
                         print("It is now {}'s turn.".format(colors[self.turn]))
-                        print("-----------------------------------------------------------------")
+                        print("-------------------------------------")
         else:
             print("*** Invalid move, try again. ***")
         if self.stop:
             self.endgame()
         return self.board.w_coords, self.board.b_coords  # to update ChessBoard
     
+
+    # function to determine how the game ended and inform user on the outcome
     def endgame(self):
         # show last move of game on gui
         self.gui_board.wc, self.gui_board.bc = self.board.w_coords, self.board.b_coords  
@@ -93,6 +98,8 @@ class Game():
             case 6: text = "Threefold repetition reached.\nIt's a draw.\nGame over."
         self.gui_board.ending_popup(text)
 
+
+    # function to reset the board state to starting position and start a new gamea
     def reset_game(self, win):
         self.board.reset()
         self.gui_board.wc = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
