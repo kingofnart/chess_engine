@@ -6,6 +6,7 @@ from gui import ChessBoard
 
 class Game():
 
+
     def __init__(self):
 
         self.board = Grid()
@@ -17,6 +18,7 @@ class Game():
         self.stop_condition = -1
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
+
 
     def play(self):
         print("Game starting! It is white to move.")
@@ -71,6 +73,7 @@ class Game():
             self.endgame()
         return self.board.w_coords, self.board.b_coords  # to update ChessBoard
     
+
     def endgame(self):
         # show last move of game on gui
         self.gui_board.wc, self.gui_board.bc = self.board.w_coords, self.board.b_coords  
@@ -93,6 +96,8 @@ class Game():
             case 6: text = "Threefold repetition reached.\nIt's a draw.\nGame over."
         self.gui_board.ending_popup(text)
 
+
+    # function to reset board state and restart a new game
     def reset_game(self, win):
         self.board.reset()
         self.gui_board.wc = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
@@ -109,4 +114,5 @@ class Game():
         self.stop = False
         self.turn = 0
         self.stop_condition = -1
+        self.gui_board.create_starting_popup()  # show starting popup again
         self.play()

@@ -4,6 +4,7 @@ from piece import Piece
 
 class Grid():
     
+
     def __init__(self):
         
         # color key: 0 = white, 1 = black
@@ -54,6 +55,7 @@ class Grid():
         self.unenpassant(0)
         self.unenpassant(1)
 
+
     # getters
     def get_someone_attempting_enpassant_move(self):
         return self.someone_attempting_enpassant_move
@@ -64,6 +66,7 @@ class Grid():
     def get_queening(self):
         return self.queening
     
+
     # setters
     def set_someone_attempting_enpassant_move(self, input):
        self.someone_attempting_enpassant_move = input
@@ -73,6 +76,7 @@ class Grid():
         self.castle_queenside = input
     def set_queening(self, input):
         self.queening = input
+
 
     # function to reset board to starting position  
     def reset(self):
@@ -109,6 +113,7 @@ class Grid():
         self.valid_moves_w = self.attacked_squares(0, validation=1) # also sets attacked_squares_w
         self.valid_moves_b = self.attacked_squares(1, validation=1) # also sets attacked_squares_b
     
+
     # function to save list of all squares attacked by a color
     # validation flag is if you want to store all valid moves
     # don't want to validate if im checking attacked squares on tmp grid for king safety
@@ -311,6 +316,7 @@ class Grid():
         #         print("Updated white's valid move list. Number of valid moves: {}, moves: {}"
         #               .format(len(self.valid_moves_w), self.valid_moves_w))
 
+
     # helper function for attacked_squares to add each element of list only if it's unique
     # might want to change attacked_squares to set of tuples instead of list of lists
     def add_to_list(self, old, new):
@@ -319,6 +325,7 @@ class Grid():
             for x in new:
                 if x not in old:
                     old.append(x)
+
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
@@ -344,6 +351,7 @@ class Grid():
             idx[1] = idx[1] + x
         return lst
     
+
     # function to test if move is valid
     def valid_move(self, move, color, flag=0):
         
@@ -611,6 +619,7 @@ class Grid():
              #print("Invalid move, must select piece. Not applying...")
             return 0
         
+
     # function to reset enpassant for all pawns (also all pieces but only pawns matter)
     def unenpassant(self, color):
         
@@ -622,6 +631,7 @@ class Grid():
             if piece.enpassant:
                 # print("Pawn ", piece.id, " of color ", piece.color, " has be unenpassanted.")
                 piece.set_enpassant(0)
+
 
     # function to check if king is attacked after applying a move
     def king_safety(self, opp_color):
@@ -645,6 +655,7 @@ class Grid():
                  #print("Move retains king safety. Valid move. Applying...")
                 return 1
             
+
     # function to apply move
     def apply_move(self, move, color):
         
@@ -746,7 +757,6 @@ class Grid():
                 self.set_queening(piece)
 
         
-
     # function to add boardstate to history list to check for threefold repetition
     def update_history(self):
         
@@ -759,6 +769,7 @@ class Grid():
                     lst.append(p.id + 16*p.color)
                 else: lst.append(-1)  # -1=no piece
         self.board_history.append(lst)
+
 
     # function to check for a threefold repetition => draw
     def check_threefold(self):
@@ -773,6 +784,7 @@ class Grid():
             return 1
         return 0
     
+
     # function to check if king of color is mated or stalemated
     # returns tuple (color that ended game, x) where x = 0 for checkmate, x = 1 for stalemate
     # returns (-1, -1) if game not ended yet
@@ -810,6 +822,7 @@ class Grid():
                     print("White has stalemated Black. It's a draw. Game over.")
                     return (0,1)
             else: return (-1,-1)
+
 
     # function to add valid moves to valid_lst for color iff move is valid
     def update_validmoves_lst(self, move, color, valid_lst):

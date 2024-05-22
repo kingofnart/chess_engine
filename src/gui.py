@@ -5,6 +5,7 @@ from functools import partial
 
 class ChessBoard:
 
+
     def __init__(self, root, make_move, end_da_game, white_coords, black_coords):
         
         self.root = root
@@ -12,8 +13,8 @@ class ChessBoard:
         self.end_callback = end_da_game
         self.wc = white_coords
         self.bc = black_coords
-# piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
-#             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+        # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+        #                g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
         self.names_w = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
                       8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
         self.names_b = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
@@ -31,8 +32,9 @@ class ChessBoard:
                                    fg=self.num2colors[0][1], font=("Arial", "16"))
         self.load_images()  # first load images
         self.create_board()  # then create board
-        self.starting_popup()  # then run starting popup
+        self.create_starting_popup()  # then run starting popup
         # then wait for user input and eventually game end
+
 
     # function to preload in all the piece images
     def load_images(self):
@@ -44,6 +46,7 @@ class ChessBoard:
         # also add empty image to images dictionary
         self.images['_'] = tk.PhotoImage(width=135, height=135)
     
+
     # function that creates all the button widgets and puts them in the correct spot
     # with the correct command function
     def create_board(self):
@@ -74,6 +77,7 @@ class ChessBoard:
                 btn.image = img  # make reference, avoid garbage collection
         self.white_timer.timer_label.grid(row=9, column=5, columnspan=3, sticky='E')
 
+
     # function to get user input
     # user input must be two clicks of different locations
     # call function from Game class when input is received
@@ -87,6 +91,7 @@ class ChessBoard:
             # save new coordinates & update gui to display the move
             self.wc, self.bc = self.callback(self.first_click, pos)  # send (move0, move1) to play class
             self.update()
+
 
     # function to update images on buttons for piece locations
     def update(self):
@@ -109,12 +114,14 @@ class ChessBoard:
                     else:
                         child.config(image=self.images['_'])
 
+
     # function to change name of queened pawn
     def queen(self, piece):
         if piece.get_color():  # black 
             self.names_b[piece.id] = 'Q'
         else:  # white
             self.names_w[piece.id] = 'Q'
+
 
     # function to show popup of how game ended
     def ending_popup(self, txt):
@@ -125,10 +132,13 @@ class ChessBoard:
         popup.config(width=label.winfo_width())
         Button(popup, text="New Game", font=('ALGERIAN 15'), command=partial(self.tmp_fn_idk_why, popup), 
                   bg="#759956", width=10, height=2, activebackground="#078c0e").grid(row=1, column=0, pady=20)
+        self.center_popup(popup)
+
 
     # need this for new game button to show up
     def tmp_fn_idk_why(self, popup):
         self.end_callback(popup)
+
 
     # function to update timers and turn indicator after move has been applied
     def update_turn(self, turn):
@@ -137,19 +147,22 @@ class ChessBoard:
         self.turn_label.config(text="{} to move".format(self.color2name[turn]), 
                                bg=self.num2colors[turn][0], fg=self.num2colors[turn][1])
 
+
     # function to give countdown for game start
-    def starting_popup(self):
+    def create_starting_popup(self):
         # need these to be attributes to be used in countdown()
         self.start_popup = Toplevel(self.mainframe, bg="#88b9ba")
         self.start_popup.transient(self.root)
         self.start_popup.lift(self.root)
         self.start_popup.grab_set()  # don't let user play yet
-        self.start_popup.geometry("500x100")
+        self.start_popup.geometry("500x200")
         self.count = 5  
         self.label = tk.Label(self.start_popup, text="Game starting in {}...".format(self.count), 
-                         font=("OCR A EXTENDED", 25), bg="#ff3c00", fg="#01001f")
+                         font=("OCR A EXTENDED", 25), bg="#ff3c00", fg="#000000", height=3)
         self.label.pack(expand=True)
+        self.center_popup(self.start_popup)
         self.countdown()
+
 
     # function to recursively count down + wait second then destroy
     def countdown(self):
@@ -158,11 +171,27 @@ class ChessBoard:
             self.count -= 1
             self.root.after(1000, self.countdown)
         else:
-            self.label.config(text="Commence battle!", font=("Eras Demi ITC", 30), bg="#12d400")
+            self.label.config(text="Commence battle!", font=("Eras Demi ITC", 30), bg="#12d400", fg="#ffffff", height=2)
             self.root.after(1000, self.destroy_popup)
+
 
     # function to make sure popup is destroyed first then whites clock starts and the board isnt minimized
     def destroy_popup(self):
         self.start_popup.destroy()
         self.white_timer.toggle()  # Start white's clock
         self.root.deiconify()  # Ensure main window is not minimized
+
+
+    # function to center starting popup over chessboard
+    def center_popup(self, popup):
+        self.root.update()  # DO NOT USE update_ideltasks() here
+        main_width = self.root.winfo_width()
+        main_height = self.root.winfo_height()
+        main_x = self.root.winfo_x()
+        main_y = self.root.winfo_y()
+        popup.update_idletasks()  # Ensure all sizes are updated
+        popup_width = popup.winfo_width()
+        popup_height = popup.winfo_height()
+        popup_x = main_x + (main_width // 2) - (popup_width // 2)
+        popup_y = main_y + (main_height // 2) - (popup_height // 2)
+        popup.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
