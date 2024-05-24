@@ -47,7 +47,7 @@ class Grid():
         self.someone_attempting_enpassant_move = False
         self.castle_queenside = 0
         self.castle_kingside = 0
-        self.queening = None  # NOTE: = None for not queening, piece object (the pawn) otherwise
+        self.queening = None  # NOTE self.queening = None for not queening, piece object (the pawn) otherwise
         # popluate attacked_squares and valid_moves for white and black
         self.attacked_squares(0, validation=1)
         self.attacked_squares(1, validation=1)
@@ -353,7 +353,7 @@ class Grid():
     
 
     # function to test if move is valid
-    def valid_move(self, move, color, flag=0):
+    def valid_move(self, move, color, set_enpassant=0):
         
         # move = [[x1, y1], [x2, y2]]
         piece = self.grid[move[0][0]][move[0][1]]
@@ -590,7 +590,7 @@ class Grid():
                                 if pawn2 != 0:  # en pesant?
                                     if pawn2.get_enpassant():  # yes en pesant
                                         #print("Valid pawn en passant. Applying...")
-                                        if flag:
+                                        if set_enpassant:
                                             # print("SETTING EN PASSANT!!!!!!!!")
                                             self.set_someone_attempting_enpassant_move(True)
                                         return 1
@@ -755,6 +755,7 @@ class Grid():
             elif move[1][0] == rank: # pawn has reached opponent's back rank
                 piece.make_queen()
                 self.set_queening(piece)
+                print("setting queen")
 
         
     # function to add boardstate to history list to check for threefold repetition

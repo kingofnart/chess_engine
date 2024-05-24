@@ -3,9 +3,9 @@ class Piece:
     
 
     def __init__(self, color, type, id):
-        self.color = color
+        self.color = color  # 0=white, 1=black
         self.type = type
-        self.id = id
+        self.id = id  # unique to piece (0-15)
         self.captured = False
         self.moved = False
         self.enpassant = False
@@ -30,7 +30,7 @@ class Piece:
     def get_color(self):
         return self.color
     
-    
+
     # for queening pawns
     def make_queen(self):
         self.type = 1
