@@ -1,5 +1,5 @@
 import sys, numpy as np
-sys.path.append('src')
+sys.path.append('chess_app')
 from grid import Grid
 from piece import Piece
 
