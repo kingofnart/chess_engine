@@ -8,7 +8,7 @@ class Grid():
     def __init__(self):
         
         # color key: 0 = white, 1 = black
-        self.names = {0: "White", 1: "Black"}
+        self.color_names = {0: "White", 1: "Black"}
         self.w_pcs = [Piece(0,0,0), Piece(0,1,1), Piece(0,2,2), Piece(0,2,3), 
                       Piece(0,3,4), Piece(0,3,5), Piece(0,4,6), Piece(0,4,7), 
                       Piece(0,5,8), Piece(0,5,9), Piece(0,5,10), Piece(0,5,11), 
@@ -123,16 +123,17 @@ class Grid():
         # get references to correct lists
         if color:
             self.attacked_squares_b = []
+            # updating attacked_list will also update self.attacked_squares_b
             attacked_list = self.attacked_squares_b
             pieces = self.b_pcs
             coords = self.b_coords
         else:
             self.attacked_squares_w = []
+            # updating attacked_list will also update self.attacked_squares_w
             attacked_list = self.attacked_squares_w
             pieces = self.w_pcs
             coords = self.w_coords
         if validation:
-            # print("finding all valid moves for {}".format(self.names[color]))
             if color:  # black
                 self.valid_moves_b = []
                 valid_moves = self.valid_moves_b
@@ -209,6 +210,7 @@ class Grid():
 
                     # rook
                     case 2:
+                        #if validation: print("atckdsqrs validating rook (id,color) ({},{})".format(piece.id, piece.color))
                         # only horizontals & verticals
                         lst = self.line_search(0, 1, coord, get_valid=validation)  # 0
                         self.add_to_list(attacked_list, lst)
@@ -290,7 +292,6 @@ class Grid():
                             c2 = [coord[0] + sign, coord[1] - 1]
                             self.add_to_list(attacked_list, [c2])
                             if validation:
-                                # print("validating queenside pawn capture for {}'s {} pawn".format(self.names[color], piece.id))
                                 self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
                         if coord[1] < 7:
                             c2 = [coord[0] + sign, coord[1] + 1]
@@ -307,14 +308,6 @@ class Grid():
                     
                     case _:
                         raise Exception("Invalid piece id")
-        # just for debugging
-        # if validation:
-        #     if color:
-        #         print("Updated black's valid move list. Number of valid moves: {}, moves: {}"
-        #               .format(len(self.valid_moves_b), self.valid_moves_b))
-        #     else:
-        #         print("Updated white's valid move list. Number of valid moves: {}, moves: {}"
-        #               .format(len(self.valid_moves_w), self.valid_moves_w))
 
 
     # helper function for attacked_squares to add each element of list only if it's unique
@@ -324,23 +317,21 @@ class Grid():
         if len(new) > 0:
             for x in new:
                 if x not in old:
-                    old.append(x)
+                    old.append(x) 
 
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
-    def line_search(self, y, x, coord, get_valid = False): # x, y = -1,0,1 to set search direction
-        
+    def line_search(self, y, x, coord, get_valid = False): # x, y \in {-1,0,1} to set search direction
         search = True
         lst = []
+        color = self.grid[coord[0]][coord[1]].get_color()
         # don't set square piece is on to attacked, piece cant attack itself!
         idx = [coord[0] + y, coord[1] + x] 
         # want to search in straight line until you find piece or edge of board
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
             lst.append(idx.copy())
             if get_valid:
-                # print("Getting valid moves in linesearch")
-                color = self.grid[coord[0]][coord[1]].color
                 if color:
                     self.update_validmoves_lst([coord.tolist(), idx], color, self.valid_moves_b)
                 else:
@@ -355,20 +346,16 @@ class Grid():
     # function to test if move is valid
     def valid_move(self, move, color, set_enpassant=0):
         
-        # move = [[x1, y1], [x2, y2]]
+        # move = [[y1, x1], [y2, x2]]
         piece = self.grid[move[0][0]][move[0][1]]
         if piece:
-            #  print("Checking if moving piece (id,color): ({},{}) from [{},{}] to [{},{}] is valid..."
-            #       .format(piece.id, piece.color, move[0][0], move[0][1], move[1][0], move[1][1]))
             # check to make sure you're moving the right color piece
             if piece.color == color:
                 # make sure you're not capturing your own piece
                 piece2 = self.grid[move[1][0]][move[1][1]]
                 if piece2:
                     if piece2.color == color:
-                        #print("Can't capture your own piece. Invalid move. Not applying...")
                         return 0
-                    #print("Making a capture, piece capturing (id,color):", piece2.id, piece2.color)
                 
                 match piece.type:
                     
@@ -379,7 +366,6 @@ class Grid():
                         # normal king move
                         if dif1 <= 1 and dif2 <= 1:
                             if move[1][0] >= 0 and move[1][0] <= 7 and move[1][1] >= 0 and move[1][1] <= 7:
-                                #print("Valid king move. Applying...")
                                 return 1
                         # castling
                         # requirements: king and rook can't have moved yet
@@ -390,163 +376,126 @@ class Grid():
                         elif move[0][1] + 2 == move[1][1]:  # caslting kingside
                             # make sure squares between king and rook are empty
                             if self.grid[move[0][0]][move[0][1] + 1] != 0 or self.grid[move[0][0]][move[0][1] + 2] != 0:
-                                #print("Pieces in between king and rook. Invalid move. Not applying...")
                                 return 0
                             if color:
                                 atck_lst = self.attacked_squares_w
                                 # check black h rook and king haven't moved yet
                                 if self.b_pcs[3].get_moved() or piece.get_moved():
-                                    #print("Can't castle after moving. Invalid move. Not applying...")
                                     return 0
                             else:
                                 atck_lst = self.attacked_squares_b
                                 # check white h rook and king haven't moved yet
                                 if self.w_pcs[3].get_moved() or piece.get_moved():
-                                    #print("Can't castle after moving. Invalid move. Not applying...")
                                     return 0
                             # cant castle through, out of, or into check
                             for pos in atck_lst:
                                 if move[0][0] == pos[0] and move[0][1] == pos[1]:
-                                    #print("Can't castle while in check. Invalid move. Not applying...")
                                     return 0
                                 elif move[0][0] == pos[0] and move[0][1] + 1 == pos[1]:
-                                    #print("Can't castle through check. Invalid move. Not applying...")
                                     return 0
                                 elif move[0][0] == pos[0] and move[0][1] + 2 == pos[1]:
-                                    #print("Can't castle into check. Invalid move. Not applying...")
                                     return 0
-                            #print("Valid king side castle move. Applying...")
-                            self.castle_kingside = 1
+                            self.set_castle_kingside(1)
                             return 1
                         elif move[0][1] - 2 == move[1][1]:  # caslting queenside
                             # make sure squares between king and rook are empty
                             if self.grid[move[0][0]][move[0][1] - 1] != 0 or self.grid[move[0][0]][move[0][1] - 2] != 0 \
                                 or self.grid[move[0][0]][move[0][1] - 3] != 0:
-                                #print("Pieces in between king and rook. Invalid move. Not applying...")
                                 return 0
                             if color:
                                 atck_lst = self.attacked_squares_w
                                 # check black a rook and king haven't moved yet
                                 if self.b_pcs[2].get_moved() or piece.get_moved():
-                                    #print("Can't castle after moving. Invalid move. Not applying...")
                                     return 0
                             else:
                                 atck_lst = self.attacked_squares_b
                                 # check white a rook and king haven't moved yet
                                 if self.w_pcs[2].get_moved() or piece.get_moved():
-                                    #print("Can't castle after moving. Invalid move. Not applying...")
                                     return 0
                             # cant castle through, out of, or into check
                             for pos in atck_lst:
                                 if move[0][0] == pos[0] and move[0][1] == pos[1]:
-                                    #print("Can't castle while in check. Invalid move. Not applying...")
                                     return 0
                                 elif move[0][0] == pos[0] and move[0][1] - 1 == pos[1]:
-                                    #print("Can't castle through check. Invalid move. Not applying...")
                                     return 0
                                 elif move[0][0] == pos[0] and move[0][1] - 2 == pos[1]:
-                                    #print("Can't castle into check. Invalid move. Not applying...")
                                     return 0
-                            #print("Valid queenside castle move. Applying...")
-                            self.castle_queenside = 1
+                            self.set_castle_queenside(1)
                             return 1
-                        #print("Invalid king move. Not applying...")
                         return 0
 
                     # queen
                     case 1: 
                         for pos in self.line_search(1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(1, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(0, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(0, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         for pos in self.line_search(1, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid queen move. Applying...")
                                 return 1
                         else: 
-                            #print("Invalid queen move. Not applying...")
                             return 0
 
                     # rook
                     case 2:
                         for pos in self.line_search(1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid rook move. Applying...")
                                 return 1
                         for pos in self.line_search(0, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid rook move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid rook move. Applying...")
                                 return 1
                         for pos in self.line_search(0, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid rook move. Applying...")
                                 return 1
                         else: 
-                            #print("Invalid rook move. Not applying...")
                             return 0
 
                     # knight
                     case 3:
                         if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
                             if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
-                                #print("Valid knight move. Applying...")
                                 return 1
                         elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
                             if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
-                                #print("Valid knight move. Applying...")
                                 return 1
                         else: 
-                            #print("Invalid knight move. Not applying...")
                             return 0
 
                     # bishop
                     case 4:
                         for pos in self.line_search(1, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid bishop move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid bishop move. Applying...")
                                 return 1
                         for pos in self.line_search(-1, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid bishop move. Applying...")
                                 return 1
                         for pos in self.line_search(1, -1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                #print("Valid bishop move. Applying...")
                                 return 1
                         else: 
-                            #print("Invalid bishop move. Not applying...")
                             return 0
 
                     # pawn
@@ -560,26 +509,20 @@ class Grid():
                         if move[0][1] == move[1][1]:  # pawns only move forward unless capturing
                             if move[0][0] + sign == move[1][0]:  # check for piece infront of pawn
                                 if not piece2:  # valid move
-                                    #print("Valid pawn move. Applying...")
                                     return 1
                                 else:
-                                    #print("Pawns can only capture diagonally. Invalid move. Not applying...")
                                     return 0
                             elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
                                 if not piece2:
-                                    #print("Valid pawn move. Applying...")
                                     return 1
                                 else:
-                                    #print("Pawns can only capture diagonally. Invalid move. Not applying...")
                                     return 0
                             else:  # invalid move
-                                #print("Invalid pawn move! Not applying...")
                                 return 0
                         # capturing pawn move
                         elif move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
                             # make sure move is diagonal
                             if move[0][0] + sign != move[1][0]:  # invalid move
-                                #print("Invalid pawn move. Not applying...")
                                 return 0
                             # En Passant
                             elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
@@ -589,34 +532,25 @@ class Grid():
                                 pawn2 = self.grid[move[0][0]][move[1][1]]
                                 if pawn2 != 0:  # en pesant?
                                     if pawn2.get_enpassant():  # yes en pesant
-                                        #print("Valid pawn en passant. Applying...")
                                         if set_enpassant:
-                                            # print("SETTING EN PASSANT!!!!!!!!")
                                             self.set_someone_attempting_enpassant_move(True)
                                         return 1
                                     else:  # no en pesant
-                                        #  print("En passant cannot be perfomed on piece at [{},{}]. Invalid move. Not applying..."
-                                        #       .format(move[0][0], move[1][1]))
                                         return 0
                                 else: 
-                                     #print("Invalid capture attempt. Not applying...")
                                     return 0
                             elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
-                                 #print("Valid pawn move. Applying...")
                                 return 1
 
                         else:  # invalid move
-                                 #print("Invalid pawn move. Not applying...")
                                 return 0
                     
                     case _:  # invalid piece id
                         return 0
                     
             else:  # moving piece of wrong color
-                 #print("Wrong color, move a piece of the other color. Not applying...")
                 return 0
         else:  # not piece
-             #print("Invalid move, must select piece. Not applying...")
             return 0
         
 
@@ -629,38 +563,33 @@ class Grid():
             pcs = self.w_pcs
         for piece in pcs:
             if piece.enpassant:
-                # print("Pawn ", piece.id, " of color ", piece.color, " has be unenpassanted.")
                 piece.set_enpassant(0)
 
 
     # function to check if king is attacked after applying a move
     def king_safety(self, opp_color):
-        
+
         self.attacked_squares(opp_color)
-        # color is color of pieces to check attacked squares of
+        # opp_color is color of pieces to check attacked squares of
+        # => not opp_color is color of king of which safety is being checked for
         if opp_color:  # opp_color = black
             king_pos = self.w_coords[0]
             if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_b):
-                # print("White king is put in check by that move. Invalid move. Not applying...")
                 return 0
             else:
-                 #print("Move retains king safety. Valid move. Applying...")
                 return 1
         else:  # opp_color = white
             king_pos = self.b_coords[0]
             if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_w):
-                # print("Black king is put in check by that move! Invalid, not applying...")
                 return 0
             else:
-                 #print("Move retains king safety. Valid move. Applying...")
                 return 1
-            
+
 
     # function to apply move
     def apply_move(self, move, color):
         
         piece = self.grid[move[0][0]][move[0][1]]
-        #print("Moving piece (id,color): ", piece.id, piece.color)
         piece.set_moved(True)
         if self.get_castle_kingside():
             if color:  # black to move
@@ -672,6 +601,7 @@ class Grid():
                 self.grid[7][7] = 0  # and the old reference to the rook
                 self.b_coords[piece.id] = [7,6]
                 self.b_coords[rook.id] = [7,5]
+                rook.set_moved(True)
             else: # white to move
                 # king on e1, hasn't moved
                 rook = self.grid[0][7]  # white h rook, hasn't moved
@@ -681,7 +611,7 @@ class Grid():
                 self.grid[0][7] = 0
                 self.w_coords[piece.id] = [0,6]
                 self.w_coords[rook.id] = [0,5]
-            rook.set_moved(True)
+                rook.set_moved(True)
             self.set_castle_kingside(0)
         elif self.get_castle_queenside():
             if color: # black to move
@@ -690,19 +620,20 @@ class Grid():
                 self.grid[7][2] = piece
                 self.grid[7][3] = rook
                 self.grid[7][4] = 0
-                self.grid[7][7] = 0
+                self.grid[7][0] = 0 
                 self.b_coords[piece.id] = [7,2]
                 self.b_coords[rook.id] = [7,3]
+                rook.set_moved(True)
             else: # white to move
                 # king on e1, hasn't moved
-                rook = self.grid[0][7]  # white a rook, hasn't moved
+                rook = self.grid[0][0]  # white a rook, hasn't moved
                 self.grid[0][2] = piece
                 self.grid[0][3] = rook
                 self.grid[0][4] = 0
-                self.grid[0][7] = 0
+                self.grid[0][0] = 0  # ARGGGGGGGGGGGGGGGGG!!!!!!!!!!!!!!!!!! ;-;^10^10^10^10
                 self.w_coords[piece.id] = [0,2]
                 self.w_coords[rook.id] = [0,3]
-            rook.set_moved(True)
+                rook.set_moved(True)
             self.set_castle_queenside(0)
         elif self.get_someone_attempting_enpassant_move():
             if color:  # black en passanting white
@@ -723,7 +654,6 @@ class Grid():
             self.grid[move[1][0]][move[1][1]] = piece
             self.grid[move[0][0]][move[0][1]] = 0
             self.set_someone_attempting_enpassant_move(False)
-            # print("An en passant has taken place! ****!")
         else:
             piece2 = self.grid[move[1][0]][move[1][1]]
             self.grid[move[1][0]][move[1][1]] = piece
@@ -731,31 +661,27 @@ class Grid():
             if color:  # color = black
                 self.b_coords[piece.id] = move[1]
                 if piece2 != 0:
-                    #print("Capturing white piece (id,color): ", piece2.id, piece2.color)
                     piece2.set_captured(1)
                     self.w_coords[piece2.id] = [-1,-1]
             else:  # color = white
                 self.w_coords[piece.id] = move[1]
                 if piece2 != 0:
-                    #print("Capturing black piece (id,color): ", piece2.id, piece2.color)
                     piece2.set_captured(1)
                     self.b_coords[piece2.id] = [-1,-1]
         # check if pawn moved 2 squares and set it's en passant flag
         # also check if pawn has reach the opponents back rank and make it a queen
-        if color:
-            sign = -2
-            rank = 0
-        else:
-            sign = 2
-            rank = 7
         if piece.type == 5:
+            if color:
+                sign = -2
+                rank = 0
+            else:
+                sign = 2
+                rank = 7
             if move[0][0] + sign == move[1][0] and move[0][1] == move[1][1]:
                 piece.set_enpassant(1)
-                # print("Pawn ({},{}) can now be en passanted".format(piece.id, piece.color))
             elif move[1][0] == rank: # pawn has reached opponent's back rank
                 piece.make_queen()
                 self.set_queening(piece)
-                print("setting queen")
 
         
     # function to add boardstate to history list to check for threefold repetition
@@ -790,13 +716,13 @@ class Grid():
     # returns tuple (color that ended game, x) where x = 0 for checkmate, x = 1 for stalemate
     # returns (-1, -1) if game not ended yet
     def check_mate(self, color):
-        
         # color = side that just moved => about to be not color's turn
         # not color might be check mated or in stalemate
         # need to check if not color's king is in color's attacked squares
         self.attacked_squares(not color, validation=1)  # get not color's available moves
-        # checking if black is checkmating white
+        # checking if black is checkmating/stalemating white
         if color: 
+            print("Number of valid moves for White: {}".format(len(self.valid_moves_w)))
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
@@ -809,8 +735,9 @@ class Grid():
                     print("Black has stalemated White. It's a draw. Game over.")
                     return (1,1)
             else: return (-1,-1)
-        # checking if white is checkmating black
-        else: 
+        # checking if white is checkmating/stalemating black
+        else:
+            print("Number of valid moves for Black: {}".format(len(self.valid_moves_b)))
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]
@@ -827,13 +754,10 @@ class Grid():
 
     # function to add valid moves to valid_lst for color iff move is valid
     def update_validmoves_lst(self, move, color, valid_lst):
-       
         if self.valid_move(move, color):
             tmp_board = copy.deepcopy(self)
-            #print("Checking move retains king safety...")
             tmp_board.apply_move(move, color)
             # check opponents attacked squares for check
             if(tmp_board.king_safety(not color)):
-                # print("Adding move [[{},{}],[{},{}]] to valid moves list {}"
-                #       .format(move[0][0], move[0][1], move[1][0], move[1][1], self.names[color]))
                 valid_lst.append(move)
+            tmp_board = None  # remove reference for garbage collection

@@ -24,8 +24,9 @@ class ChessBoard {
 
 
     // function to send user input (move) to backend to proccess
-    // frontend -> backend
+    // frontend -> backend (but also backend->frontend)
     async makeMove(move) {
+        console.log("Sending move ", move, " to be proccessed")
         const response = await fetch('/move', {
             method: 'POST',
             headers: {
@@ -34,6 +35,7 @@ class ChessBoard {
             // convert move list to json to send to backend
             body: JSON.stringify({ move }),
         });
+        // response contains the result of backend attempting to apply move
         const result = await response.json();
         if (result.error) {
             if (result.error === "invalid") {
@@ -49,6 +51,8 @@ class ChessBoard {
             alert(txt);
         } else if (result.status === 'move applied') { // proceed with game
             this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+        } else {
+            alert("Error in response from makeMove")
         }
     }
 
@@ -88,10 +92,10 @@ class ChessBoard {
     // function to update board handling promotions
     updateBoard(w_coords, b_coords, turn, promotion) {
         if (promotion) {
-            console.log("promotion not none");
+            //console.log("promotion not none");
             this.promoteQueen(promotion);
         }
-        console.log("board updated");
+        //console.log("board updated");
         this.renderBoard(w_coords, b_coords);
         this.updateTurnIndicator(turn);
         this.updateTimers(turn);
@@ -102,7 +106,7 @@ class ChessBoard {
     promoteQueen(input) {
         let names = input.color ? this.names_b : this.names_w;
         names[input.index] = 'Q';
-        console.log(names);
+        //console.log(names);
         const square = document.querySelector(`[data-coordinate='${input.coord}']`);
         if (square) {
             const img = square.querySelector('img');

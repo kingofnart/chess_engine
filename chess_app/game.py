@@ -1,8 +1,6 @@
 import copy
-import numpy as np
 from tkinter import *
 from grid import Grid
-# from gui import ChessBoard
 
 class Game():
 
@@ -16,12 +14,6 @@ class Game():
         self.stop_condition = -1
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
-
-
-    def play(self):
-        print("Game starting! It is white to move.")
-        print("-----------------------------------------------------------------")
-        # self.root.mainloop()
         
 
     # ChessBoard class will call this when it gets two clicks input
@@ -31,11 +23,9 @@ class Game():
         colors = {0: "White", 1: "Black"}
         if self.board.valid_move([sq1, sq2], self.turn, set_enpassant=True):
             tmp_board = copy.deepcopy(self.board)
-            print("Checking apply move on tmp board...")
             tmp_board.apply_move([sq1, sq2], self.turn)
             # check opponents attacked squares for check
             if not tmp_board.king_safety(not self.turn):
-                print("*** Move puts king in check ***")
                 # return in json format
                 if self.turn:
                     ret_coords = self.board.b_coords
@@ -43,11 +33,9 @@ class Game():
                     ret_coords = self.board.w_coords
                 return {'error': 'king safety', 'coords': ret_coords.tolist()}
             self.board.apply_move([sq1, sq2], self.turn)
-            print("Move applied.")
             # need to make a flag to tell frontend if queening is occurring
             promotion_info = None
             if self.board.get_queening() is not None:
-                print("updating promotion info")
                 # promotion has piece id as index, color, coordinate
                 if self.turn:  # black queening
                     coords_lst = self.board.w_coords
@@ -63,6 +51,8 @@ class Game():
                 self.stop = True
                 self.stop_condition = 6
             else:
+                # NOTE check_mate is called with color of the side that just made a move
+                # => check_mate checks the length of the valid_moves list for NOT color
                 (p,q) = self.board.check_mate(self.turn)
                 if (p,q) != (-1,-1):
                     self.stop = True
@@ -94,7 +84,7 @@ class Game():
                 'promotion': promotion_info
             }
         return {'error': 'invalid'}
-    
+
 
     # need at least two endpoints for Flask
     # function to send game state to frontend
