@@ -4,10 +4,28 @@
     <meta charset="UTF-8">
     <title>Chess Game</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='images/space-bg.webp') }}");
+        }
+    </style>
 </head>
 <body>
-    <div id="game-container">
+    <div id="main-container">
+        <div class="row">
+            <div class="turn-indicator" id="turn-indicator">White to move</div>
+            <div class="timer" id="black-timer">5:00</div>
+        </div>
+        <div id="game-container-wrapper">
+            <div id="row-labels"></div>
+            <div id="game-container"></div>
+        </div>
+        <div id="column-labels"></div>
+        <div class="row">
+            <div></div>
+            <div class="timer" id="white-timer">5:00</div>
+        </div>
     </div>
-    <script src="static/script/serve.js"></script>
+    <script src="{{ url_for('static', filename='script/chessboard.js') }}"></script>
 </body>
 </html>

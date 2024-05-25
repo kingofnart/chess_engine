@@ -35,10 +35,13 @@ class Game():
             tmp_board.apply_move([sq1, sq2], self.turn)
             # check opponents attacked squares for check
             if not tmp_board.king_safety(not self.turn):
-                print("*** Invalid move, try again. ***")
+                print("*** Move puts king in check ***")
                 # return in json format
-                return {'error': 'Move puts king in check'}
-            print("King still safe, still applying...")
+                if self.turn:
+                    ret_coords = self.board.b_coords
+                else:
+                    ret_coords = self.board.w_coords
+                return {'error': 'king safety', 'coords': ret_coords.tolist()}
             self.board.apply_move([sq1, sq2], self.turn)
             print("Move applied.")
             # need to make a flag to tell frontend if queening is occurring
@@ -87,9 +90,10 @@ class Game():
                 'status': 'move applied',
                 'w_coords': self.board.w_coords.tolist(), 
                 'b_coords': self.board.b_coords.tolist(),
+                'turn': self.turn,
                 'promotion': promotion_info
             }
-        return {'error': 'Invalid move'}
+        return {'error': 'invalid'}
     
 
     # need at least two endpoints for Flask

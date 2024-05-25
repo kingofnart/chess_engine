@@ -10,8 +10,9 @@ def index():
 
 @app.route('/move', methods=['POST'])
 def move():
-    # convert json move info to python (list)
+    # convert json move info to python object (dict)
     data = request.get_json()
+    # data = {'move': ['y1,x1', 'y2,x2']}
     move = data.get('move')
     result = game.make_move(move)
     return jsonify(result)

@@ -1,25 +1,123 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* background-image: url_for("/chess_app/static/space-bg.webp"); */
+    background-size: cover;
+    background-position: center;
+    /* background-color: #050d46; */
+    margin: 0;
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#game-container-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
 #game-container {
     display: grid;
     grid-template-columns: repeat(8, 50px);
     grid-template-rows: repeat(8, 50px);
+    outline: 5px solid rgb(84, 84, 84);
 }
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.turn-indicator {
+    align-self: flex-start;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Lucida Console", "Courier New", monospace;
+    margin-right: auto;
+    margin: 10px 0;
+    padding: 5px 10px;
+}
+
+.timer {
+    align-self: flex-end;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Lucida Console", "Courier New", monospace;
+    margin: 10px 0;
+    padding: 5px 10px 5px 30px;
+    background-color: rgb(120, 222, 118);
+    border-radius: 15px;
+}
+
+#white_timer {
+    margin-left: auto;
+}
+
 .square {
     width: 50px;
     height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    user-select: none; 
 }
+
+#column-labels {
+    display: flex;
+    justify-content: space-between;
+    height: 20px;
+    width: 400px;
+}
+
+#row-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 400px;
+    width: 20px;
+    position: absolute;
+    left: -50px;
+    top: 0;
+}
+
+.coordinate-label {
+    font-size: 18px; 
+    font-weight: bold;
+    font-family: "Lucida Console", "Courier New", monospace;
+    width: 50px; 
+    line-height: 50px;
+    text-align: center; 
+    color: rgb(250, 250, 250);
+}
+
 .dark {
     background-color: #694507;
 }
+
 .light {
     background-color: #F5D7A4;
 }
+
 .piece {
     width: 45px;
     height: 45px;
 }
+
 .selected {
-    outline: 2px solid red;
+    background-color: #e3db9d; /* Change background color */
+    box-shadow: inset 2px 2px 5px #000000; /* Add inset box-shadow for pressed look */
+}
+
+.invalid-move {
+    background-color: red !important; /* Force red background */
 }
