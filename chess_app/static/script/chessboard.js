@@ -9,10 +9,14 @@ class ChessBoard {
         this.rowLabels = document.getElementById('row-labels')
         this.columnLabels = document.getElementById('column-labels')
         this.selectedSquare = null;
-        this.names_w = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B", 
-                        8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
-        this.names_b = {0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
-                        8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"}
+        this.names_w = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        }
+        this.names_b = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        }
         // used as interval IDs
         this.timerIntervals = { white: null, black: null };
         // Event listener to handle user input and make move
@@ -24,7 +28,7 @@ class ChessBoard {
 
 
     // function to send user input (move) to backend to proccess
-    // frontend -> backend (but also backend->frontend)
+    // frontend -> backend (but also backend->frontend via returns i.e. response)
     async makeMove(move) {
         console.log("Sending move ", move, " to be proccessed")
         const response = await fetch('/move', {
@@ -33,17 +37,17 @@ class ChessBoard {
                 'Content-Type': 'application/json',
             },
             // convert move list to json to send to backend
-            body: JSON.stringify({ move }),
+            body: JSON.stringify({ move })
         });
         // response contains the result of backend attempting to apply move
         const result = await response.json();
         if (result.error) {
             if (result.error === "invalid") {
-                this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`), 
-                                      document.querySelector(`[data-coordinate='${move[1]}']`));
+                this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`),
+                    document.querySelector(`[data-coordinate='${move[1]}']`));
             } else if (result.error === "king safety") {
                 this.flashInvalidMove(document.querySelector(`[data-coordinate='${result.coords[0]}']`),
-                                      document.querySelector(`[data-coordinate='${result.coords[0]}']`));
+                    document.querySelector(`[data-coordinate='${result.coords[0]}']`));
             }
         } else if (result.status === 'end') { // game over
             this.fetchGameState();
@@ -57,7 +61,7 @@ class ChessBoard {
     }
 
 
-    // function to get the (possibly) updated game state
+    // method to get initial game state
     // backend -> frontend
     async fetchGameState() {
         const response = await fetch('/state');
@@ -111,7 +115,7 @@ class ChessBoard {
         if (square) {
             const img = square.querySelector('img');
             // only allowing promoting to queen for now
-            img.src = this.getPieceImageUrl('Q', input.color); 
+            img.src = this.getPieceImageUrl('Q', input.color);
         }
     }
 
@@ -152,7 +156,7 @@ class ChessBoard {
                 square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
                 // 7-row adds white pieces at the bottom
                 // want to dynamically change this to reflect color user is playing
-                square.dataset.coordinate = `${7-row},${col}`;
+                square.dataset.coordinate = `${7 - row},${col}`;
                 this.gameContainer.appendChild(square);
             }
         }
@@ -170,7 +174,7 @@ class ChessBoard {
             const square = document.querySelector(`[data-coordinate='${coord[0]},${coord[1]}']`);
             if (square) { // safety
                 const img = document.createElement('img');
-                img.src = this.getPieceImageUrl(names[index], color); 
+                img.src = this.getPieceImageUrl(names[index], color);
                 img.classList.add('piece');
                 square.appendChild(img);
             }
@@ -202,16 +206,24 @@ class ChessBoard {
     // params: int id of game ending, returns: string corresponding to ending
     getEnding(input) {
         // Determine ending based on the input
-        switch(input) {
-                case 2:
-                    return "White checkmated Black. White wins. Game over.";
-                case 3:
-                    return "White stalemated Black. It's a draw. Game over.";
-                case 4:
-                    return "Black checkmated White. Black wins. Game over.";
-                case 5:
-                    return "Black stalemated White. It's a draw. Game over.";
-            }
+        switch (input) {
+            case 0:
+                return "White has flagged. Black wins. Game over.";
+            case 1:
+                return "Black has flagged. White wins. Game over.";
+            case 2:
+                return "White checkmated Black. White wins. Game over.";
+            case 3:
+                return "White stalemated Black. It's a draw. Game over.";
+            case 4:
+                return "Black checkmated White. Black wins. Game over.";
+            case 5:
+                return "Black stalemated White. It's a draw. Game over.";
+            case 6:
+                return "Threefold repetition reached. It's a draw. Game over.";
+            default:
+                return "Game ended in error."
+        }
     }
 
 
@@ -223,6 +235,7 @@ class ChessBoard {
     }
 
 
+    // toggle the timers
     updateTimers(turn) {
         if (turn === true) {
             clearInterval(this.timerIntervals.white);
@@ -241,9 +254,11 @@ class ChessBoard {
             // get time in seconds
             let time = this.parseTime(timerElement.innerText);
             time--;
+            // need to inform backend a timer ran out
             if (time <= 0) {
                 clearInterval(this.timerIntervals[color]);
                 timerElement.innerText = '00:00';
+                this.makeMove([null, color])
             } else {
                 // show user time in MM:SS
                 timerElement.innerText = this.formatTime(time);
@@ -269,13 +284,13 @@ class ChessBoard {
 
     // method to flash squares red for invalid move
     flashInvalidMove(square1, square2) {
-        console.log('Flashing squares:', square1, square2); 
+        console.log('Flashing squares:', square1, square2);
         if (square1) { square1.classList.add('invalid-move'); }
         if (square2) { square2.classList.add('invalid-move'); }
         setTimeout(() => {
             if (square1) { square1.classList.remove('invalid-move'); }
             if (square2) { square2.classList.remove('invalid-move'); }
-        }, 100); 
+        }, 100);
         setTimeout(() => {
             if (square1) square1.classList.add('invalid-move');
             if (square2) square2.classList.add('invalid-move');
