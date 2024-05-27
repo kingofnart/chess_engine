@@ -1,5 +1,4 @@
 import copy
-from tkinter import *
 from grid import Grid
 
 class Game():
