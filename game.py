@@ -20,7 +20,9 @@ class Game():
         # check if trying to reset
         if move[0] == "reset":
             self.turn = 0
+            self.stop = False
             self.board.reset()
+            return { 'status': 'reset'}
         else:
             # make sure nobody's timer ran out
             if move[0] is None:

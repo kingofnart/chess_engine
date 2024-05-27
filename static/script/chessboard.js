@@ -6,31 +6,32 @@ class ChessBoard {
         this.turnIndicator = document.getElementById('turn-indicator');
         this.blackTimer = document.getElementById('black-timer');
         this.whiteTimer = document.getElementById('white-timer');
-        this.rowLabels = document.getElementById('row-labels')
-        this.columnLabels = document.getElementById('column-labels')
-        this.startButton = document.getElementById('start-button')
-        this.resignButton = document.getElementById('resign-button')
-        this.time_control_button = document.getElementById('time-control-button')
+        this.rowLabels = document.getElementById('row-labels');
+        this.columnLabels = document.getElementById('column-labels');
+        this.startButton = document.getElementById('start-button');
+        this.resignButton = document.getElementById('resign-button');
+        this.time_control_button = document.getElementById('time-control-button');
         this.selectedSquare = null;
-        this.gameRunning = true
+        this.gameRunning = true;
         this.names_w = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        }
+        };
         this.names_b = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        }
+        };
         // used as handles for (set/clear)Interval
         this.timerHandles = { white: null, black: null };
         // used to increment timers each move
-        this.increment = 0
+        this.increment = 0;
         // Event listener to handle user input and make move
         this.gameContainer.addEventListener('click', (event) => this.handleClick(event));
         // Assigning event listener
         this.startButton.addEventListener('click', () => this.startGame());
         this.resignButton.addEventListener('click', () => this.endGame(7));
-        this.time_control_button.addEventListener('click', () => this.showDropdown())
+        this.resignButton.disabled = true;
+        this.time_control_button.addEventListener('click', () => this.showDropdown());
         document.querySelectorAll('.time-option').forEach(button => {
             button.addEventListener('click', (event) => this.setTimeControl(event));
         });
@@ -54,7 +55,7 @@ class ChessBoard {
         });
         // response contains the result of backend attempting to apply move
         const result = await response.json();
-        if (result === null) {
+        if (result.status === 'reset') {
             // pass
         } else {
             if (result.error) {
@@ -69,10 +70,10 @@ class ChessBoard {
                 this.fetchGameState();
                 this.endGame(result.end_result)
             } else if (result.status === 'move applied') { // proceed with game
-                this.addIncrement(result.turn)
+                this.addIncrement(result.turn);
                 this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
             } else {
-                alert("Error in response from makeMove")
+                alert("Error in response from makeMove");
             }
         }
     }
@@ -84,7 +85,7 @@ class ChessBoard {
         const response = await fetch('/state');
         const state = await response.json();
         this.renderBoard(state.w_coords, state.b_coords);
-        this.updateTurnIndicator(state.turn)
+        this.updateTurnIndicator(state.turn);
     }
 
 
@@ -214,8 +215,9 @@ class ChessBoard {
     startGame() {
         this.startButton.style.display = 'none';
         this.turnIndicator.hidden = false;
-        this.startTimer("white")
-        this.time_control_button.disabled = true
+        this.startTimer("white");
+        this.time_control_button.disabled = true;
+        this.resignButton.disabled = false;
     }
 
     
@@ -226,15 +228,16 @@ class ChessBoard {
         const message_row = document.getElementById("message-row")
         const txt = this.getEnding(input)
         const message = document.createElement('div');
-        message.innerText = txt
+        message.innerText = txt;
         message.classList.add('end-message');
         message_row.appendChild(message);
         const reset_row = document.getElementById("reset-row")
         const button = document.createElement('button');
         button.addEventListener('click', () => this.resetGame())
         button.classList.add('reset-button', 'button');
-        button.textContent = "Reset"
+        button.textContent = "Reset";
         reset_row.appendChild(button);
+        this.resignButton.disabled = true;
     }
 
 
@@ -245,23 +248,23 @@ class ChessBoard {
         this.names_w = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        }
+        };
         this.names_b = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        }
-        this.whiteTimer.innerText = "5:00"
-        this.blackTimer.innerText = "5:00"
+        };
+        this.whiteTimer.innerText = "5:00";
+        this.blackTimer.innerText = "5:00";
         if (this.whiteTimer.classList.contains('time-trouble')) {
             this.whiteTimer.classList.remove('time-trouble');
         }
         if (this.blackTimer.classList.contains('time-trouble')) {
             this.blackTimer.classList.remove('time-trouble');
         }
-        const end_message = document.querySelector(".end-message")
-        end_message.remove()
-        const reset_button = document.querySelector(".reset-button")
-        reset_button.remove()
+        const end_message = document.querySelector(".end-message");
+        end_message.remove();
+        const reset_button = document.querySelector(".reset-button");
+        reset_button.remove();
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
     }
@@ -286,26 +289,26 @@ class ChessBoard {
             case 6:
                 return "Threefold repetition reached. It's a draw. Game over.";
             case 7:
-                return "Player has resigned. Bot wins."
+                return "Player has resigned. Bot wins.";
             default:
-                return "Game ended in error."
+                return "Game ended in error.";
         }
     }
 
 
     // method to show/hide dropdown menu
     showDropdown() {
-        document.getElementById('drop-cont').classList.toggle('show')
+        document.getElementById('drop-cont').classList.toggle('show');
     }
 
 
     // method to set the time control
     setTimeControl(event) {
         const time = event.target.getAttribute('data-time');
-        var time_arr = JSON.parse(time)
+        var time_arr = JSON.parse(time);
         this.whiteTimer.innerText = time_arr[0] + ":00";
         this.blackTimer.innerText = time_arr[0] + ":00";
-        this.increment = time_arr[1]
+        this.increment = time_arr[1];
         this.showDropdown(); // hide dropdown after selection
     }
 
@@ -341,7 +344,7 @@ class ChessBoard {
             if (time <= 0 && this.gameRunning) {
                 clearInterval(this.timerHandles[color]);
                 timerElement.innerText = '00:00';
-                this.makeMove([null, color])
+                this.makeMove([null, color]);
                 this.gameRunning = false;
             } else {
                 // show user they're running out of time
