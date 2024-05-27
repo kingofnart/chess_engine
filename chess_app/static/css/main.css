@@ -3,10 +3,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    /* background-image: url_for("/chess_app/static/space-bg.webp"); */
     background-size: cover;
     background-position: center;
-    /* background-color: #050d46; */
     margin: 0;
 }
 
@@ -39,12 +37,12 @@ body {
 }
 
 .turn-indicator {
-    align-self: flex-start;
+    /* align-self: flex-start; */
     font-size: 20px;
     font-weight: bold;
     font-family: "Lucida Console", "Courier New", monospace;
-    margin-right: auto;
-    margin: 10px 0;
+    /* margin-right: auto;
+    margin: 10px 0; */
     padding: 5px 10px;
 }
 
@@ -55,7 +53,7 @@ body {
     font-family: "Lucida Console", "Courier New", monospace;
     margin: 10px 0;
     padding: 5px 10px 5px 30px;
-    background-color: rgb(120, 222, 118);
+    background-color: rgb(23, 150, 40);
     border-radius: 15px;
 }
 
@@ -69,7 +67,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    user-select: none; 
+    user-select: none;
+    border: none;
 }
 
 #column-labels {
@@ -114,10 +113,116 @@ body {
 }
 
 .selected {
-    background-color: #e3db9d; /* Change background color */
-    box-shadow: inset 2px 2px 5px #000000; /* Add inset box-shadow for pressed look */
+    background-color: #e3db9d; 
+    box-shadow: inset 2px 2px 5px #000000; 
 }
 
 .invalid-move {
-    background-color: red !important; /* Force red background */
+    background-color: red !important;
+}
+
+.button {
+    background-color: #687241; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    margin: auto;
+    border-radius: 5px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    user-select: none;
+}
+
+.start-button {
+    padding: 10px, 5px;
+    margin: auto;
+}
+
+
+.reset-button {
+    padding: 10px, 5px;
+    margin: auto;
+}
+
+.reset-button:hover {
+    background-color: #c1ce88;
+    color: black;
+}
+
+#resign-button {
+    background-color: #6e433d;
+}
+
+#resign-button:hover {
+    background-color: #c43620;
+    color: black;
+}
+
+.end-message {
+    padding: 15px 32px;
+    margin: auto;
+    background-color: lightgrey;
+    color: black;
+    text-align: center;
+    font-size: 12px;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+/* click drop menu from w3schools: */
+.dropbtn {
+    background-color: #537992;
+    color: white;
+    padding: 10px 5px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #5f8cab;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #4f4769;
+    min-width: 60px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.dropdown-content button {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.dropdown-content button:hover {background-color: #8b3fa0;}
+
+.show {display: block;}
+
+.time-trouble {
+    background-color: #c43620;
+    color: white;
 }

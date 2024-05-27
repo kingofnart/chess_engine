@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, url_for, render_template
+from flask import Flask, request, jsonify, render_template
 from game import Game
 
 app = Flask(__name__)
