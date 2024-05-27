@@ -1,7 +1,10 @@
-import sys, numpy as np
-sys.path.append('chess_app')
+import sys, os, numpy as np
+# Add the root directory to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from grid import Grid
 from piece import Piece
+
+
 
 # piece type key: 0 = King; 1 = Queen; 2 = Rook; 3 = Knight; 4 = Bishop; 5 = Pawn
 # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
