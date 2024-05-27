@@ -514,9 +514,10 @@ class Grid():
                                     return 0
                             elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
                                 if not piece2:
-                                    return 1
-                                else:
-                                    return 0
+                                    if not self.grid[move[0][0]+sign][move[0][1]]:
+                                        return 1
+                                    else: return 0
+                                else: return 0
                             else:  # invalid move
                                 return 0
                         # capturing pawn move
@@ -722,7 +723,7 @@ class Grid():
         self.attacked_squares(not color, validation=1)  # get not color's available moves
         # checking if black is checkmating/stalemating white
         if color: 
-            print("Number of valid moves for White: {}".format(len(self.valid_moves_w)))
+            print("Number of valid moves for White: {}\nValid moves list: {}".format(len(self.valid_moves_w), self.valid_moves_w))
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
@@ -737,7 +738,7 @@ class Grid():
             else: return (-1,-1)
         # checking if white is checkmating/stalemating black
         else:
-            print("Number of valid moves for Black: {}".format(len(self.valid_moves_b)))
+            print("Number of valid moves for Black: {}\nValid moves list: {}".format(len(self.valid_moves_b), self.valid_moves_b))
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]

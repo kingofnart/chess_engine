@@ -8,7 +8,11 @@ class ChessBoard {
         this.whiteTimer = document.getElementById('white-timer');
         this.rowLabels = document.getElementById('row-labels')
         this.columnLabels = document.getElementById('column-labels')
+        this.startButton = document.getElementById('start-button')
+        this.resignButton = document.getElementById('resign-button')
+        this.time_control_button = document.getElementById('time-control-button')
         this.selectedSquare = null;
+        this.gameRunning = true
         this.names_w = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
@@ -17,10 +21,19 @@ class ChessBoard {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
         }
-        // used as interval IDs
-        this.timerIntervals = { white: null, black: null };
+        // used as handles for (set/clear)Interval
+        this.timerHandles = { white: null, black: null };
+        // used to increment timers each move
+        this.increment = 0
         // Event listener to handle user input and make move
         this.gameContainer.addEventListener('click', (event) => this.handleClick(event));
+        // Assigning event listener
+        this.startButton.addEventListener('click', () => this.startGame());
+        this.resignButton.addEventListener('click', () => this.endGame(7));
+        this.time_control_button.addEventListener('click', () => this.showDropdown())
+        document.querySelectorAll('.time-option').forEach(button => {
+            button.addEventListener('click', (event) => this.setTimeControl(event));
+        });
         // fetch initial game state
         this.fetchGameState();
         this.renderLabels();
@@ -41,22 +54,26 @@ class ChessBoard {
         });
         // response contains the result of backend attempting to apply move
         const result = await response.json();
-        if (result.error) {
-            if (result.error === "invalid") {
-                this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`),
-                    document.querySelector(`[data-coordinate='${move[1]}']`));
-            } else if (result.error === "king safety") {
-                this.flashInvalidMove(document.querySelector(`[data-coordinate='${result.coords[0]}']`),
-                    document.querySelector(`[data-coordinate='${result.coords[0]}']`));
-            }
-        } else if (result.status === 'end') { // game over
-            this.fetchGameState();
-            const txt = this.getEnding(result.end_result)
-            alert(txt);
-        } else if (result.status === 'move applied') { // proceed with game
-            this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+        if (result === null) {
+            // pass
         } else {
-            alert("Error in response from makeMove")
+            if (result.error) {
+                if (result.error === "invalid") {
+                    this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`),
+                        document.querySelector(`[data-coordinate='${move[1]}']`));
+                } else if (result.error === "king safety") {
+                    this.flashInvalidMove(document.querySelector(`[data-coordinate='${result.coords[0]}']`),
+                        document.querySelector(`[data-coordinate='${result.coords[0]}']`));
+                }
+            } else if (result.status === 'end') { // game over
+                this.fetchGameState();
+                this.endGame(result.end_result)
+            } else if (result.status === 'move applied') { // proceed with game
+                this.addIncrement(result.turn)
+                this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+            } else {
+                alert("Error in response from makeMove")
+            }
         }
     }
 
@@ -68,30 +85,34 @@ class ChessBoard {
         const state = await response.json();
         this.renderBoard(state.w_coords, state.b_coords);
         this.updateTurnIndicator(state.turn)
-        this.updateTimers(state.turn);
     }
 
 
+    // method to handle user clicking on squares
+    // waits for two different squares to be slected then sends them to makeMove
     handleClick(event) {
-        const square = event.target.closest('.square');
-        if (!square) return;
-        // check if user has already selected a square
-        if (this.selectedSquare) {
-            if (this.selectedSquare != square) {
-                const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
-                this.makeMove(move);
-                this.selectedSquare.classList.remove('selected');
-                this.selectedSquare = null;
-            } else {
-                this.flashInvalidMove(this.selectedSquare, this.selectedSquare)
-                this.selectedSquare.classList.remove('selected');
-                this.selectedSquare = null;
+        if (this.turnIndicator.hidden === false) {
+            const square = event.target.closest('.square');
+            if (!square) return;
+            // check if user has already selected a square
+            if (this.selectedSquare) {
+                if (this.selectedSquare != square) {
+                    const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
+                    this.makeMove(move);
+                    this.selectedSquare.classList.remove('selected');
+                    this.selectedSquare = null;
+                } else {
+                    this.flashInvalidMove(this.selectedSquare, this.selectedSquare)
+                    this.selectedSquare.classList.remove('selected');
+                    this.selectedSquare = null;
+                }
+            } else { // add square to selected class and wait for another click
+                this.selectedSquare = square;
+                this.selectedSquare.classList.add('selected');
             }
-        } else { // add square to selected class and wait for another click
-            this.selectedSquare = square;
-            this.selectedSquare.classList.add('selected');
         }
     }
+
 
     // function to update board handling promotions
     updateBoard(w_coords, b_coords, turn, promotion) {
@@ -102,46 +123,7 @@ class ChessBoard {
         //console.log("board updated");
         this.renderBoard(w_coords, b_coords);
         this.updateTurnIndicator(turn);
-        this.updateTimers(turn);
-    }
-
-
-    // input form: {'index': piece id, 'color': piece color, 'coord': piece position}
-    promoteQueen(input) {
-        let names = input.color ? this.names_b : this.names_w;
-        names[input.index] = 'Q';
-        //console.log(names);
-        const square = document.querySelector(`[data-coordinate='${input.coord}']`);
-        if (square) {
-            const img = square.querySelector('img');
-            // only allowing promoting to queen for now
-            img.src = this.getPieceImageUrl('Q', input.color);
-        }
-    }
-
-
-    // method to render the labels of rows/cols
-    renderLabels() {
-        // create column labels
-        this.columnLabels.innerHTML = ''
-        const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        columns.forEach(letter => {
-            const label = document.createElement('div');
-            label.className = 'coordinate-label';
-            label.innerText = letter;
-            this.columnLabels.appendChild(label);
-        });
-        //this.gameContainerWrapper.appendChild(columnLabels);
-        // create row labels
-        this.rowLabels.innerHTML = ''
-        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
-        rows.forEach(row => {
-            const label = document.createElement('div');
-            label.className = 'coordinate-label';
-            label.innerText = row;
-            this.rowLabels.appendChild(label);
-        });
-        //this.gameContainerWrapper.appendChild(rowLabels);
+        this.toggleTimers(turn);
     }
 
 
@@ -151,7 +133,7 @@ class ChessBoard {
         // create hmtl elements for all 64 squares
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                const square = document.createElement('div');
+                const square = document.createElement('button');
                 // add square css and light/dark bg dependent on the diagonal (c1+c2)%2==0
                 square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
                 // 7-row adds white pieces at the bottom
@@ -182,6 +164,31 @@ class ChessBoard {
     }
 
 
+    // method to render the labels of rows/cols
+    renderLabels() {
+        // create column labels
+        this.columnLabels.innerHTML = ''
+        const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        columns.forEach(letter => {
+            const label = document.createElement('div');
+            label.className = 'coordinate-label';
+            label.innerText = letter;
+            this.columnLabels.appendChild(label);
+        });
+        //this.gameContainerWrapper.appendChild(columnLabels);
+        // create row labels
+        this.rowLabels.innerHTML = ''
+        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        rows.forEach(row => {
+            const label = document.createElement('div');
+            label.className = 'coordinate-label';
+            label.innerText = row;
+            this.rowLabels.appendChild(label);
+        });
+        //this.gameContainerWrapper.appendChild(rowLabels);
+    }
+
+
     // params: piece type, piece color, returns: filename of piece image
     getPieceImageUrl(type, color) {
         switch (type) {
@@ -203,6 +210,63 @@ class ChessBoard {
     }
 
 
+    // method to start game and create turn indicator text
+    startGame() {
+        this.startButton.style.display = 'none';
+        this.turnIndicator.hidden = false;
+        this.startTimer("white")
+        this.time_control_button.disabled = true
+    }
+
+    
+    // method to stop clocks, show game ending message and reset button
+    endGame(input) {
+        clearInterval(this.timerHandles.white);
+        clearInterval(this.timerHandles.black);
+        const message_row = document.getElementById("message-row")
+        const txt = this.getEnding(input)
+        const message = document.createElement('div');
+        message.innerText = txt
+        message.classList.add('end-message');
+        message_row.appendChild(message);
+        const reset_row = document.getElementById("reset-row")
+        const button = document.createElement('button');
+        button.addEventListener('click', () => this.resetGame())
+        button.classList.add('reset-button', 'button');
+        button.textContent = "Reset"
+        reset_row.appendChild(button);
+    }
+
+
+    // method to reset the board state and clocks
+    resetGame() {
+        this.makeMove(["reset"])
+        this.fetchGameState()
+        this.names_w = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        }
+        this.names_b = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        }
+        this.whiteTimer.innerText = "5:00"
+        this.blackTimer.innerText = "5:00"
+        if (this.whiteTimer.classList.contains('time-trouble')) {
+            this.whiteTimer.classList.remove('time-trouble');
+        }
+        if (this.blackTimer.classList.contains('time-trouble')) {
+            this.blackTimer.classList.remove('time-trouble');
+        }
+        const end_message = document.querySelector(".end-message")
+        end_message.remove()
+        const reset_button = document.querySelector(".reset-button")
+        reset_button.remove()
+        this.startButton.style.display = 'block';
+        this.turnIndicator.hidden = true;
+    }
+
+
     // params: int id of game ending, returns: string corresponding to ending
     getEnding(input) {
         // Determine ending based on the input
@@ -221,13 +285,32 @@ class ChessBoard {
                 return "Black stalemated White. It's a draw. Game over.";
             case 6:
                 return "Threefold repetition reached. It's a draw. Game over.";
+            case 7:
+                return "Player has resigned. Bot wins."
             default:
                 return "Game ended in error."
         }
     }
 
 
-    // Update the turn indicator based on the current turn
+    // method to show/hide dropdown menu
+    showDropdown() {
+        document.getElementById('drop-cont').classList.toggle('show')
+    }
+
+
+    // method to set the time control
+    setTimeControl(event) {
+        const time = event.target.getAttribute('data-time');
+        var time_arr = JSON.parse(time)
+        this.whiteTimer.innerText = time_arr[0] + ":00";
+        this.blackTimer.innerText = time_arr[0] + ":00";
+        this.increment = time_arr[1]
+        this.showDropdown(); // hide dropdown after selection
+    }
+
+
+    // method to update the turn indicator based on the current turn
     updateTurnIndicator(turn) {
         this.turnIndicator.style.background = turn === true ? "black" : "white";
         this.turnIndicator.style.color = turn === true ? "white" : "black";
@@ -236,12 +319,12 @@ class ChessBoard {
 
 
     // toggle the timers
-    updateTimers(turn) {
+    toggleTimers(turn) {
         if (turn === true) {
-            clearInterval(this.timerIntervals.white);
+            clearInterval(this.timerHandles.white);
             this.startTimer('black');
         } else {
-            clearInterval(this.timerIntervals.black);
+            clearInterval(this.timerHandles.black);
             this.startTimer('white');
         }
     }
@@ -250,20 +333,37 @@ class ChessBoard {
     // method to start timers and check if timer reached 0
     startTimer(color) {
         const timerElement = color === 'white' ? this.whiteTimer : this.blackTimer;
-        this.timerIntervals[color] = setInterval(() => {
+        this.timerHandles[color] = setInterval(() => {
             // get time in seconds
             let time = this.parseTime(timerElement.innerText);
             time--;
             // need to inform backend a timer ran out
-            if (time <= 0) {
-                clearInterval(this.timerIntervals[color]);
+            if (time <= 0 && this.gameRunning) {
+                clearInterval(this.timerHandles[color]);
                 timerElement.innerText = '00:00';
                 this.makeMove([null, color])
+                this.gameRunning = false;
             } else {
+                // show user they're running out of time
+                if (time <= 20) {
+                    if (!timerElement.classList.contains('timer-trouble')) {
+                        timerElement.classList.add('time-trouble');
+                    }
+                }
                 // show user time in MM:SS
                 timerElement.innerText = this.formatTime(time);
             }
         }, 1000); // delay set to 1 second
+    }
+
+
+    // method to add increment to turn's timer
+    addIncrement(turn) {
+        // if turn=1, color=black
+        const timerElement = turn ? this.blackTimer : this.whiteTimer;
+        let time = this.parseTime(timerElement.innerText);
+        time += this.increment;
+        timerElement.innerText = this.formatTime(time);
     }
 
 
@@ -279,6 +379,20 @@ class ChessBoard {
         const minutes = Math.floor(time / 60).toString().padStart(1, '0');
         const seconds = (time % 60).toString().padStart(2, '0');
         return `${minutes}:${seconds}`;
+    }
+
+
+    // input form: {'index': piece id, 'color': piece color, 'coord': piece position}
+    promoteQueen(input) {
+        let names = input.color ? this.names_b : this.names_w;
+        names[input.index] = 'Q';
+        //console.log(names);
+        const square = document.querySelector(`[data-coordinate='${input.coord}']`);
+        if (square) {
+            const img = square.querySelector('img');
+            // only allowing promoting to queen for now
+            img.src = this.getPieceImageUrl('Q', input.color);
+        }
     }
 
 

@@ -11,10 +11,27 @@
     </style>
 </head>
 <body>
+    <script>
+        // from w3schools:
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
     <div id="main-container">
         <div class="row">
-            <div class="turn-indicator" id="turn-indicator">White to move</div>
-            <div class="timer" id="black-timer">0:10</div>
+            <button class="turn-indicator" id="start-button">Start Game</button>
+            <div class="turn-indicator" id="turn-indicator" hidden>White to move</div>
+            <div class="timer" id="black-timer">5:00</div>
         </div>
         <div id="game-container-wrapper">
             <div id="row-labels"></div>
@@ -22,8 +39,24 @@
         </div>
         <div id="column-labels"></div>
         <div class="row">
-            <div></div>
+            <div class="dropdown">
+                <button class="dropbtn" id="time-control-button">Time Control</button>
+                <div class="dropdown-content" id="drop-cont">
+                  <button class="time-option" data-time="[5,0]">5-0</button>
+                  <button class="time-option" data-time="[3,2]">3-2</button>
+                  <button class="time-option" data-time="[3,0]">3-0</button>
+                  <button class="time-option" data-time="[2,1]">2-1</button>
+                  <button class="time-option" data-time="[1,0]">1-0</button>
+                </div>
+              </div>
             <div class="timer" id="white-timer">5:00</div>
+        </div>
+        <div class="row">
+            <button class="button" id="resign-button">Resign</button>
+        </div>
+        <div class="row" id="message-row">
+        </div>
+        <div class="row" id="reset-row">
         </div>
     </div>
     <script src="{{ url_for('static', filename='script/chessboard.js') }}"></script>
