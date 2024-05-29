@@ -1,6 +1,7 @@
 class ChessBoard {
 
     constructor() {
+        console.log("Initializing ChessBoard");
         this.gameContainer = document.getElementById('game-container');
         this.gameContainerWrapper = document.getElementById('game-container-wrapper');
         this.turnIndicator = document.getElementById('turn-indicator');
@@ -44,37 +45,43 @@ class ChessBoard {
     // function to send user input (move) to backend to proccess
     // frontend -> backend (but also backend->frontend via returns i.e. response)
     async makeMove(move) {
-        console.log("Sending move ", move, " to be proccessed")
-        const response = await fetch('/move', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            // convert move list to json to send to backend
-            body: JSON.stringify({ move })
-        });
-        // response contains the result of backend attempting to apply move
-        const result = await response.json();
-        if (result.status === 'reset') {
-            // pass
-        } else {
-            if (result.error) {
-                if (result.error === "invalid") {
-                    this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`),
-                        document.querySelector(`[data-coordinate='${move[1]}']`));
-                } else if (result.error === "king safety") {
-                    this.flashInvalidMove(document.querySelector(`[data-coordinate='${result.coords[0]}']`),
-                        document.querySelector(`[data-coordinate='${result.coords[0]}']`));
-                }
-            } else if (result.status === 'end') { // game over
-                this.fetchGameState();
-                this.endGame(result.end_result)
-            } else if (result.status === 'move applied') { // proceed with game
-                this.addIncrement(result.turn);
-                this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+        console.log("Sending move ", move, " to be proccessed");
+        try {
+            const response = await fetch('/move', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // convert move list to json to send to backend
+                body: JSON.stringify({ move })
+            });
+            console.log("Received response from /move")
+            // response contains the result of backend attempting to apply move
+            const result = await response.json();
+            console.log("Response JSON: ", result);
+            if (result.status === 'reset') {
+                // pass
             } else {
-                alert("Error in response from makeMove");
+                if (result.error) {
+                    if (result.error === "invalid") {
+                        this.flashInvalidMove(document.querySelector(`[data-coordinate='${move[0]}']`),
+                            document.querySelector(`[data-coordinate='${move[1]}']`));
+                    } else if (result.error === "king safety") {
+                        this.flashInvalidMove(document.querySelector(`[data-coordinate='${result.coords[0]}']`),
+                            document.querySelector(`[data-coordinate='${result.coords[0]}']`));
+                    }
+                } else if (result.status === 'end') { // game over
+                    this.fetchGameState();
+                    this.endGame(result.end_result);
+                } else if (result.status === 'move applied') { // proceed with game
+                    this.addIncrement(result.turn);
+                    this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+                } else {
+                    alert("Error in response from makeMove");
+                }
             }
+        } catch (error) {
+            console.error("Error during makeMove: ", error);
         }
     }
 
@@ -92,6 +99,7 @@ class ChessBoard {
     // method to handle user clicking on squares
     // waits for two different squares to be slected then sends them to makeMove
     handleClick(event) {
+        console.log("Square clicked");
         if (this.turnIndicator.hidden === false) {
             const square = event.target.closest('.square');
             if (!square) return;
@@ -99,11 +107,12 @@ class ChessBoard {
             if (this.selectedSquare) {
                 if (this.selectedSquare != square) {
                     const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
+                    console.log("Selected move:", move);
                     this.makeMove(move);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
                 } else {
-                    this.flashInvalidMove(this.selectedSquare, this.selectedSquare)
+                    this.flashInvalidMove(this.selectedSquare, this.selectedSquare);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
                 }
@@ -140,6 +149,7 @@ class ChessBoard {
                 // 7-row adds white pieces at the bottom
                 // want to dynamically change this to reflect color user is playing
                 square.dataset.coordinate = `${7 - row},${col}`;
+                // `${7 - row},${col}` ~= "7-row,col"
                 this.gameContainer.appendChild(square);
             }
         }
@@ -168,7 +178,7 @@ class ChessBoard {
     // method to render the labels of rows/cols
     renderLabels() {
         // create column labels
-        this.columnLabels.innerHTML = ''
+        this.columnLabels.innerHTML = '';
         const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
         columns.forEach(letter => {
             const label = document.createElement('div');
@@ -178,7 +188,7 @@ class ChessBoard {
         });
         //this.gameContainerWrapper.appendChild(columnLabels);
         // create row labels
-        this.rowLabels.innerHTML = ''
+        this.rowLabels.innerHTML = '';
         const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
         rows.forEach(row => {
             const label = document.createElement('div');
@@ -225,15 +235,15 @@ class ChessBoard {
     endGame(input) {
         clearInterval(this.timerHandles.white);
         clearInterval(this.timerHandles.black);
-        const message_row = document.getElementById("message-row")
-        const txt = this.getEnding(input)
+        const message_row = document.getElementById("message-row");
+        const txt = this.getEnding(input);
         const message = document.createElement('div');
         message.innerText = txt;
         message.classList.add('end-message');
         message_row.appendChild(message);
         const reset_row = document.getElementById("reset-row")
         const button = document.createElement('button');
-        button.addEventListener('click', () => this.resetGame())
+        button.addEventListener('click', () => this.resetGame());
         button.classList.add('reset-button', 'button');
         button.textContent = "Reset";
         reset_row.appendChild(button);
@@ -242,9 +252,7 @@ class ChessBoard {
 
 
     // method to reset the board state and clocks
-    resetGame() {
-        this.makeMove(["reset"])
-        this.fetchGameState()
+    async resetGame() {
         this.names_w = {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
@@ -267,6 +275,8 @@ class ChessBoard {
         reset_button.remove();
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
+        await this.makeMove(["reset"]);
+        await this.fetchGameState();
     }
 
 
@@ -422,5 +432,6 @@ class ChessBoard {
 
 // make ChessBoard object when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
     new ChessBoard();
 });

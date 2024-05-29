@@ -19,8 +19,11 @@ class Game():
     def make_move(self, move):
         # check if trying to reset
         if move[0] == "reset":
+            print("GAME: reset received")
             self.turn = 0
+            self.board_history = []
             self.stop = False
+            self.stop_condition = -1
             self.board.reset()
             return { 'status': 'reset'}
         else:
@@ -34,19 +37,21 @@ class Game():
             else:  # timers still running
                 sq1 = [int(move[0][0]), int(move[0][2])]
                 sq2 = [int(move[1][0]), int(move[1][2])]
+                print(f"GAME: move received: {[sq1, sq2]}")
                 colors = {0: "White", 1: "Black"}
                 if self.board.valid_move([sq1, sq2], self.turn, set_enpassant=True):
                     tmp_board = copy.deepcopy(self.board)
                     tmp_board.apply_move([sq1, sq2], self.turn)
                     # check opponents attacked squares for check
                     if not tmp_board.king_safety(not self.turn):
-                        # return in json format
+                        # return coords to flash the king thats being put in check
                         if self.turn:
                             ret_coords = self.board.b_coords
                         else:
                             ret_coords = self.board.w_coords
                         return {'error': 'king safety', 'coords': ret_coords.tolist()}
                     self.board.apply_move([sq1, sq2], self.turn)
+                    print(f"GAME: move {[sq1, sq2]} is valid and has been applied")
                     # need to make a flag to tell frontend if queening is occurring
                     promotion_info = None
                     if self.board.get_queening() is not None:
@@ -79,7 +84,7 @@ class Game():
                                 self.stop_condition = 3
                             else:  # white checkmate
                                 self.stop_condition = 2
-                else: return {'error': 'invalid'}
+                else: return {'error': 'invalid'}  # valid_move() failed
             if self.stop:
                 # return in json format
                 return {
@@ -89,7 +94,7 @@ class Game():
             # proceed with game
             self.turn = not self.turn
             self.board.unenpassant(self.turn)
-            print("It is now {}'s turn.".format(colors[self.turn]))
+            print(f"It is now {colors[self.turn]}'s turn.")
             print("-----------------------------------------------------------------")
             return {
                 'status': 'move applied',
