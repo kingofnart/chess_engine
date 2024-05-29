@@ -165,7 +165,7 @@ class ChessBoard {
         coords.forEach((coord, index) => {
             // get the square with coordinate = coord
             const square = document.querySelector(`[data-coordinate='${coord[0]},${coord[1]}']`);
-            if (square) { // safety
+            if (square) { // coord of captured piece is [-1,-1] => no square at [-1,-1]
                 const img = document.createElement('img');
                 img.src = this.getPieceImageUrl(names[index], color);
                 img.classList.add('piece');
