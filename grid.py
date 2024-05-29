@@ -80,7 +80,7 @@ class Grid():
 
     # function to reset board to starting position  
     def reset(self):
-        
+        print("GRID: reset called")
         for piece in self.w_pcs:
             piece.set_captured(0)
             piece.set_enpassant(0)
@@ -89,6 +89,14 @@ class Grid():
             piece.set_captured(0)
             piece.set_enpassant(0)
             piece.set_moved(0)
+        self.w_pcs = [Piece(0,0,0), Piece(0,1,1), Piece(0,2,2), Piece(0,2,3), 
+                      Piece(0,3,4), Piece(0,3,5), Piece(0,4,6), Piece(0,4,7), 
+                      Piece(0,5,8), Piece(0,5,9), Piece(0,5,10), Piece(0,5,11), 
+                      Piece(0,5,12), Piece(0,5,13), Piece(0,5,14), Piece(0,5,15)]
+        self.b_pcs = [Piece(1,0,0), Piece(1,1,1), Piece(1,2,2), Piece(1,2,3), 
+                      Piece(1,3,4), Piece(1,3,5), Piece(1,4,6), Piece(1,4,7), 
+                      Piece(1,5,8), Piece(1,5,9), Piece(1,5,10), Piece(1,5,11), 
+                      Piece(1,5,12), Piece(1,5,13), Piece(1,5,14), Piece(1,5,15)]
         self.w_coords = np.array([[0,4], [0,3], [0,0], [0,7], [0,1], 
                                   [0,6], [0,2], [0,5], [1,0], [1,1], 
                                   [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]])
@@ -105,13 +113,22 @@ class Grid():
                      self.b_pcs[8:], 
                      [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
                       self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
-        self.enspassant = 0
+        # reset lists
+        self.board_history = []
+        self.attacked_squares_w = []
+        self.attacked_squares_b = []
+        self.valid_moves_w = []
+        self.valid_moves_b = []
+        self.update_history()
+        # reset special move flags
+        self.someone_attempting_enpassant_move = False
         self.castle_queenside = 0
         self.castle_kingside = 0
-        self.board_history = []
-        self.update_history()
-        self.valid_moves_w = self.attacked_squares(0, validation=1) # also sets attacked_squares_w
-        self.valid_moves_b = self.attacked_squares(1, validation=1) # also sets attacked_squares_b
+        self.queening = None  
+        self.attacked_squares(0, validation=1)
+        self.attacked_squares(1, validation=1)
+        self.unenpassant(0)
+        self.unenpassant(1)
     
 
     # function to save list of all squares attacked by a color
@@ -723,7 +740,7 @@ class Grid():
         self.attacked_squares(not color, validation=1)  # get not color's available moves
         # checking if black is checkmating/stalemating white
         if color: 
-            print("Number of valid moves for White: {}\nValid moves list: {}".format(len(self.valid_moves_w), self.valid_moves_w))
+            print(f"Number of valid moves for White: {len(self.valid_moves_w)}")
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
@@ -738,7 +755,7 @@ class Grid():
             else: return (-1,-1)
         # checking if white is checkmating/stalemating black
         else:
-            print("Number of valid moves for Black: {}\nValid moves list: {}".format(len(self.valid_moves_b), self.valid_moves_b))
+            print(f"Number of valid moves for Black: {len(self.valid_moves_b)}")
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]
