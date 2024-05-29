@@ -49,19 +49,12 @@ def test_fried_liver(driver):
              ("7,6", "5,5"), ("2,5", "4,6"), ("6,3", "4,3"), ("3,4", "4,3"), ("5,5", "4,3"),
              ("4,6", "6,5"), ("7,4", "6,5"), ("0,3", "2,5"), ("6,5", "7,6"), ("3,2", "4,3"),
              ("7,3", "4,3"), ("2,5", "4,3"), ("7,2", "5,4"), ("4,3", "5,4")]
+    
     start(driver)
-    for move in moves:
-        source = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
-        )
-        target = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
-        )
-        source.click()
-        time.sleep(0.5)
-        target.click()
-        time.sleep(0.5)
+    apply_moves(driver, moves)
+    input_names = reset_names()
     input_coords = reset_coords()
+    
     input_coords[0][1] = ("5,4")
     input_coords[0][5] = ("-1,-1")
     input_coords[0][7] = ("-1,-1")
@@ -73,7 +66,45 @@ def test_fried_liver(driver):
     input_coords[1][6] = ("-1,-1")
     input_coords[1][11] = ("-1,-1")
     input_coords[1][13] = ("-1,-1")
+    
+    check_board_images(driver, input_coords, input_names)
+    reset(driver)
+
+
+def test_opera(driver):
+    moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("6,3", "5,3"), ("1,3", "3,3"), 
+             ("7,2", "3,6"), ("3,3", "4,4"), ("3,6", "2,5"), ("0,3", "2,5"), ("5,3", "4,4"),
+             ("0,5", "3,2"), ("7,6", "5,5"), ("2,5", "2,1"), ("7,3", "6,4"), ("0,1", "2,2"), 
+             ("6,2", "5,2"), ("0,2", "4,6"), ("6,1", "4,1"), ("2,2", "4,1"), ("5,2", "4,1"), 
+             ("3,2", "4,1"), ("7,1", "6,3"), ("0,4", "0,2"), ("7,0", "7,3"), ("0,3", "6,3"), 
+             ("7,3", "6,3"), ("0,7", "0,3"), ("6,4", "5,4"), ("4,1", "6,3"), ("5,5", "6,3"), 
+             ("2,1", "7,1"), ("6,3", "7,1"),  ("0,3", "7,3")]
+    
+    start(driver)
+    apply_moves(driver, moves)
     input_names = reset_names()
+    input_coords = reset_coords()
+
+    input_coords[0][0] = ("0,2")
+    input_coords[0][1] = ("-1,-1")
+    input_coords[0][2] = ("-1,-1")
+    input_coords[0][3] = ("7,3")
+    input_coords[0][4] = ("-1,-1")
+    input_coords[0][5] = ("-1,-1")
+    input_coords[0][6] = ("4,6")
+    input_coords[0][7] = ("-1,-1")
+    input_coords[0][11] = ("-1,-1")
+    input_coords[0][12] = ("3,4")
+    input_coords[1][1] = ("5,4")
+    input_coords[1][2] = ("-1,-1")
+    input_coords[1][4] = ("-1,-1")
+    input_coords[1][5] = ("7,1")
+    input_coords[1][6] = ("-1,-1")
+    input_coords[1][9] = ("-1,-1")
+    input_coords[1][10] = ("-1,-1")
+    input_coords[1][11] = ("-1,-1")
+    input_coords[1][12] = ("4,4")
+    
     check_board_images(driver, input_coords, input_names)
     reset(driver)
 
@@ -98,6 +129,20 @@ def test_invalid_move(driver):
 
 
 # Helpers
+def apply_moves(driver, moves):
+    for move in moves:
+        source = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
+        )
+        target = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
+        )
+        source.click()
+        time.sleep(0.5)
+        target.click()
+        time.sleep(0.5)
+
+
 def getPieceImageUrl(type, color):
     match type:
         case 'Q':
