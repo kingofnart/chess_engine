@@ -19,7 +19,7 @@ def test_page_title(driver):
     assert "Chess" in driver.title
 
 
-def test_play_chess(driver):
+def test_simple_moves(driver):
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2")]
     start(driver)
     for move in moves:
@@ -41,6 +41,40 @@ def test_play_chess(driver):
     input_names = reset_names()
     check_board_images(driver, input_coords, input_names)
     resign(driver)
+    reset(driver)
+
+    
+def test_fried_liver(driver):
+    moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2"), ("0,5", "3,2"), 
+             ("7,6", "5,5"), ("2,5", "4,6"), ("6,3", "4,3"), ("3,4", "4,3"), ("5,5", "4,3"),
+             ("4,6", "6,5"), ("7,4", "6,5"), ("0,3", "2,5"), ("6,5", "7,6"), ("3,2", "4,3"),
+             ("7,3", "4,3"), ("2,5", "4,3"), ("7,2", "5,4"), ("4,3", "5,4")]
+    start(driver)
+    for move in moves:
+        source = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
+        )
+        target = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
+        )
+        source.click()
+        time.sleep(0.5)
+        target.click()
+        time.sleep(0.5)
+    input_coords = reset_coords()
+    input_coords[0][1] = ("5,4")
+    input_coords[0][5] = ("-1,-1")
+    input_coords[0][7] = ("-1,-1")
+    input_coords[0][12] = ("-1,-1")
+    input_coords[1][0] = ("7,6")
+    input_coords[1][4] = ("5,2")
+    input_coords[1][12] = ("4,4")
+    input_coords[1][1] = ("-1,-1")
+    input_coords[1][6] = ("-1,-1")
+    input_coords[1][11] = ("-1,-1")
+    input_coords[1][13] = ("-1,-1")
+    input_names = reset_names()
+    check_board_images(driver, input_coords, input_names)
     reset(driver)
 
 
@@ -108,23 +142,24 @@ def check_board_images(driver, coords_g, names_g):
     i=0
     for coords, names in zip(coords_g, names_g):
         for coord in coords:
-            print(f"TEST: coordinate checking: {coord}")
-            square = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{coord}"]'))
-            )
-            if square: 
-                try:
-                    print(f"TEST: found square at {coord}")
-                    img = WebDriverWait(square, 10).until(
-                        EC.presence_of_element_located((By.TAG_NAME, "img"))
-                    )
-                    img_src = img.get_attribute("src")
-                    print(f"TEST: found image at {coord} url: {img_src}, calling pcURL with color: {i}")
-                    expected_src = getPieceImageUrl(names[coords.index(coord)], i)
-                    assert img_src == expected_src
-                except Exception as e:
-                    print(f"Excpection occurred: {e}")
-                    assert False, f"Image not found at coordinate {coord}"
+            if coord != ("-1,-1"):
+                print(f"TEST: coordinate checking: {coord}")
+                square = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{coord}"]'))
+                )
+                if square: 
+                    try:
+                        print(f"TEST: found square at {coord}")
+                        img = WebDriverWait(square, 10).until(
+                            EC.presence_of_element_located((By.TAG_NAME, "img"))
+                        )
+                        img_src = img.get_attribute("src")
+                        print(f"TEST: found image at {coord} url: {img_src}, calling pcURL with color: {i}")
+                        expected_src = getPieceImageUrl(names[coords.index(coord)], i)
+                        assert img_src == expected_src
+                    except Exception as e:
+                        print(f"Excpection occurred: {e}")
+                        assert False, f"Image not found at coordinate {coord}"
         i+=1
 
 
