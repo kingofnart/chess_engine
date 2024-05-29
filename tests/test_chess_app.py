@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 @pytest.fixture(scope="module")
@@ -21,24 +22,17 @@ def test_page_title(driver):
 
 def test_simple_moves(driver):
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2")]
+    
     start(driver)
-    for move in moves:
-        source = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
-        )
-        target = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
-        )
-        source.click()
-        time.sleep(0.5)
-        target.click()
-        time.sleep(0.5)
+    apply_moves(driver, moves)
+    input_names = reset_names()
     input_coords = reset_coords()
+    
     input_coords[0][5] = ("2,5")
     input_coords[0][12] = ("3,4")
     input_coords[1][4] = ("5,2")
     input_coords[1][12] = ("4,4")
-    input_names = reset_names()
+    
     check_board_images(driver, input_coords, input_names)
     resign(driver)
     reset(driver)
@@ -109,20 +103,75 @@ def test_opera(driver):
     reset(driver)
 
 
-def test_invalid_move(driver):
+def test_kasparov_topalov(driver):
+    moves = [("1,4", "3,4"), ("6,3", "5,3"), ("1,3", "3,3"), ("7,6", "5,5"), ("0,1", "2,2"), 
+             ("6,6", "5,6"), ("0,2", "2,4"), ("7,5", "6,6"), ("0,3", "1,3"), ("6,2", "5,2"),
+             ("1,5", "2,5"), ("6,1", "4,1"), ("0,6", "1,4"), ("7,1", "6,3"), ("2,4", "5,7"),
+             ("6,6", "5,7"), ("1,3", "5,7"), ("7,2", "6,1"), ("1,0", "2,0"), ("6,4", "4,4"),
+             ("0,4", "0,2"), ("7,3", "6,4"), ("0,2", "0,1"), ("6,0", "5,0"), ("1,4", "0,2"),
+             ("7,4", "7,2"), ("0,2", "2,1"), ("4,4", "3,3"), ("0,3", "3,3"), ("5,2", "4,2"),
+             ("3,3", "0,3"), ("6,3", "5,1"), ("1,6", "2,6"), ("7,2", "7,1"), ("2,1", "4,0"),
+             ("6,1", "7,0"), ("0,5", "2,7"), ("5,3", "4,3"), ("5,7", "3,5"), ("7,1", "6,0"),
+             ("0,7", "0,4"), ("4,3", "3,3"), ("2,2", "4,3"), ("5,1", "4,3"), ("3,4", "4,3"),
+             ("6,4", "5,3"), ("0,3", "3,3"), ("4,2", "3,3"), ("0,4", "6,4"), ("6,0", "5,1"),
+             ("3,5", "3,3"), ("5,1", "4,0"), ("1,1", "3,1"), ("4,0", "3,0"), ("3,3", "2,2"),
+             ("5,3", "4,3"), ("6,4", "6,0"), ("7,0", "6,1"), ("6,0", "6,1"), ("4,3", "3,2"),
+             ("2,2", "5,5"), ("3,0", "2,0"), ("5,5", "5,0"), ("2,0", "3,1"), ("1,2", "2,2"),
+             ("3,1", "2,2"), ("5,0", "0,0"), ("2,2", "1,3"), ("0,0", "1,1"), ("1,3", "0,3"),
+             ("2,7", "0,5"), ("7,3", "1,3"), ("6,1", "6,3"), ("1,3", "6,3"), ("0,5", "3,2"),
+             ("4,1", "3,2"), ("1,1", "7,7"), ("6,3", "2,3"), ("7,7", "7,0"), ("3,2", "2,2"),
+             ("7,0", "3,0"), ("0,3", "0,4"), ("2,5", "3,5"), ("6,5", "4,5"), ("0,1", "0,2"),
+             ("2,3", "1,3"), ("3,0", "6,0")]
+    
     start(driver)
-    source = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="1,4"]'))
-        )
-    target = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="4,4"]'))
-        )
-    source.click()
-    time.sleep(0.5)
-    target.click()
-    time.sleep(0.5)
+    apply_moves(driver, moves)
+    input_names = reset_names()
+    input_coords = reset_coords()
+
+    input_coords[0][0] = ("0,2")
+    input_coords[0][1] = ("6,0")
+    input_coords[0][2] = ("-1,-1")
+    input_coords[0][3] = ("-1,-1")
+    input_coords[0][4] = ("-1,-1")
+    input_coords[0][5] = ("-1,-1")
+    input_coords[0][6] = ("-1,-1")
+    input_coords[0][7] = ("-1,-1")
+    input_coords[0][8] = ("-1,-1")
+    input_coords[0][9] = ("-1,-1")
+    input_coords[0][10] = ("-1,-1")
+    input_coords[0][11] = ("-1,-1")
+    input_coords[0][12] = ("-1,-1")
+    input_coords[0][13] = ("3,5")
+    input_coords[0][14] = ("2,6")
+    input_coords[1][0] = ("0,4")
+    input_coords[1][1] = ("-1,-1")
+    input_coords[1][2] = ("1,3")
+    input_coords[1][3] = ("-1,-1")
+    input_coords[1][4] = ("-1,-1")
+    input_coords[1][5] = ("-1,-1")
+    input_coords[1][6] = ("-1,-1")
+    input_coords[1][7] = ("-1,-1")
+    input_coords[1][8] = ("-1,-1")
+    input_coords[1][9] = ("2,2")
+    input_coords[1][10] = ("-1,-1")
+    input_coords[1][11] = ("-1,-1")
+    input_coords[1][12] = ("-1,-1")
+    input_coords[1][13] = ("4,5")
+    input_coords[1][14] = ("5,6")
+    
+    check_board_images(driver, input_coords, input_names)
+    resign(driver)
+    reset(driver)
+
+
+def test_invalid_moves(driver):
+    moves = [("1,4", "4,4"), ("6,4", "3,4"), ("0,3", "5,3"), ("7,7", "5,7"), ("0,2", "3,5"), ("1,4", "2,3")]
+    
+    start(driver)
+    apply_moves(driver, moves)
     input_coords = reset_coords()
     input_names = reset_names()
+    
     check_board_images(driver, input_coords, input_names)
     resign(driver)
     reset(driver) 
@@ -131,16 +180,27 @@ def test_invalid_move(driver):
 # Helpers
 def apply_moves(driver, moves):
     for move in moves:
-        source = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
-        )
-        target = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
-        )
-        source.click()
-        time.sleep(0.5)
-        target.click()
-        time.sleep(0.5)
+        retries = 3
+        applied = False
+        while retries > 0 and not applied:
+            try:
+                source = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
+                )
+                target = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
+                )
+                source.click()
+                time.sleep(0.5)
+                target.click()
+                time.sleep(0.5)
+                applied = True
+            except StaleElementReferenceException:
+                retries -= 1
+                print(f"Retrying move {move} due to stale element")
+            except Exception as e:
+                print(f"Exception occurred during move {move}: {e}")
+                raise
 
 
 def getPieceImageUrl(type, color):
