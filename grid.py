@@ -35,6 +35,10 @@ class Grid():
                      self.b_pcs[8:], 
                      [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
                       self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
+        # list for caluculating material difference
+        self.material_w = np.array([0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1])
+        self.material_b = np.array([0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1])
+        self.material_diff = 0
         # initialize lists
         self.board_history = []
         self.attacked_squares_w = []
@@ -65,6 +69,8 @@ class Grid():
         return self.castle_queenside
     def get_queening(self):
         return self.queening
+    def get_material_diff(self):
+        return self.material_diff
     
 
     # setters
@@ -114,6 +120,8 @@ class Grid():
                      [self.b_pcs[2], self.b_pcs[4], self.b_pcs[6], self.b_pcs[1], 
                       self.b_pcs[0], self.b_pcs[7], self.b_pcs[5], self.b_pcs[3]]]
         # reset lists
+        self.material_w = [0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1]
+        self.material_b = [0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1]
         self.board_history = []
         self.attacked_squares_w = []
         self.attacked_squares_b = []
@@ -668,6 +676,10 @@ class Grid():
             pawn2.set_captured(1)
             self.grid[move[1][0] + sign][move[1][1]] = 0
             cap_coords[pawn2.id] = [-1,-1]
+            if sign:  # black en passanting white => white pawn captured
+                self.material_w[pawn2.id] = 0
+            else:  # white en passanting black => black pawn captured
+                self.material_b[pawn2.id] = 0
             # update grid
             self.grid[move[1][0]][move[1][1]] = piece
             self.grid[move[0][0]][move[0][1]] = 0
@@ -681,11 +693,13 @@ class Grid():
                 if piece2 != 0:
                     piece2.set_captured(1)
                     self.w_coords[piece2.id] = [-1,-1]
+                    self.material_w[piece2.id] = 0
             else:  # color = white
                 self.w_coords[piece.id] = move[1]
                 if piece2 != 0:
                     piece2.set_captured(1)
                     self.b_coords[piece2.id] = [-1,-1]
+                    self.material_b[piece2.id] = 0
         # check if pawn moved 2 squares and set it's en passant flag
         # also check if pawn has reach the opponents back rank and make it a queen
         if piece.type == 5:
@@ -701,7 +715,7 @@ class Grid():
                 piece.make_queen()
                 self.set_queening(piece)
 
-        
+
     # function to add boardstate to history list to check for threefold repetition
     def update_history(self):
         
@@ -779,3 +793,9 @@ class Grid():
             if(tmp_board.king_safety(not color)):
                 valid_lst.append(move)
             tmp_board = None  # remove reference for garbage collection
+
+    
+    # method to caulculate material difference
+    def material_count(self):
+        self.material_diff = np.sum(self.material_w) - np.sum(self.material_b)
+        print(f"New material diff: {self.material_diff}")

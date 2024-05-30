@@ -94,14 +94,17 @@ class Game():
             # proceed with game
             self.turn = not self.turn
             self.board.unenpassant(self.turn)
+            self.board.material_count()
             print(f"It is now {colors[self.turn]}'s turn.")
             print("-----------------------------------------------------------------")
+            print(f"GAME: mat-diff: {self.board.get_material_diff()}")
             return {
                 'status': 'move applied',
                 'w_coords': self.board.w_coords.tolist(), 
                 'b_coords': self.board.b_coords.tolist(),
                 'turn': self.turn,
-                'promotion': promotion_info
+                'promotion': promotion_info,
+                'material_diff': int(self.board.get_material_diff())
             }
 
 
