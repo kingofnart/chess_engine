@@ -12,6 +12,8 @@ class ChessBoard {
         this.startButton = document.getElementById('start-button');
         this.resignButton = document.getElementById('resign-button');
         this.time_control_button = document.getElementById('time-control-button');
+        this.top_mat_cnt = document.getElementById('top-mat-cnt')
+        this.bot_mat_cnt = document.getElementById('bot-mat-cnt')
         this.selectedSquare = null;
         this.gameRunning = true;
         this.names_w = {
@@ -76,6 +78,7 @@ class ChessBoard {
                 } else if (result.status === 'move applied') { // proceed with game
                     this.addIncrement(result.turn);
                     this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
+                    this.update_material_diff(result.material_diff)
                 } else {
                     alert("Error in response from makeMove");
                 }
@@ -275,6 +278,7 @@ class ChessBoard {
         reset_button.remove();
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
+        this.update_material_diff(0)
         await this.makeMove(["reset"]);
         await this.fetchGameState();
     }
@@ -426,6 +430,23 @@ class ChessBoard {
             if (square1) square1.classList.remove('invalid-move');
             if (square2) square2.classList.remove('invalid-move');
         }, 300);
+    }
+
+
+    // method to update the material counters
+    update_material_diff(diff) {
+        if (diff > 0) {
+            this.bot_mat_cnt.innerText = '+' + diff
+            this.bot_mat_cnt.hidden = false
+            this.top_mat_cnt.hidden = true
+        } else if (diff < 0) {
+            this.top_mat_cnt.innerText = '+' + Math.abs(diff)
+            this.top_mat_cnt.hidden = false
+            this.bot_mat_cnt.hidden = true
+        } else {
+            this.top_mat_cnt.hidden = true
+            this.bot_mat_cnt.hidden = true
+        }
     }
 }
 
