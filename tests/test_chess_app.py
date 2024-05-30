@@ -51,20 +51,20 @@ def test_simple_moves(driver):
     reset(driver)
 
 
-# def test_threefold(driver):
-#     moves = [("1,4", "2,4"), ("6,4", "5,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"),
-#              ("6,4", "7,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"), ("6,4", "7,4")]
+def test_threefold(driver):
+    moves = [("1,4", "2,4"), ("6,4", "5,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"),
+             ("6,4", "7,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"), ("6,4", "7,4")]
 
-#     start(driver)
-#     apply_moves(driver, moves)
-#     input_names = reset_names()
-#     input_coords = reset_coords()
+    start(driver)
+    apply_moves(driver, moves)
+    input_names = reset_names()
+    input_coords = reset_coords()
 
-#     input_coords[0][12] = ("2,4")
-#     input_coords[1][12] = ("5,4")
+    input_coords[0][12] = ("2,4")
+    input_coords[1][12] = ("5,4")
     
-#     check_board_images(driver, input_coords, input_names)
-#     reset(driver)
+    check_board_images(driver, input_coords, input_names)
+    reset(driver)
 
 
 def test_special_moves(driver):
@@ -256,11 +256,11 @@ def apply_moves(driver, moves):
                 source = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
                 )
+                source.click()
+                time.sleep(0.5)
                 target = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
                 )
-                source.click()
-                time.sleep(0.5)
                 target.click()
                 time.sleep(0.5)
                 applied = True
