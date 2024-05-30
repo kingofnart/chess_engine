@@ -51,6 +51,22 @@ def test_simple_moves(driver):
     reset(driver)
 
 
+# def test_threefold(driver):
+#     moves = [("1,4", "2,4"), ("6,4", "5,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"),
+#              ("6,4", "7,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"), ("6,4", "7,4")]
+
+#     start(driver)
+#     apply_moves(driver, moves)
+#     input_names = reset_names()
+#     input_coords = reset_coords()
+
+#     input_coords[0][12] = ("2,4")
+#     input_coords[1][12] = ("5,4")
+    
+#     check_board_images(driver, input_coords, input_names)
+#     reset(driver)
+
+
 def test_special_moves(driver):
     moves = [("1,7", "3,7"), ("6,3", "4,3"), ("3,7", "4,7"), ("6,6", "4,6"), ("4,7", "5,6"),
              ("6,4", "5,4"), ("5,6", "6,7"), ("6,2", "5,2"), ("6,7", "7,6"), ("7,5", "5,3")]
@@ -79,8 +95,7 @@ def test_stalemate(driver):
              ("6,7", "4,7"), ("4,0", "6,2"), ("5,0", "5,7"), ("1,7", "3,7"), ("6,5", "5,5"),
              ("6,2", "6,3"), ("7,4", "6,5"), ("6,3", "6,1"), ("7,3", "2,3"), ("6,1", "7,1"),
              ("2,3", "6,7"), ("7,1", "7,2"), ("6,5", "5,6"), ("7,2", "5,4")]
-        # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
-    #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+
     start(driver)
     apply_moves(driver, moves)
     input_names = reset_names()
