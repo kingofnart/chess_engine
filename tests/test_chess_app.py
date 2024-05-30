@@ -20,6 +20,19 @@ def test_page_title(driver):
     assert "Chess" in driver.title
 
 
+def test_invalid_moves(driver):
+    moves = [("1,4", "4,4"), ("6,4", "3,4"), ("0,3", "5,3"), ("7,7", "5,7"), ("0,2", "3,5"), ("1,4", "2,3")]
+    
+    start(driver)
+    apply_moves(driver, moves)
+    input_coords = reset_coords()
+    input_names = reset_names()
+    
+    check_board_images(driver, input_coords, input_names)
+    resign(driver)
+    reset(driver) 
+
+
 def test_simple_moves(driver):
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2")]
     
@@ -37,7 +50,61 @@ def test_simple_moves(driver):
     resign(driver)
     reset(driver)
 
+
+def test_special_moves(driver):
+    moves = [("1,7", "3,7"), ("6,3", "4,3"), ("3,7", "4,7"), ("6,6", "4,6"), ("4,7", "5,6"),
+             ("6,4", "5,4"), ("5,6", "6,7"), ("6,2", "5,2"), ("6,7", "7,6"), ("7,5", "5,3")]
     
+    start(driver)
+    apply_moves(driver, moves)
+    input_names = reset_names()
+    input_coords = reset_coords()
+    
+    input_names[0][15] = "Q"
+    input_coords[0][15] = ("7,6")
+    input_coords[1][5] = ("-1,-1")
+    input_coords[1][10] = ("5,2")
+    input_coords[1][11] = ("4,3")
+    input_coords[1][12] = ("5,4")
+    input_coords[1][14] = ("-1,-1")
+    input_coords[1][15] = ("-1,-1")
+    
+    check_board_images(driver, input_coords, input_names)
+    resign(driver)
+    reset(driver)
+
+
+def test_stalemate(driver):
+    moves = [("1,4", "2,4"), ("6,0", "4,0"), ("0,3", "4,7"), ("7,0", "5,0"), ("4,7", "4,0"),
+             ("6,7", "4,7"), ("4,0", "6,2"), ("5,0", "5,7"), ("1,7", "3,7"), ("6,5", "5,5"),
+             ("6,2", "6,3"), ("7,4", "6,5"), ("6,3", "6,1"), ("7,3", "2,3"), ("6,1", "7,1"),
+             ("2,3", "6,7"), ("7,1", "7,2"), ("6,5", "5,6"), ("7,2", "5,4")]
+        # piece id key: [king (0), queen (1), a rook (2), h rook (3), b knight (4), 
+    #             g knight (5), c bishop (6), f bishop (7), pawns a-h (8-15)]
+    start(driver)
+    apply_moves(driver, moves)
+    input_names = reset_names()
+    input_coords = reset_coords()
+    
+    input_coords[0][1] = ("5,4")
+    input_coords[0][12] = ("2,4")
+    input_coords[0][15] = ("3,7")
+    input_coords[1][0] = ("5,6")
+    input_coords[1][1] = ("6,7")
+    input_coords[1][2] = ("5,7")
+    input_coords[1][4] = ("-1,-1")
+    input_coords[1][6] = ("-1,-1")
+    input_coords[1][8] = ("-1,-1")
+    input_coords[1][9] = ("-1,-1")
+    input_coords[1][10] = ("-1,-1")
+    input_coords[1][11] = ("-1,-1")
+    input_coords[1][13] = ("5,5")
+    input_coords[1][15] = ("4,7")
+    
+    check_board_images(driver, input_coords, input_names)
+    reset(driver)
+
+
 def test_fried_liver(driver):
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2"), ("0,5", "3,2"), 
              ("7,6", "5,5"), ("2,5", "4,6"), ("6,3", "4,3"), ("3,4", "4,3"), ("5,5", "4,3"),
@@ -162,19 +229,6 @@ def test_kasparov_topalov(driver):
     check_board_images(driver, input_coords, input_names)
     resign(driver)
     reset(driver)
-
-
-def test_invalid_moves(driver):
-    moves = [("1,4", "4,4"), ("6,4", "3,4"), ("0,3", "5,3"), ("7,7", "5,7"), ("0,2", "3,5"), ("1,4", "2,3")]
-    
-    start(driver)
-    apply_moves(driver, moves)
-    input_coords = reset_coords()
-    input_names = reset_names()
-    
-    check_board_images(driver, input_coords, input_names)
-    resign(driver)
-    reset(driver) 
 
 
 # Helpers
