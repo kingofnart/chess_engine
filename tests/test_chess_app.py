@@ -6,12 +6,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 @pytest.fixture(scope="module")
 def driver():
-    driver = webdriver.Chrome()
-    driver.get(os.getenv("APP_URL", "http://localhost:5000"))
+    options = webdriver.ChromeOptions()
+    # options.add_argument("--headless")  # no browser gui: faster, less resource-intensive
+    # options.add_argument("--no-sandbox")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--disable-gpu")
+    # options.add_argument("--window-size=1920x1080")
+    # options.binary_location = "/usr/bin/google-chrome"
+    service = ChromeService(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    #driver.get(os.getenv("APP_URL", "http://127.0.0.1:5000"))    
     yield driver
     driver.quit()
 
@@ -253,14 +263,25 @@ def apply_moves(driver, moves):
         applied = False
         while retries > 0 and not applied:
             try:
-                source = WebDriverWait(driver, 10).until(
+                try:
+                    source = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
-                )
+                    )
+                except:
+                    driver.save_screenshot("/chess_engine/static/screenshots/source_error.png")
+                    print(driver.page_source)
+                    raise
+                
                 source.click()
                 time.sleep(0.5)
-                target = WebDriverWait(driver, 10).until(
+                try:
+                    target = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
-                )
+                    )
+                except:
+                    driver.save_screenshot("/chess_engine/static/screenshots/target_error.png")
+                    print(driver.page_source)
+                    raise
                 target.click()
                 time.sleep(0.5)
                 applied = True
@@ -338,9 +359,14 @@ def check_board_images(driver, coords_g, names_g):
 
 
 def start(driver):
-    start = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, 'start-button'))
+    try:
+        start = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'start-button'))
         )
+    except:
+        driver.save_screenshot("/chess_engine/static/screenshots/start_error.png")
+        print(driver.page_source)
+        raise
     start.click()
     time.sleep(0.5)
 
