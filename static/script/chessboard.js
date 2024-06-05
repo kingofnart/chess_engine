@@ -1,7 +1,6 @@
 class ChessBoard {
 
     constructor() {
-        console.log("Initializing ChessBoard");
         this.gameContainer = document.getElementById('game-container');
         this.gameContainerWrapper = document.getElementById('game-container-wrapper');
         this.turnIndicator = document.getElementById('turn-indicator');
@@ -47,7 +46,6 @@ class ChessBoard {
     // function to send user input (move) to backend to proccess
     // frontend -> backend (but also backend->frontend via returns i.e. response)
     async makeMove(move) {
-        console.log("Sending move ", move, " to be proccessed");
         try {
             const response = await fetch('/move', {
                 method: 'POST',
@@ -57,10 +55,8 @@ class ChessBoard {
                 // convert move list to json to send to backend
                 body: JSON.stringify({ move })
             });
-            console.log("Received response from /move")
             // response contains the result of backend attempting to apply move
             const result = await response.json();
-            console.log("Response JSON: ", result);
             if (result.status === 'reset') {
                 // pass
             } else {
@@ -102,7 +98,6 @@ class ChessBoard {
     // method to handle user clicking on squares
     // waits for two different squares to be slected then sends them to makeMove
     handleClick(event) {
-        console.log("Square clicked");
         if (this.turnIndicator.hidden === false) {
             const square = event.target.closest('.square');
             if (!square) return;
@@ -110,7 +105,6 @@ class ChessBoard {
             if (this.selectedSquare) {
                 if (this.selectedSquare != square) {
                     const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
-                    console.log("Selected move:", move);
                     this.makeMove(move);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
@@ -130,10 +124,8 @@ class ChessBoard {
     // function to update board handling promotions
     updateBoard(w_coords, b_coords, turn, promotion) {
         if (promotion) {
-            //console.log("promotion not none");
             this.promoteQueen(promotion);
         }
-        //console.log("board updated");
         this.renderBoard(w_coords, b_coords);
         this.updateTurnIndicator(turn);
         this.toggleTimers(turn);
@@ -403,7 +395,6 @@ class ChessBoard {
     promoteQueen(input) {
         let names = input.color ? this.names_b : this.names_w;
         names[input.index] = 'Q';
-        //console.log(names);
         const square = document.querySelector(`[data-coordinate='${input.coord}']`);
         if (square) {
             const img = square.querySelector('img');
@@ -415,7 +406,6 @@ class ChessBoard {
 
     // method to flash squares red for invalid move
     flashInvalidMove(square1, square2) {
-        console.log('Flashing squares:', square1, square2);
         if (square1) { square1.classList.add('invalid-move'); }
         if (square2) { square2.classList.add('invalid-move'); }
         setTimeout(() => {
@@ -453,6 +443,5 @@ class ChessBoard {
 
 // make ChessBoard object when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed");
     new ChessBoard();
 });

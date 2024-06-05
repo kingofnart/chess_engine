@@ -86,7 +86,6 @@ class Grid():
 
     # function to reset board to starting position  
     def reset(self):
-        print("GRID: reset called")
         for piece in self.w_pcs:
             piece.set_captured(0)
             piece.set_enpassant(0)
@@ -235,7 +234,6 @@ class Grid():
 
                     # rook
                     case 2:
-                        #if validation: print("atckdsqrs validating rook (id,color) ({},{})".format(piece.id, piece.color))
                         # only horizontals & verticals
                         lst = self.line_search(0, 1, coord, get_valid=validation)  # 0
                         self.add_to_list(attacked_list, lst)
@@ -739,7 +737,6 @@ class Grid():
             if lst == curr:
                 cnt += 1
         if cnt == 3:
-            print("Threefold repetition reached. It's a draw, game over.")
             return 1
         return 0
     
@@ -754,32 +751,26 @@ class Grid():
         self.attacked_squares(not color, validation=1)  # get not color's available moves
         # checking if black is checkmating/stalemating white
         if color: 
-            print(f"Number of valid moves for White: {len(self.valid_moves_w)}")
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
                 if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_b):
                     # white has no moves and is in check => checkmate
-                    print("Black has checkmated White. Black wins. Game over.")
                     return (1,0)
                 else:
                     # white has no moves and is not in check => stalemate
-                    print("Black has stalemated White. It's a draw. Game over.")
                     return (1,1)
             else: return (-1,-1)
         # checking if white is checkmating/stalemating black
         else:
-            print(f"Number of valid moves for Black: {len(self.valid_moves_b)}")
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]
                 if any(king_pos[0] == x[0] and king_pos[1] == x[1] for x in self.attacked_squares_w):
                     # black has no moves and is in check => checkmate
-                    print("White has checkmated Black. White wins. Game over.")
                     return (0,0)
                 else:
                     # black has no moves and is not in check => stalemate
-                    print("White has stalemated Black. It's a draw. Game over.")
                     return (0,1)
             else: return (-1,-1)
 
@@ -798,4 +789,3 @@ class Grid():
     # method to caulculate material difference
     def material_count(self):
         self.material_diff = np.sum(self.material_w) - np.sum(self.material_b)
-        print(f"New material diff: {self.material_diff}")

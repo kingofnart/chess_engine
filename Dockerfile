@@ -18,12 +18,16 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
+COPY requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install --no-cache-dir -r requirements.txt
+
+COPY start_and_test.sh /usr/local/bin/start_and_test.sh
+RUN chmod +x /usr/local/bin/start_and_test.sh
 
 USER appuser
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8000

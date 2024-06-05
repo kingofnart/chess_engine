@@ -14,15 +14,12 @@ def move():
     data = request.get_json()
     # data = {'move': ['y1,x1', 'y2,x2']}
     move = data.get('move')
-    print(f"APP: received move: {move}")
     result = game.make_move(move)
-    print(f"APP: returning result: {result}")
     return jsonify(result)
 
 @app.route('/state', methods=['GET'])
 def state():
     result = game.get_state()
-    print(f"APP: sending game state: {result}")
     return jsonify(result)
 
 if __name__ == '__main__':
