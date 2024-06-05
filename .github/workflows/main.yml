@@ -43,7 +43,9 @@ jobs:
       - name: Build and run Docker test container
         run: |
           set -e
-          docker compose up --build test
+          docker compose up --build --abort-on-container-exit test
+          exit_code=$?
+          docker compose down
           exit $exit_code
 
 
