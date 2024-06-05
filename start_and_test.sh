@@ -5,7 +5,7 @@ FLASK_PID=$!
 
 sleep 5
 
-pytest -vv
+pytest -x -vv
 
 exit_code=$?
 
