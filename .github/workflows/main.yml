@@ -42,7 +42,10 @@ jobs:
 
       - name: Build and run Docker test container
         run: |
+          set -e
           docker compose up --build test
+          exit $exit_code
+
 
       - name: Shut down Docker containers
         if: always()

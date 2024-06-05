@@ -26,7 +26,7 @@ def driver():
     yield driver
     driver.quit()
 
-def test_fail(driver):
+def test_fail():
     assert 1 == 0
 
 def test_page_title(driver):
