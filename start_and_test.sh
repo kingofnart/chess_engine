@@ -10,4 +10,4 @@ exit_code=$?
 
 wait
 
-exit exit_code
+exit $exit_code
