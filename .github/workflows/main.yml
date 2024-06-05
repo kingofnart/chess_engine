@@ -15,8 +15,8 @@ jobs:
       matrix:
         python-version: ["3.12"]
 
-    # env:
-    #   APP_URL: https://localhost:5000
+    env:
+      APP_URL: https://localhost:5000
     
     steps:
       - name: Checkout
@@ -39,6 +39,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
       
-      - name: Run tests in Docker container
+      - name: Run tests
         run: |
-          docker run --rm ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest pytest
+          pytest
