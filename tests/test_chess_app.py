@@ -6,11 +6,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 @pytest.fixture(scope="module")
 def driver():
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+    
+    service = ChromeService(executable_path=ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.get(os.getenv("APP_URL", "http://localhost:5000"))
     yield driver
     driver.quit()
