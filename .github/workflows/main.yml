@@ -42,8 +42,7 @@ jobs:
 
       - name: Build and run Docker test container
         run: |
-          docker compose build test
-          docker compose up test
+          docker compose up --build -d test
 
       - name: Shut down Docker containers
         run: |
