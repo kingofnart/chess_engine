@@ -40,6 +40,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
 
+      - name: Set up environment variables
+        run: |
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> $GITHUB_ENV
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> $GITHUB_ENV
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> $GITHUB_ENV
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> $GITHUB_ENV
+          echo CHESS_DB_SECRET_KEY=${{ secrets.CHESS_DB_SECRET_KEY }} >> $GITHUB_ENV
+
       - name: Build and run Docker test container
         run: |
           set -e
