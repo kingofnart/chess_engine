@@ -5,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
@@ -442,6 +442,11 @@ def login(driver):
     username_input.send_keys("valid_username")
     password_input.send_keys("valid_password")
     login_button.click()
-    WebDriverWait(driver, 20).until(
-        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
-    )
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
+        )
+    except TimeoutException as e:
+        print(f"TimeoutException: {e}")
+        driver.save_screenshot("/chess_engine/static/screenshots/login_timeout.png")
+        raise
