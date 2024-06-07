@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: $${{ POSTGRES_DB }}
+      POSTGRES_USER: $${{ POSTGRES_USER }}
+      POSTGRES_PASSWORD: $${{ POSTGRES_PASSWORD }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: $${{ DATABASE_URL }}
+      CHESS_DB_SECRET_KEY: $${{ CHESS_DB_SECRET_KEY }}
+    command: ["python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=8000"]
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - app
+    environment:
+      POSTGRES_DB: $${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: $${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: $${{ secrets.POSTGRES_PASSWORD }}
+      DATABASE_URL: $${{ secrets.DATABASE_URL }}
+      CHESS_DB_SECRET_KEY: $${{ secrets.CHESS_DB_SECRET_KEY }}
+    command: ["/usr/local/bin/start_and_test.sh"]
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+  
+volumes:
+  postgres_data:

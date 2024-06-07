@@ -8,14 +8,14 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /chess_engine
 
-# Install required packages for Chrome and ChromeDriver
+# Install required packages for Chrome and ChromeDriver + dos2unix (to read script)
 RUN apt-get update \
     && apt-get install -y \
        wget \
        unzip \
        curl \
        gnupg \
-       --no-install-recommends
+       dos2unix
 
 # Install Chrome
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
@@ -33,12 +33,15 @@ RUN CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_R
 RUN pip install --upgrade pip \
     && pip install pytest selenium webdriver-manager
 
+RUN apt-get update && apt-get install -y libpq-dev build-essential
+
 COPY requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install --no-cache-dir -r requirements.txt
 
 COPY start_and_test.sh /usr/local/bin/start_and_test.sh
+RUN dos2unix /usr/local/bin/start_and_test.sh
 RUN chmod +x /usr/local/bin/start_and_test.sh
 
 COPY . .

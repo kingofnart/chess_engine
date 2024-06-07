@@ -41,6 +41,12 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
 
       - name: Build and run Docker test container
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CHESS_DB_SECRET_KEY: ${{ secrets.CHESS_DB_SECRET_KEY }}
         run: |
           set -e
           docker compose up --build --abort-on-container-exit test
