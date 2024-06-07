@@ -35,11 +35,11 @@ services:
     depends_on:
       - app
     environment:
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      CHESS_DB_SECRET_KEY: ${{ secrets.CHESS_DB_SECRET_KEY }}
+      POSTGRES_DB: $${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: $${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: $${{ secrets.POSTGRES_PASSWORD }}
+      DATABASE_URL: $${{ secrets.DATABASE_URL }}
+      CHESS_DB_SECRET_KEY: $${{ secrets.CHESS_DB_SECRET_KEY }}
     command: ["/usr/local/bin/start_and_test.sh"]
 
   adminer:
