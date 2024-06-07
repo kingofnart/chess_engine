@@ -13,10 +13,9 @@ game = Game()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-    # if 'username' in session:
-    #     return render_template('index.html')
-    # return redirect(url_for('login'))
+    if 'username' in session:
+        return render_template('index.html')
+    return redirect(url_for('login'))
 
 @app.route('/move', methods=['POST'])
 def move():
@@ -37,7 +36,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         conn = connect()
         if conn == -1:
@@ -69,11 +68,11 @@ def login():
             session['username'] = username
             return redirect(url_for('index'))
         else:
-            return 'Invalid credentials'
+            return render_template('login.html', error="Invalid credentials")
 
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
