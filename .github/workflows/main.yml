@@ -49,10 +49,10 @@ jobs:
           CHESS_DB_SECRET_KEY: ${{ secrets.CHESS_DB_SECRET_KEY }}
         run: |
           set -e
-          docker-compose up --build -d db
-          docker-compose up --build -d app
-          sleep 10 # Wait for the db and app services to be fully up
-          docker-compose exec -T app python init_db.py
+          docker compose up --build -d db
+          docker compose up --build -d app
+          sleep 10
+          docker compose exec -T app python init_db.py
           docker compose up --build --abort-on-container-exit test
           exit_code=$?
           docker compose down

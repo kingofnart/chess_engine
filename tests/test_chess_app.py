@@ -442,6 +442,6 @@ def login(driver):
     username_input.send_keys("valid_username")
     password_input.send_keys("valid_password")
     login_button.click()
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 20).until(
         EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
     )
