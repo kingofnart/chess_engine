@@ -31,6 +31,7 @@ def driver():
     driver.quit()
 
 def test_valid_login(driver):
+    print("---------- test_valid_login ----------")
     try:
         login(driver)
     except TimeoutException as e:
@@ -43,6 +44,7 @@ def test_valid_login(driver):
 
 
 def test_invalid_login(driver):
+    print("---------- test_invalid_login ----------")
     driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
     username_input = driver.find_element(By.ID, 'username')
     password_input = driver.find_element(By.ID, 'password')
@@ -59,6 +61,7 @@ def test_invalid_login(driver):
 
 
 def test_navigation_to_register(driver):
+    print("---------- test_navigation_to_register ----------")
     driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
     register_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/register"]')
     register_link.click()
@@ -70,6 +73,7 @@ def test_navigation_to_register(driver):
 
 
 def test_navigation_to_login(driver):
+    print("---------- test_navigation_to_login ----------")
     driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
     login_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/login"]')
     login_link.click()
@@ -80,7 +84,21 @@ def test_navigation_to_login(driver):
     assert "Login" in driver.title
 
 
+def test_logout(driver):
+    print("---------- test_logout ----------")
+    login(driver)
+    logout_button = driver.find_element(By.ID, 'logout')
+    logout_button.click()
+    
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/login"))
+    )
+    assert "Login" in driver.title
+
+
+
 def test_invalid_moves(driver):
+    print("---------- test_invalid_moves ----------")
     login(driver)
     moves = [("1,4", "4,4"), ("6,4", "3,4"), ("0,3", "5,3"), ("7,7", "5,7"), ("0,2", "3,5"), ("1,4", "2,3")]
     
@@ -95,6 +113,7 @@ def test_invalid_moves(driver):
 
 
 def test_simple_moves(driver):
+    print("---------- test_simple_moves ----------")
     login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2")]
     
@@ -114,6 +133,7 @@ def test_simple_moves(driver):
 
 
 def test_threefold(driver):
+    print("---------- test_threefold ----------")
     login(driver)
     moves = [("1,4", "2,4"), ("6,4", "5,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"),
              ("6,4", "7,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"), ("6,4", "7,4")]
@@ -131,6 +151,7 @@ def test_threefold(driver):
 
 
 def test_special_moves(driver):
+    print("---------- test_special_moves ----------")
     login(driver)
     moves = [("1,7", "3,7"), ("6,3", "4,3"), ("3,7", "4,7"), ("6,6", "4,6"), ("4,7", "5,6"),
              ("6,4", "5,4"), ("5,6", "6,7"), ("6,2", "5,2"), ("6,7", "7,6"), ("7,5", "5,3")]
@@ -155,6 +176,7 @@ def test_special_moves(driver):
 
 
 def test_stalemate(driver):
+    print("---------- test_stalemate ----------")
     login(driver)
     moves = [("1,4", "2,4"), ("6,0", "4,0"), ("0,3", "4,7"), ("7,0", "5,0"), ("4,7", "4,0"),
              ("6,7", "4,7"), ("4,0", "6,2"), ("5,0", "5,7"), ("1,7", "3,7"), ("6,5", "5,5"),
@@ -186,6 +208,7 @@ def test_stalemate(driver):
 
 
 def test_fried_liver(driver):
+    print("---------- test_fried_liver ----------")
     login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2"), ("0,5", "3,2"), 
              ("7,6", "5,5"), ("2,5", "4,6"), ("6,3", "4,3"), ("3,4", "4,3"), ("5,5", "4,3"),
@@ -214,6 +237,7 @@ def test_fried_liver(driver):
 
 
 def test_opera(driver):
+    print("---------- test_opera ----------")
     login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("6,3", "5,3"), ("1,3", "3,3"), 
              ("7,2", "3,6"), ("3,3", "4,4"), ("3,6", "2,5"), ("0,3", "2,5"), ("5,3", "4,4"),
@@ -253,6 +277,7 @@ def test_opera(driver):
 
 
 def test_kasparov_topalov(driver):
+    print("---------- test_kasparov_topalov ----------")
     login(driver)
     moves = [("1,4", "3,4"), ("6,3", "5,3"), ("1,3", "3,3"), ("7,6", "5,5"), ("0,1", "2,2"), 
              ("6,6", "5,6"), ("0,2", "2,4"), ("7,5", "6,6"), ("0,3", "1,3"), ("6,2", "5,2"),
