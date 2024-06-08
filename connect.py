@@ -1,10 +1,11 @@
-import psycopg2
-from config import load_config
+import psycopg2, os
 
 def connect():
-    config = load_config()
     try:
-        conn = psycopg2.connect(**config)
+        conn = psycopg2.connect(host=os.getenv('POSTGRES_HOST', 'db'),
+                                database=os.getenv('POSTGRES_DB'),
+                                user=os.getenv('POSTGRES_USER'),
+                                password=os.getenv('POSTGRES_PASSWORD'))
         print('Connected to the PostgreSQL server.')
         return conn
     except (psycopg2.DatabaseError, Exception) as error:

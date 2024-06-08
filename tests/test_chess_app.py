@@ -5,10 +5,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from flask import session
 
 
 @pytest.fixture(scope="module")
@@ -22,29 +23,79 @@ def driver():
     
     service = ChromeService(executable_path=ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    register_testuser(driver)
     driver.get(os.getenv("APP_URL", "http://localhost:5000"))
+
     yield driver
     driver.quit()
 
+def test_valid_login(driver):
+    try:
+        login(driver)
+    except TimeoutException as e:
+        print(f"TimeoutException: {e}")
+        screenshot_path = "/static/screenshots/login_timeout.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {screenshot_path}")
+        raise    
+    assert "Chess Game" in driver.title
 
-def test_page_title(driver):
-    assert "Chess" in driver.title
+
+def test_invalid_login(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
+    username_input = driver.find_element(By.ID, 'username')
+    password_input = driver.find_element(By.ID, 'password')
+    login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+    
+    username_input.send_keys("invalid_username")
+    password_input.send_keys("invalid_password")
+    login_button.click()
+    
+    error_message = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, 'error'))
+    )
+    assert "Invalid credentials" in error_message.text
+
+
+def test_navigation_to_register(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
+    register_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/register"]')
+    register_link.click()
+    
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/register"))
+    )
+    assert "Register" in driver.title
+
+
+def test_navigation_to_login(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
+    login_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/login"]')
+    login_link.click()
+    
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/login"))
+    )
+    assert "Login" in driver.title
 
 
 def test_invalid_moves(driver):
+    login(driver)
     moves = [("1,4", "4,4"), ("6,4", "3,4"), ("0,3", "5,3"), ("7,7", "5,7"), ("0,2", "3,5"), ("1,4", "2,3")]
     
     start(driver)
     apply_moves(driver, moves)
     input_coords = reset_coords()
     input_names = reset_names()
-    
+
     check_board_images(driver, input_coords, input_names)
     resign(driver)
     reset(driver) 
 
 
 def test_simple_moves(driver):
+    login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2")]
     
     start(driver)
@@ -63,6 +114,7 @@ def test_simple_moves(driver):
 
 
 def test_threefold(driver):
+    login(driver)
     moves = [("1,4", "2,4"), ("6,4", "5,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"),
              ("6,4", "7,4"), ("0,4", "1,4"), ("7,4", "6,4"), ("1,4", "0,4"), ("6,4", "7,4")]
 
@@ -79,6 +131,7 @@ def test_threefold(driver):
 
 
 def test_special_moves(driver):
+    login(driver)
     moves = [("1,7", "3,7"), ("6,3", "4,3"), ("3,7", "4,7"), ("6,6", "4,6"), ("4,7", "5,6"),
              ("6,4", "5,4"), ("5,6", "6,7"), ("6,2", "5,2"), ("6,7", "7,6"), ("7,5", "5,3")]
     
@@ -102,6 +155,7 @@ def test_special_moves(driver):
 
 
 def test_stalemate(driver):
+    login(driver)
     moves = [("1,4", "2,4"), ("6,0", "4,0"), ("0,3", "4,7"), ("7,0", "5,0"), ("4,7", "4,0"),
              ("6,7", "4,7"), ("4,0", "6,2"), ("5,0", "5,7"), ("1,7", "3,7"), ("6,5", "5,5"),
              ("6,2", "6,3"), ("7,4", "6,5"), ("6,3", "6,1"), ("7,3", "2,3"), ("6,1", "7,1"),
@@ -132,6 +186,7 @@ def test_stalemate(driver):
 
 
 def test_fried_liver(driver):
+    login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("7,1", "5,2"), ("0,5", "3,2"), 
              ("7,6", "5,5"), ("2,5", "4,6"), ("6,3", "4,3"), ("3,4", "4,3"), ("5,5", "4,3"),
              ("4,6", "6,5"), ("7,4", "6,5"), ("0,3", "2,5"), ("6,5", "7,6"), ("3,2", "4,3"),
@@ -159,6 +214,7 @@ def test_fried_liver(driver):
 
 
 def test_opera(driver):
+    login(driver)
     moves = [("1,4", "3,4"), ("6,4", "4,4"), ("0,6", "2,5"), ("6,3", "5,3"), ("1,3", "3,3"), 
              ("7,2", "3,6"), ("3,3", "4,4"), ("3,6", "2,5"), ("0,3", "2,5"), ("5,3", "4,4"),
              ("0,5", "3,2"), ("7,6", "5,5"), ("2,5", "2,1"), ("7,3", "6,4"), ("0,1", "2,2"), 
@@ -197,6 +253,7 @@ def test_opera(driver):
 
 
 def test_kasparov_topalov(driver):
+    login(driver)
     moves = [("1,4", "3,4"), ("6,3", "5,3"), ("1,3", "3,3"), ("7,6", "5,5"), ("0,1", "2,2"), 
              ("6,6", "5,6"), ("0,2", "2,4"), ("7,5", "6,6"), ("0,3", "1,3"), ("6,2", "5,2"),
              ("1,5", "2,5"), ("6,1", "4,1"), ("0,6", "1,4"), ("7,1", "6,3"), ("2,4", "5,7"),
@@ -386,3 +443,25 @@ def reset(driver):
     )
     reset.click()
     time.sleep(0.5)
+
+
+def login(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
+    username_input = driver.find_element(By.ID, 'username')
+    password_input = driver.find_element(By.ID, 'password')
+    login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+    username_input.send_keys("valid_username")
+    password_input.send_keys("valid_password")
+    login_button.click()
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
+    )
+
+def register_testuser(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
+    username_input = driver.find_element(By.ID, 'username')
+    password_input = driver.find_element(By.ID, 'password')
+    register_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+    username_input.send_keys("valid_username")
+    password_input.send_keys("valid_password")
+    register_button.click()
