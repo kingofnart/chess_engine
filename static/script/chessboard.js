@@ -57,7 +57,7 @@ class ChessBoard {
             });
             // response contains the result of backend attempting to apply move
             const result = await response.json();
-            if (result.status === 'reset') {
+            if (result.status === 'reset' || result.status === 'history_updated') {
                 // pass
             } else {
                 if (result.error) {
@@ -227,7 +227,7 @@ class ChessBoard {
 
     
     // method to stop clocks, show game ending message and reset button
-    endGame(input) {
+    async endGame(input) {
         clearInterval(this.timerHandles.white);
         clearInterval(this.timerHandles.black);
         const message_row = document.getElementById("message-row");
@@ -242,6 +242,7 @@ class ChessBoard {
         button.classList.add('reset-button', 'button');
         button.textContent = "Reset";
         reset_row.appendChild(button);
+        await this.makeMove(["update_history"]);
         this.resignButton.disabled = true;
     }
 
@@ -270,7 +271,7 @@ class ChessBoard {
         reset_button.remove();
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
-        this.update_material_diff(0)
+        this.update_material_diff(0);
         await this.makeMove(["reset"]);
         await this.fetchGameState();
     }

@@ -1,5 +1,7 @@
 import copy
 from grid import Grid
+from connect import connect
+from flask import session, current_app
 
 class Game():
 
@@ -8,7 +10,6 @@ class Game():
 
         self.board = Grid()
         self.turn = 0  # 0 = white, 1 = black
-        self.board_history = []
         self.stop = False
         self.stop_condition = -1
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
@@ -20,11 +21,14 @@ class Game():
         # check if trying to reset
         if move[0] == "reset":
             self.turn = 0
-            self.board_history = []
             self.stop = False
             self.stop_condition = -1
             self.board.reset()
             return { 'status': 'reset'}
+        elif move[0] == "update_history":
+            print(f"Saving game history: {self.board.move_history}")
+            self.save_game(self.board.move_history)
+            return { 'status': 'history_updated'}
         else:
             # make sure nobody's timer ran out
             if move[0] is None:
@@ -60,7 +64,7 @@ class Game():
                         promotion_info = {'index': self.board.queening.id, 'color': self.turn, 
                                         'coord': coords_lst[self.board.queening.id].tolist()}
                         self.board.set_queening(None)
-                    self.board.update_history()
+                    self.board.update_history(move)
                     # check stopping conditions
                     if self.board.check_threefold():
                         self.stop = True
@@ -107,5 +111,19 @@ class Game():
         return {
             'w_coords': self.board.w_coords.tolist(),
             'b_coords': self.board.b_coords.tolist(),
-            'history': self.board_history
+            'history': self.board.board_history
         }
+    
+    def save_game(self, history):
+        with current_app.app_context():
+            user_id = session.get('user_id')
+            if not user_id:
+                return "User not logged in", 401
+    
+        conn = connect()
+        if conn == -1:
+            return "Error connecting to database", 500
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO games (user_id, game_history) VALUES (%s, %s)", (user_id, history))
+                conn.commit()
