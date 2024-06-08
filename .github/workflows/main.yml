@@ -66,6 +66,7 @@ jobs:
           docker compose exec -T app python init_db.py
           sleep 30
           docker compose up --build --abort-on-container-exit test
+          docker cp chess_engine-test-1:/static/screenshots chess_engine/static/screenshots
           ls -l chess_engine/static/screenshots
           exit_code=$?
           docker compose down
