@@ -27,7 +27,14 @@ def driver():
     driver.quit()
 
 def test_valid_login(driver):
-    login(driver)
+    try:
+        login(driver)
+    except TimeoutException as e:
+        print(f"TimeoutException: {e}")
+        screenshot_path = "/static/screenshots/login_timeout.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {screenshot_path}")
+        raise    
     assert "Chess Game" in driver.title
 
 
@@ -442,11 +449,6 @@ def login(driver):
     username_input.send_keys("valid_username")
     password_input.send_keys("valid_password")
     login_button.click()
-    try:
-        WebDriverWait(driver, 10).until(
-            EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
-        )
-    except TimeoutException as e:
-        print(f"TimeoutException: {e}")
-        driver.save_screenshot("/chess_engine/static/screenshots/login_timeout.png")
-        raise
+    WebDriverWait(driver, 10).until(
+        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
+    )

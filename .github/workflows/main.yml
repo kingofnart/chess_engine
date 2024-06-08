@@ -58,6 +58,13 @@ jobs:
           docker compose down
           exit $exit_code
 
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshots
+          path: screenshots
+
 
       - name: Shut down Docker containers
         if: always()
