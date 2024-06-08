@@ -74,8 +74,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: screenshots
-          path: chess_engine/static/screenshots
+          name: screenshot
+          path: chess_engine/static/screenshots/login_timeout.png
 
 
       - name: Shut down Docker containers
