@@ -43,6 +43,11 @@ def register():
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
+                cur.execute("SELECT username FROM users WHERE username = %s", (username,))
+                existing_user = cur.fetchone()
+                if existing_user:
+                    return render_template('register.html', error="Username already taken")
+                
                 cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
                 conn.commit()
 

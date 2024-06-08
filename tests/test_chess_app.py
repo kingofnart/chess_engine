@@ -9,6 +9,7 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from flask import session
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +23,10 @@ def driver():
     
     service = ChromeService(executable_path=ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    register_testuser(driver)
     driver.get(os.getenv("APP_URL", "http://localhost:5000"))
+
     yield driver
     driver.quit()
 
@@ -452,3 +456,12 @@ def login(driver):
     WebDriverWait(driver, 10).until(
         EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
     )
+
+def register_testuser(driver):
+    driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
+    username_input = driver.find_element(By.ID, 'username')
+    password_input = driver.find_element(By.ID, 'password')
+    register_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+    username_input.send_keys("valid_username")
+    password_input.send_keys("valid_password")
+    register_button.click()
