@@ -41,6 +41,7 @@ class Grid():
         self.material_diff = 0
         # initialize lists
         self.board_history = []
+        self.move_history = []
         self.attacked_squares_w = []
         self.attacked_squares_b = []
         self.valid_moves_w = []
@@ -715,8 +716,7 @@ class Grid():
 
 
     # function to add boardstate to history list to check for threefold repetition
-    def update_history(self):
-        
+    def update_history(self, move=None):
         lst = []
         for row in range(8):
             for col in range(8):
@@ -726,6 +726,8 @@ class Grid():
                     lst.append(p.id + 16*p.color)
                 else: lst.append(-1)  # -1=no piece
         self.board_history.append(lst)
+        if move:
+            self.move_history.append(move)
 
 
     # function to check for a threefold repetition => draw

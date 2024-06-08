@@ -5,17 +5,17 @@ from connect import connect
 import os
 
 app = Flask(__name__)
-
 app.secret_key = os.getenv('CHESS_DB_SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
-    
 game = Game()
+
 
 @app.route('/')
 def index():
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
+
 
 @app.route('/move', methods=['POST'])
 def move():
@@ -26,10 +26,12 @@ def move():
     result = game.make_move(move)
     return jsonify(result)
 
+
 @app.route('/state', methods=['GET'])
 def state():
     result = game.get_state()
     return jsonify(result)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -55,6 +57,7 @@ def register():
 
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -67,20 +70,27 @@ def login():
         with conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT password FROM users WHERE username = %s", (username,))
-                user = cur.fetchone()
+                user_hash = cur.fetchone()
+                cur.execute("SELECT user_id FROM users WHERE username = %s", (username,))
+                user_id = cur.fetchone()
 
-        if user and check_password_hash(user[0], password):
+        if user_hash and check_password_hash(user_hash[0], password):
+            print(f"User {username} logged in! hash: {user_hash[0]}")
             session['username'] = username
+            session['user_id'] = user_id[0]
+            print(f"User ID: {user_id[0]}")
             return redirect(url_for('index'))
         else:
             return render_template('login.html', error="Invalid credentials")
 
     return render_template('login.html')
 
+
 @app.route('/logout', methods=['POST'])
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
