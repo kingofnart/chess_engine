@@ -59,24 +59,28 @@ jobs:
           CHESS_DB_SECRET_KEY: ${{ secrets.CHESS_DB_SECRET_KEY }}
         run: |
           set -e
-          mkdir -p chess_engine/static/screenshots
+          mkdir -p /static/screenshots
           docker compose up --build -d db
           docker compose up --build -d app
           sleep 10
           docker compose exec -T app python init_db.py
           sleep 30
           docker compose up --build --abort-on-container-exit test
+          ls -l /static/screenshots
           exit_code=$?
           docker compose down
           exit $exit_code
+
+      - name: Verify Screenshot Directory
+        if: always()
+        run: ls -l /static/screenshots
 
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: screenshot
-          path: chess_engine/static/screenshots/login_timeout.png
-
+          path: /static/screenshots
 
       - name: Shut down Docker containers
         if: always()
