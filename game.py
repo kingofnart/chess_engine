@@ -26,7 +26,6 @@ class Game():
             self.board.reset()
             return { 'status': 'reset'}
         elif move[0] == "update_history":
-            print(f"Saving game history: {self.board.move_history}")
             self.save_game(self.board.move_history)
             return { 'status': 'history_updated'}
         else:

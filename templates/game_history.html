@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div id="main-container">
+        <div class="header">
+            <h1>Game History for {{ username }}</h1>
+        </div>
+        <div class="game-history">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Game ID</th>
+                        <th>Moves</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                    <tr>
+                        <td>{{ game.id }}</td>
+                        <td>{{ game.game }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <form action="{{ url_for('index') }}" method="get">
+            <button type="submit" class="button">Back</button>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='script/chessboard.js') }}"></script>
+</body>
+</html>

@@ -402,3 +402,7 @@ database.ini
 
 # Environment Variables
 .env
+init.env
+
+# Compose Override
+compose.override.yaml

@@ -1,4 +1,5 @@
 from flask import Flask, request, session, jsonify, render_template, url_for, redirect
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from game import Game
 from connect import connect
@@ -9,15 +10,44 @@ app.secret_key = os.getenv('CHESS_DB_SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 game = Game()
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+
+class User(UserMixin):
+    def __init__(self, user_id, username, password):
+        self.id = user_id
+        self.username = username
+        self.password = password
+
+    @staticmethod
+    def get(user_id):
+        conn = connect()
+        if conn == -1:
+            return None
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT user_id, username, password FROM users WHERE user_id = %s", (user_id,))
+                user_data = cur.fetchone()
+                if not user_data:
+                    return None
+                return User(user_id=user_data[0], username=user_data[1], password=user_data[2])
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
 
 @app.route('/')
+@login_required
 def index():
-    if 'username' in session:
-        return render_template('index.html')
-    return redirect(url_for('login'))
+    return render_template('index.html')
 
 
 @app.route('/move', methods=['POST'])
+@login_required
 def move():
     # convert json move info to python object (dict)
     data = request.get_json()
@@ -28,6 +58,7 @@ def move():
 
 
 @app.route('/state', methods=['GET'])
+@login_required
 def state():
     result = game.get_state()
     return jsonify(result)
@@ -69,16 +100,13 @@ def login():
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT password FROM users WHERE username = %s", (username,))
-                user_hash = cur.fetchone()
-                cur.execute("SELECT user_id FROM users WHERE username = %s", (username,))
-                user_id = cur.fetchone()
+                cur.execute("SELECT user_id, username, password FROM users WHERE username = %s", (username,))
+                user_data = cur.fetchone()
 
-        if user_hash and check_password_hash(user_hash[0], password):
-            print(f"User {username} logged in! hash: {user_hash[0]}")
-            session['username'] = username
-            session['user_id'] = user_id[0]
-            print(f"User ID: {user_id[0]}")
+        if user_data and check_password_hash(user_data[2], password):
+            print(f"User {user_data[1]} logged in! ID: {user_data[0]} hash: {user_data[2]}")
+            user = User(user_data[0], user_data[1], user_data[2])
+            login_user(user)
             return redirect(url_for('index'))
         else:
             return render_template('login.html', error="Invalid credentials")
@@ -87,9 +115,31 @@ def login():
 
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
+
+@app.route('/game_history')
+@login_required
+def game_history():
+    user_id = current_user.id
+    games = get_user_games(user_id) 
+    print(f"Games: {games}")
+    return render_template('game_history.html', username=current_user.username, games=games)
+
+
+# helper for game_history()
+def get_user_games(user_id):
+    conn = connect()
+    if conn == -1:
+        return []
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT game_id, game_history FROM games WHERE user_id = %s", (user_id,))
+            games = cur.fetchall()
+    return [{"id": game[0], "game": game[1]} for game in games]
 
 
 if __name__ == '__main__':
