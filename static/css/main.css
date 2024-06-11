@@ -25,13 +25,15 @@ body {
     grid-template-columns: repeat(8, 50px);
     grid-template-rows: repeat(8, 50px);
     outline: 5px solid rgb(84, 84, 84);
+    margin: 0;
+    padding: 0;
 }
 
 .game-history-container {
     display: grid;
     grid-template-columns: repeat(8, 50px);
     grid-template-rows: repeat(8, 50px);
-    outline: 5px solid rgb(84, 84, 84);
+    outline: 5px solid rgb(26, 20, 1);
 }
 
 .row {
@@ -292,8 +294,12 @@ body {
 }
 
 table, th, td {
-    border: 1px solid black;
+    border: 3px solid black;
   }
+
+#back-btn {
+    margin-top: 15px;
+}
 
 p {
     display: inline-block;
@@ -305,4 +311,84 @@ p {
     border-radius: 8px;
     font-family: "Lucida Console", "Courier New", monospace;
     font-size: 10px;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    width: 100px;
+}
+
+.navigation-buttons button {
+    margin-top: 5px;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 24px; 
+    border: 3px solid #101010;
+    border-radius: 1px;
+    background-color: #717171;
+    cursor: pointer;
+    color: black;
+}
+
+.navigation-buttons button:hover {
+    color: #fffeaa;
+    background-color: #282828;
+}
+
+td {
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+table {
+    width: 100%; 
+    border-collapse: collapse;
+    font-family: "Lucida Console", "Courier New", monospace;
+    background-color: #d4d4d4cc;
+}
+
+th, td {
+    text-align: center; 
+    vertical-align: middle; 
+}
+
+h1 {
+    display: inline-block;
+    background-color: #21e1c84c;
+    color: white;
+    padding: 5px;
+    margin: 5px;
+    margin-bottom: 25px;
+    border: 5px solid #758435;
+    border-radius: 8px;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+th {
+    height: 50px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    box-shadow: inset 0 0 5px grey; 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
 }

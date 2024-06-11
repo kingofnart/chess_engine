@@ -9,6 +9,9 @@
             max-height: 500px;
             overflow-y: auto;
         }
+        body {
+                background-image: url("{{ url_for('static', filename='images/Cygnus_X-1.jpg') }}");
+            }
     </style>
 </head>
 <body>
@@ -27,27 +30,23 @@
                 <tbody>
                     {% for game in games %}
                     <tr>
-                        <td>{{ game.time }}</td>
+                        <td><span class="game-time" data-time="{{ game.time }}"></span></td>
                         <td>
-                            <h3>Game ID:{{ game.id }}</h3>
                             <div id="game-container-wrapper-{{ game.id }}">
-                                <div id="row-labels-{{ game.id }}"></div>
                                 <div class='game-history-container' id="game-container-{{ game.id }}"></div>
                             </div>
-                            <div id="column-labels-{{ game.id }}"></div>
                             <div class="navigation-buttons">
                                 <button id="left-{{ game.id }}">&larr;</button>
                                 <button id="right-{{ game.id }}">&rarr;</button>
                             </div>
                         </td>
-                       
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <form action="{{ url_for('index') }}" method="get">
-            <button type="submit" class="button">Back</button>
+            <button type="submit" class="button" id="back-btn">Back</button>
         </form>
     </div>
     <script>
