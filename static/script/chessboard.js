@@ -1,6 +1,7 @@
 class ChessBoard {
 
     constructor() {
+        this.gameID = 0
         this.gameContainer = document.getElementById('game-container');
         this.gameContainerWrapper = document.getElementById('game-container-wrapper');
         this.turnIndicator = document.getElementById('turn-indicator');
@@ -45,7 +46,8 @@ class ChessBoard {
 
     // function to send user input (move) to backend to proccess
     // frontend -> backend (but also backend->frontend via returns i.e. response)
-    async makeMove(move) {
+    async makeMove(gameID, move) {
+        console.log("frontend sending move: ", move)
         try {
             const response = await fetch('/move', {
                 method: 'POST',
@@ -53,11 +55,11 @@ class ChessBoard {
                     'Content-Type': 'application/json',
                 },
                 // convert move list to json to send to backend
-                body: JSON.stringify({ move })
+                body: JSON.stringify({ move, gameID })
             });
             // response contains the result of backend attempting to apply move
             const result = await response.json();
-            if (result.status === 'reset' || result.status === 'history_updated') {
+            if (result.status === 'reset' || result.status === 'game saved') {
                 // pass
             } else {
                 if (result.error) {
@@ -74,7 +76,7 @@ class ChessBoard {
                 } else if (result.status === 'move applied') { // proceed with game
                     this.addIncrement(result.turn);
                     this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
-                    this.update_material_diff(result.material_diff)
+                    this.update_material_diff(result.material_diff);
                 } else {
                     alert("Error in response from makeMove");
                 }
@@ -105,7 +107,7 @@ class ChessBoard {
             if (this.selectedSquare) {
                 if (this.selectedSquare != square) {
                     const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
-                    this.makeMove(move);
+                    this.makeMove(this.gameID, move);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
                 } else {
@@ -181,7 +183,6 @@ class ChessBoard {
             label.innerText = letter;
             this.columnLabels.appendChild(label);
         });
-        //this.gameContainerWrapper.appendChild(columnLabels);
         // create row labels
         this.rowLabels.innerHTML = '';
         const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -191,7 +192,6 @@ class ChessBoard {
             label.innerText = row;
             this.rowLabels.appendChild(label);
         });
-        //this.gameContainerWrapper.appendChild(rowLabels);
     }
 
 
@@ -228,6 +228,7 @@ class ChessBoard {
     
     // method to stop clocks, show game ending message and reset button
     async endGame(input) {
+        console.log("Ending game")
         clearInterval(this.timerHandles.white);
         clearInterval(this.timerHandles.black);
         const message_row = document.getElementById("message-row");
@@ -242,7 +243,7 @@ class ChessBoard {
         button.classList.add('reset-button', 'button');
         button.textContent = "Reset";
         reset_row.appendChild(button);
-        await this.makeMove(["update_history"]);
+        await this.makeMove(this.gameID, ["save game"]);
         this.resignButton.disabled = true;
     }
 
@@ -272,7 +273,7 @@ class ChessBoard {
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
         this.update_material_diff(0);
-        await this.makeMove(["reset"]);
+        await this.makeMove(this.gameID, ["reset"]);
         await this.fetchGameState();
     }
 
@@ -351,7 +352,7 @@ class ChessBoard {
             if (time <= 0 && this.gameRunning) {
                 clearInterval(this.timerHandles[color]);
                 timerElement.innerText = '00:00';
-                this.makeMove([null, color]);
+                this.makeMove(this.gameID, [null, color]);
                 this.gameRunning = false;
             } else {
                 // show user they're running out of time

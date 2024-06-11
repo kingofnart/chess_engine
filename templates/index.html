@@ -70,6 +70,9 @@
                 <button type="submit" class="button" id="logout">Logout</button>
             </form>
         </div>
+        <div class="bottom-left">
+            <p>Logged in as {{ username }}</p>
+        </div>
     </div>
     <script src="{{ url_for('static', filename='script/chessboard.js') }}"></script>
 </body>
