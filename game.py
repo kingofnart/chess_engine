@@ -1,9 +1,11 @@
 import copy
 from grid import Grid
 from connect import connect
-from flask import session, current_app
+from flask import current_app
 from flask_login import current_user
 from datetime import datetime
+import pytz
+from tzlocal import get_localzone
 
 class Game():
 
@@ -130,8 +132,8 @@ class Game():
             if not current_user.is_authenticated:
                 print("User not logged in")
                 return "User not logged in", 401
-        user_id = current_user.id
-        game_time = datetime.now().replace(second=0, microsecond=0)
+        local_tz = get_localzone() # get local machines timzone
+        game_time = datetime.now(local_tz).replace(second=0, microsecond=0)
         conn = connect()
         if conn == -1:
             print("Error connecting to database")
@@ -139,7 +141,7 @@ class Game():
         with conn:
             with conn.cursor() as cur:
                 print(f"Saving game time: {game_time}, history: {history}")
-                cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (user_id, history, game_time))
+                cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (current_user.id, history, game_time))
                 conn.commit()
 
     def revert_coords(self, new_w_coords, new_b_coords):

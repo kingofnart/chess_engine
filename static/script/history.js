@@ -33,7 +33,6 @@ class ChessBoardHistory {
             [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]],
             gameID
         )
-        this.renderLabels();
     }
 
 
@@ -108,26 +107,6 @@ class ChessBoardHistory {
                 img.classList.add('piece');
                 square.appendChild(img);
             }
-        });
-    }
-
-
-    renderLabels() {
-        this.columnLabels.innerHTML = '';
-        const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        columns.forEach(letter => {
-            const label = document.createElement('div');
-            label.className = 'coordinate-label';
-            label.innerText = letter;
-            this.columnLabels.appendChild(label);
-        });
-        this.rowLabels.innerHTML = '';
-        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
-        rows.forEach(row => {
-            const label = document.createElement('div');
-            label.className = 'coordinate-label';
-            label.innerText = row;
-            this.rowLabels.appendChild(label);
         });
     }
 
@@ -228,5 +207,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chessBoard.fetchCoordinates().then(coordinates => {
             coords[gameID] = [coordinates];
         });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const gameTimes = document.querySelectorAll('.game-time');
+    gameTimes.forEach(function(element) {
+        const rawTime = element.getAttribute('data-time');
+        const date = new Date(rawTime);
+        const options = { year: 'numeric', month: 'long', day: 'numeric', 
+            hour: 'numeric', minute: 'numeric', hour12: true, timeZoneName: 'short' };
+        element.textContent = date.toLocaleString('en-US', options);
     });
 });
