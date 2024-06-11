@@ -23,7 +23,8 @@ def initialize_database():
         CREATE TABLE games (
             game_id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(user_id),
-            game_history TEXT NOT NULL
+            game_history TEXT NOT NULL,
+            game_time TIMESTAMP NOT NULL
         );
                     
         CREATE INDEX idx_games_user_id ON games (user_id);

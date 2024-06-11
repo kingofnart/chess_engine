@@ -2,6 +2,8 @@ import copy
 from grid import Grid
 from connect import connect
 from flask import session, current_app
+from flask_login import current_user
+from datetime import datetime
 
 class Game():
 
@@ -18,16 +20,25 @@ class Game():
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, move):
+        print(f"backend attempting to make move: {move}")
         # check if trying to reset
         if move[0] == "reset":
             self.turn = 0
             self.stop = False
             self.stop_condition = -1
             self.board.reset()
-            return { 'status': 'reset'}
-        elif move[0] == "update_history":
+            return { 'status': 'reset' }
+        elif move[0] == "save game":
+            print("make_move: saving...")
             self.save_game(self.board.move_history)
-            return { 'status': 'history_updated'}
+            return { 'status': 'game saved' }
+        elif move[0] == "revert":
+            self.revert_coords(move[1], move[2])
+            return {
+                    'status': 'move applied',
+                    'w_coords': self.board.w_coords.tolist(),
+                    'b_coords': self.board.b_coords.tolist()
+                }
         else:
             # make sure nobody's timer ran out
             if move[0] is None:
@@ -39,7 +50,6 @@ class Game():
             else:  # timers still running
                 sq1 = [int(move[0][0]), int(move[0][2])]
                 sq2 = [int(move[1][0]), int(move[1][2])]
-                colors = {0: "White", 1: "Black"}
                 if self.board.valid_move([sq1, sq2], self.turn, set_enpassant=True):
                     tmp_board = copy.deepcopy(self.board)
                     tmp_board.apply_move([sq1, sq2], self.turn)
@@ -63,7 +73,8 @@ class Game():
                         promotion_info = {'index': self.board.queening.id, 'color': self.turn, 
                                         'coord': coords_lst[self.board.queening.id].tolist()}
                         self.board.set_queening(None)
-                    self.board.update_history(move)
+                    if len(move) == 2:
+                        self.board.update_history(move)
                     # check stopping conditions
                     if self.board.check_threefold():
                         self.stop = True
@@ -73,16 +84,17 @@ class Game():
                         # => check_mate checks the length of the valid_moves list for NOT color
                         (p,q) = self.board.check_mate(self.turn)
                         if (p,q) != (-1,-1):
-                            self.stop = True
-                            if p:  # black ended game
-                                if q:  # black stalemated white
-                                    self.stop_condition = 5
-                                else:  # black checkmate
-                                    self.stop_condition = 4
-                            elif q:  # white stalemated black
-                                self.stop_condition = 3
-                            else:  # white checkmate
-                                self.stop_condition = 2
+                            if len(move) == 2:
+                                self.stop = True
+                                if p:  # black ended game
+                                    if q:  # black stalemated white
+                                        self.stop_condition = 5
+                                    else:  # black checkmate
+                                        self.stop_condition = 4
+                                elif q:  # white stalemated black
+                                    self.stop_condition = 3
+                                else:  # white checkmate
+                                    self.stop_condition = 2
                 else: return {'error': 'invalid'}  # valid_move() failed
             if self.stop:
                 # return in json format
@@ -115,14 +127,27 @@ class Game():
     
     def save_game(self, history):
         with current_app.app_context():
-            user_id = session.get('user_id')
-            if not user_id:
+            if not current_user.is_authenticated:
+                print("User not logged in")
                 return "User not logged in", 401
-    
+        user_id = current_user.id
+        game_time = datetime.now().replace(second=0, microsecond=0)
         conn = connect()
         if conn == -1:
+            print("Error connecting to database")
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO games (user_id, game_history) VALUES (%s, %s)", (user_id, history))
+                print(f"Saving game time: {game_time}, history: {history}")
+                cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (user_id, history, game_time))
                 conn.commit()
+
+    def revert_coords(self, new_w_coords, new_b_coords):
+        self.stop = False
+        self.stop_condition = -1
+        self.turn = not self.turn
+        # want to reset moved flag so pawns can move 2 squares
+        self.board.set_unmoved()
+        self.board.set_white_coords(new_w_coords)
+        self.board.set_black_coords(new_b_coords)
+        self.board.set_grid(self.board.w_coords, self.board.b_coords)

@@ -8,7 +8,9 @@ import os
 app = Flask(__name__)
 app.secret_key = os.getenv('CHESS_DB_SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
-game = Game()
+gameControllers = {}
+mainGame = 0
+gameControllers[mainGame] = Game()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -43,7 +45,10 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return render_template('index.html', username=current_user.username)
+    else:
+        return render_template('login.html')
 
 
 @app.route('/move', methods=['POST'])
@@ -53,14 +58,20 @@ def move():
     data = request.get_json()
     # data = {'move': ['y1,x1', 'y2,x2']}
     move = data.get('move')
-    result = game.make_move(move)
+    gameID = int(data.get('gameID'))
+    if gameID is not None and gameID in gameControllers:
+        game = gameControllers[gameID]
+        result = game.make_move(move)
+    else:
+        print(f"Game {gameID} not found")
+        result = {"error": "Invalid game ID"}
     return jsonify(result)
 
 
 @app.route('/state', methods=['GET'])
 @login_required
 def state():
-    result = game.get_state()
+    result = gameControllers[mainGame].get_state()
     return jsonify(result)
 
 
@@ -117,7 +128,7 @@ def login():
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    session.pop('username', None)
+    logout_user()
     return redirect(url_for('login'))
 
 
@@ -126,7 +137,9 @@ def logout():
 def game_history():
     user_id = current_user.id
     games = get_user_games(user_id) 
-    print(f"Games: {games}")
+    for game in games:
+        gameC = Game()
+        gameControllers[game["id"]] = gameC
     return render_template('game_history.html', username=current_user.username, games=games)
 
 
@@ -137,9 +150,9 @@ def get_user_games(user_id):
         return []
     with conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT game_id, game_history FROM games WHERE user_id = %s", (user_id,))
+            cur.execute("SELECT game_id, game_history, game_time FROM games WHERE user_id = %s", (user_id,))
             games = cur.fetchall()
-    return [{"id": game[0], "game": game[1]} for game in games]
+    return [{"id": game[0], "moves": game[1], "time": game[2]} for game in games]
 
 
 if __name__ == '__main__':

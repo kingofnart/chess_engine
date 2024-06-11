@@ -27,6 +27,13 @@ body {
     outline: 5px solid rgb(84, 84, 84);
 }
 
+.game-history-container {
+    display: grid;
+    grid-template-columns: repeat(8, 50px);
+    grid-template-rows: repeat(8, 50px);
+    outline: 5px solid rgb(84, 84, 84);
+}
+
 .row {
     display: flex;
     justify-content: space-between;
@@ -71,6 +78,17 @@ body {
     border: none;
 }
 
+.square-hist {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    border: none;
+}
+
+
 #column-labels {
     display: flex;
     justify-content: space-between;
@@ -110,6 +128,11 @@ body {
 .piece {
     width: 45px;
     height: 45px;
+}
+
+.piece-hist {
+    width: 20px;
+    height: 20px;
 }
 
 .selected {
@@ -243,24 +266,43 @@ body {
 
 .top-right {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 10px;
+    right: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
 }
 
 .bottom-right {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 10px;
+    right: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+}
+
+.bottom-left {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 table, th, td {
     border: 1px solid black;
   }
+
+p {
+    display: inline-block;
+    background-color: #11433c34;
+    color: white;
+    padding: 5px;
+    margin: 5px;
+    border: 3px solid #93a738;
+    border-radius: 8px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 10px;
+}
