@@ -47,7 +47,6 @@ class ChessBoard {
     // function to send user input (move) to backend to proccess
     // frontend -> backend (but also backend->frontend via returns i.e. response)
     async makeMove(gameID, move) {
-        console.log("frontend sending move: ", move)
         try {
             const response = await fetch('/move', {
                 method: 'POST',
@@ -228,7 +227,6 @@ class ChessBoard {
     
     // method to stop clocks, show game ending message and reset button
     async endGame(input) {
-        console.log("Ending game")
         clearInterval(this.timerHandles.white);
         clearInterval(this.timerHandles.black);
         const message_row = document.getElementById("message-row");

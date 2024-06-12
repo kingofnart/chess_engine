@@ -115,7 +115,6 @@ def login():
                 user_data = cur.fetchone()
 
         if user_data and check_password_hash(user_data[2], password):
-            print(f"User {user_data[1]} logged in! ID: {user_data[0]} hash: {user_data[2]}")
             user = User(user_data[0], user_data[1], user_data[2])
             login_user(user)
             return redirect(url_for('index'))

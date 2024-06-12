@@ -6,7 +6,6 @@ class ChessBoardHistory {
 
     constructor(init_gameID, init_moves) {
         this.gameMoves = init_moves;
-        console.log("Moves found: ", this.gameMoves, " via id: ", init_gameID);
         this.gameContainer = document.getElementById(`game-container-${init_gameID}`);
         this.gameContainerWrapper = document.getElementById(`game-container-wrapper-${init_gameID}`);
         this.rowLabels = document.getElementById(`row-labels-${init_gameID}`);
@@ -37,7 +36,6 @@ class ChessBoardHistory {
 
     async makeMove(gameID, move) {
         try {
-            console.log("sending move: ", move, " and id: ", gameID)
             const response = await fetch(`/move`, {
                 method: 'POST',
                 headers: {
@@ -48,11 +46,9 @@ class ChessBoardHistory {
             const result = await response.json();
             if (result.status === 'move applied') {
                 this.updateBoard(result.w_coords, result.b_coords, result.promotion, gameID);
-                console.log("returning: ", [result.w_coords, result.b_coords])
                 return [result.w_coords, result.b_coords];
             } else {
                 alert("Error in response from makeMove");
-                console.log("Backend didn't apply move: ");
             }
         } catch (error) {
             console.error("Error during makeMove: ", error);
@@ -87,7 +83,7 @@ class ChessBoardHistory {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 const square = document.createElement('button');
-                square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
+                square.classList.add('square-hist', (row + col) % 2 === 0 ? 'light' : 'dark');
                 square.dataset.coordinate = `${7 - row},${col},${render_gameID}`;
                 this.gameContainer.appendChild(square);
             }
@@ -104,7 +100,7 @@ class ChessBoardHistory {
             if (square) {
                 const img = document.createElement('img');
                 img.src = this.getPieceImageUrl(names[index], color);
-                img.classList.add('piece');
+                img.classList.add('piece-hist');
                 square.appendChild(img);
             }
         });
@@ -144,18 +140,13 @@ class ChessBoardHistory {
 
     async moveLeft(left_gameID) {
         const chessBoard = chessBoards[left_gameID];
-        console.log("moveLEFT found chessboard with moves: ", chessBoard.gameMoves, " with id ", left_gameID)
         if (chessBoard) {
             const gameCoords = coords[left_gameID];
-            console.log("coordinates list: ", gameCoords);
             if (gameCoords.length > 1) {
                 gameCoords.pop();
-                console.log("coordinates list after pop: ", gameCoords);
                 const [w_coords, b_coords] = gameCoords[gameCoords.length - 1];
-                console.log("current board state: (white): ", w_coords, "(black):", b_coords)
                 const left_move = ["revert", w_coords, b_coords];
                 const result = await this.makeMove(left_gameID, left_move);
-                console.log("result: " , result, ", rendering board with coordinates: (white): ", w_coords, ", (black):", b_coords);
                 chessBoard.renderBoard(w_coords, b_coords, left_gameID);
                 moveCounters[left_gameID] -= 1;
             }
@@ -166,17 +157,12 @@ class ChessBoardHistory {
 
     async moveRight(right_gameID) {
         const chessBoard = chessBoards[right_gameID];
-        console.log("moveRIGHT found chessboard with moves: ", chessBoard.gameMoves, " with id ", right_gameID)
         if (chessBoard) {
             if (moveCounters[right_gameID] < this.gameMoves.length && this.gameMoves[0].length > 0) {
-                console.log("Moves list: ", this.gameMoves, ", index of move: ", moveCounters[right_gameID]);
                 let right_move = this.gameMoves[moveCounters[right_gameID]];
                 if (right_move.length === 2) { right_move.push("nothingtoseehere") }
-                console.log("Move to be applied: ", right_move);
                 const [w_coords, b_coords] = await chessBoard.makeMove(right_gameID, right_move);
-                console.log("Coordinates received: (white): ", w_coords, "(black):", b_coords);
                 coords[right_gameID].push([w_coords, b_coords]);
-                console.log("updated to coords: ", coords[right_gameID]);
                 moveCounters[right_gameID] += 1;
             }
         } else {
