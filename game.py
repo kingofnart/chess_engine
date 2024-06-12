@@ -22,7 +22,6 @@ class Game():
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, move):
-        print(f"backend attempting to make move: {move}")
         # check if trying to reset
         if move[0] == "reset":
             self.turn = 0
@@ -31,7 +30,6 @@ class Game():
             self.board.reset()
             return { 'status': 'reset' }
         elif move[0] == "save game":
-            print("make_move: saving...")
             self.save_game(self.board.move_history)
             return { 'status': 'game saved' }
         elif move[0] == "revert":
@@ -130,17 +128,14 @@ class Game():
     def save_game(self, history):
         with current_app.app_context():
             if not current_user.is_authenticated:
-                print("User not logged in")
                 return "User not logged in", 401
         local_tz = get_localzone() # get local machines timzone
         game_time = datetime.now(local_tz).replace(second=0, microsecond=0)
         conn = connect()
         if conn == -1:
-            print("Error connecting to database")
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
-                print(f"Saving game time: {game_time}, history: {history}")
                 cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (current_user.id, history, game_time))
                 conn.commit()
 

@@ -29,10 +29,17 @@ body {
     padding: 0;
 }
 
+.game-history-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 .game-history-container {
     display: grid;
-    grid-template-columns: repeat(8, 50px);
-    grid-template-rows: repeat(8, 50px);
+    grid-template-columns: repeat(8, 35px);
+    grid-template-rows: repeat(8, 35px);
     outline: 5px solid rgb(26, 20, 1);
 }
 
@@ -81,8 +88,8 @@ body {
 }
 
 .square-hist {
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,8 +140,8 @@ body {
 }
 
 .piece-hist {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
 }
 
 .selected {
@@ -317,17 +324,22 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 5px;
+    margin: 10px;
     width: 100px;
 }
 
 .navigation-buttons button {
     margin-top: 5px;
     padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-weight: bold;
-    font-size: 24px; 
+    font-size: 20px;
+    height: 35px;
+    width: 50px;
     border: 3px solid #101010;
-    border-radius: 1px;
+    border-radius: 3px;
     background-color: #717171;
     cursor: pointer;
     color: black;
