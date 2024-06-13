@@ -38,8 +38,8 @@ class ChessBoard {
         document.querySelectorAll('.time-option').forEach(button => {
             button.addEventListener('click', (event) => this.setTimeControl(event));
         });
-        // fetch initial game state
-        this.fetchGameState();
+        // reset if necessary and fetch initial game state
+        this.resetGame();
         this.renderLabels();
     }
 
@@ -265,9 +265,13 @@ class ChessBoard {
             this.blackTimer.classList.remove('time-trouble');
         }
         const end_message = document.querySelector(".end-message");
-        end_message.remove();
+        if (end_message != null) {
+            end_message.remove();
+        }
         const reset_button = document.querySelector(".reset-button");
-        reset_button.remove();
+        if (reset_button != null) {
+            reset_button.remove();
+        }
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
         this.update_material_diff(0);
@@ -445,3 +449,18 @@ class ChessBoard {
 document.addEventListener('DOMContentLoaded', () => {
     new ChessBoard();
 });
+
+// from w3schools:
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+}
