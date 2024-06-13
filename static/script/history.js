@@ -1,6 +1,4 @@
 const chessBoards = {};
-const moveCounters = {};
-const coords = {};
 
 class ChessBoardHistory {
 
@@ -22,15 +20,15 @@ class ChessBoardHistory {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
         };
-        this.renderBoard(
-            [[0,4], [0,3], [0,0], [0,7], [0,1],
-            [0,6], [0,2], [0,5], [1,0], [1,1], 
-            [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]],
-            [[7,4], [7,3], [7,0], [7,7], [7,1], 
-            [7,6], [7,2], [7,5], [6,0], [6,1], 
-            [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]],
-            init_gameID
-        );
+        this.starting_coords = [
+            [[0,4], [0,3], [0,0], [0,7], [0,1],[0,6], [0,2], [0,5], 
+            [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7]],
+            [[7,4], [7,3], [7,0], [7,7], [7,1], [7,6], [7,2], [7,5], 
+            [6,0], [6,1], [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]]
+        ]
+        this.moveCounter = 0;
+        this.coords = [this.starting_coords];
+        this.renderBoard(this.starting_coords[0], this.starting_coords[1], init_gameID);
     }
 
 
@@ -53,20 +51,6 @@ class ChessBoardHistory {
         } catch (error) {
             console.error("Error during makeMove: ", error);
         }
-    }
-
-
-    async fetchAndRender(fetch_gameID) {
-        const response = await fetch(`/state`);
-        const state = await response.json();
-        this.renderBoard(state.w_coords, state.b_coords, fetch_gameID);
-    }
-
-
-    async fetchCoordinates() {
-        const response = await fetch(`/state`);
-        const state = await response.json();
-        return [state.w_coords, state.b_coords];
     }
 
 
@@ -141,14 +125,13 @@ class ChessBoardHistory {
     async moveLeft(left_gameID) {
         const chessBoard = chessBoards[left_gameID];
         if (chessBoard) {
-            const gameCoords = coords[left_gameID];
-            if (gameCoords.length > 1) {
-                gameCoords.pop();
-                const [w_coords, b_coords] = gameCoords[gameCoords.length - 1];
+            if (this.coords.length > 1) {
+                this.coords.pop();
+                const [w_coords, b_coords] = this.coords[this.coords.length - 1];
                 const left_move = ["revert", w_coords, b_coords];
                 const result = await this.makeMove(left_gameID, left_move);
                 chessBoard.renderBoard(w_coords, b_coords, left_gameID);
-                moveCounters[left_gameID] -= 1;
+                this.moveCounter -= 1;
             }
         } else {
             console.error(`No ChessBoard instance found for game ${left_gameID}`);
@@ -158,12 +141,12 @@ class ChessBoardHistory {
     async moveRight(right_gameID) {
         const chessBoard = chessBoards[right_gameID];
         if (chessBoard) {
-            if (moveCounters[right_gameID] < this.gameMoves.length && this.gameMoves[0].length > 0) {
-                let right_move = this.gameMoves[moveCounters[right_gameID]];
+            if (this.moveCounter < this.gameMoves.length && this.gameMoves[0].length > 0) {
+                let right_move = this.gameMoves[this.moveCounter];
                 if (right_move.length === 2) { right_move.push("nothingtoseehere") }
                 const [w_coords, b_coords] = await chessBoard.makeMove(right_gameID, right_move);
-                coords[right_gameID].push([w_coords, b_coords]);
-                moveCounters[right_gameID] += 1;
+                this.coords.push([w_coords, b_coords]);
+                this.moveCounter += 1;
             }
         } else {
             console.error(`No ChessBoard instance found for game ${right_gameID}`);
@@ -188,11 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const mv_lst = getMovesById(games2js, ID)
         const chessBoard = new ChessBoardHistory(ID, mv_lst);
         chessBoards[ID] = chessBoard;
-        moveCounters[ID] = 0;
-        // need to use .then because of async => not save the promise but the resolved value
-        chessBoard.fetchCoordinates().then(coordinates => {
-            coords[ID] = [coordinates];
-        });
     });
     const gameTimes = document.querySelectorAll('.game-time');
     gameTimes.forEach(function(element) {
