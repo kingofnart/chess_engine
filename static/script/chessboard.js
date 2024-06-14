@@ -11,9 +11,13 @@ class ChessBoard {
         this.columnLabels = document.getElementById('column-labels');
         this.startButton = document.getElementById('start-button');
         this.resignButton = document.getElementById('resign-button');
+        this.color_button = document.getElementById('color-button');
+        this.opponent_button = document.getElementById('opponent-button');
         this.time_control_button = document.getElementById('time-control-button');
         this.top_mat_cnt = document.getElementById('top-mat-cnt')
         this.bot_mat_cnt = document.getElementById('bot-mat-cnt')
+        this.offest = 7;
+        this.row_dir = -1;
         this.selectedSquare = null;
         this.gameRunning = true;
         this.names_w = {
@@ -34,13 +38,59 @@ class ChessBoard {
         this.startButton.addEventListener('click', () => this.startGame());
         this.resignButton.addEventListener('click', () => this.endGame(7));
         this.resignButton.disabled = true;
-        this.time_control_button.addEventListener('click', () => this.showDropdown());
+        this.color_button.addEventListener('click', () => this.showColorDropdown());
+        this.opponent_button.addEventListener('click', () => this.showOppDropdown());
+        this.time_control_button.addEventListener('click', () => this.showTimeDropdown());
         document.querySelectorAll('.time-option').forEach(button => {
             button.addEventListener('click', (event) => this.setTimeControl(event));
         });
+        document.querySelectorAll('.color-option').forEach(button => {
+            button.addEventListener('click', (event) => this.setColor(event));
+        });
+        document.querySelectorAll('.opp-option').forEach(button => {
+            button.addEventListener('click', (event) => this.setOpponent(event));
+        });
         // reset if necessary and fetch initial game state
         this.resetGame();
-        this.renderLabels();
+    }
+
+
+    // method to reset the board state and clocks
+    async resetGame() {
+        this.names_w = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        };
+        this.names_b = {
+            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
+            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
+        };
+        this.whiteTimer.innerText = "5:00";
+        this.blackTimer.innerText = "5:00";
+        if (this.whiteTimer.classList.contains('time-trouble')) {
+            this.whiteTimer.classList.remove('time-trouble');
+        }
+        if (this.blackTimer.classList.contains('time-trouble')) {
+            this.blackTimer.classList.remove('time-trouble');
+        }
+        const end_message = document.querySelector(".end-message");
+        if (end_message != null) {
+            end_message.remove();
+        }
+        const reset_button = document.querySelector(".reset-button");
+        if (reset_button != null) {
+            reset_button.remove();
+        }
+        this.startButton.style.display = 'block';
+        this.turnIndicator.hidden = true;
+        this.update_material_diff(0);
+        this.offest = 7;
+        this.row_dir = -1;
+        await this.makeMove(this.gameID, ["reset"]);
+        await this.fetchGameState();
+        this.setColor({ target: { getAttribute: () => 'white' } });
+        this.renderLabels("white");
+        this.showColorDropdown();  // hide dropdown
     }
 
 
@@ -144,7 +194,7 @@ class ChessBoard {
                 square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
                 // 7-row adds white pieces at the bottom
                 // want to dynamically change this to reflect color user is playing
-                square.dataset.coordinate = `${7 - row},${col}`;
+                square.dataset.coordinate = `${this.offset + this.row_dir*row},${col}`;
                 // `${7 - row},${col}` ~= "7-row,col"
                 this.gameContainer.appendChild(square);
             }
@@ -172,9 +222,9 @@ class ChessBoard {
 
 
     // method to render the labels of rows/cols
-    renderLabels() {
+    renderLabels(color) {
         // create column labels
-        this.columnLabels.innerHTML = '';
+        this.columnLabels.innerHTML = '';  
         const columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
         columns.forEach(letter => {
             const label = document.createElement('div');
@@ -184,7 +234,11 @@ class ChessBoard {
         });
         // create row labels
         this.rowLabels.innerHTML = '';
-        const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        if (color === 'black') {
+            var rows = ['1', '2', '3', '4', '5', '6', '7', '8'];
+        } else {
+            var rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        }
         rows.forEach(row => {
             const label = document.createElement('div');
             label.className = 'coordinate-label';
@@ -221,6 +275,8 @@ class ChessBoard {
         this.turnIndicator.hidden = false;
         this.startTimer("white");
         this.time_control_button.disabled = true;
+        this.color_button.disabled = true;
+        this.opponent_button.disabled = true;
         this.resignButton.disabled = false;
     }
 
@@ -243,40 +299,6 @@ class ChessBoard {
         reset_row.appendChild(button);
         await this.makeMove(this.gameID, ["save game"]);
         this.resignButton.disabled = true;
-    }
-
-
-    // method to reset the board state and clocks
-    async resetGame() {
-        this.names_w = {
-            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
-            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        };
-        this.names_b = {
-            0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
-            8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
-        };
-        this.whiteTimer.innerText = "5:00";
-        this.blackTimer.innerText = "5:00";
-        if (this.whiteTimer.classList.contains('time-trouble')) {
-            this.whiteTimer.classList.remove('time-trouble');
-        }
-        if (this.blackTimer.classList.contains('time-trouble')) {
-            this.blackTimer.classList.remove('time-trouble');
-        }
-        const end_message = document.querySelector(".end-message");
-        if (end_message != null) {
-            end_message.remove();
-        }
-        const reset_button = document.querySelector(".reset-button");
-        if (reset_button != null) {
-            reset_button.remove();
-        }
-        this.startButton.style.display = 'block';
-        this.turnIndicator.hidden = true;
-        this.update_material_diff(0);
-        await this.makeMove(this.gameID, ["reset"]);
-        await this.fetchGameState();
     }
 
 
@@ -307,19 +329,42 @@ class ChessBoard {
 
 
     // method to show/hide dropdown menu
-    showDropdown() {
-        document.getElementById('drop-cont').classList.toggle('show');
+    showColorDropdown() {
+        document.getElementById('color-drop-cont').classList.toggle('show');
     }
 
+    showOppDropdown() {
+        document.getElementById('opp-drop-cont').classList.toggle('show');
+    }
 
-    // method to set the time control
+    showTimeDropdown() {
+        document.getElementById('time-drop-cont').classList.toggle('show');
+    }
+
+    // method to change the time control
     setTimeControl(event) {
         const time = event.target.getAttribute('data-time');
         var time_arr = JSON.parse(time);
         this.whiteTimer.innerText = time_arr[0] + ":00";
         this.blackTimer.innerText = time_arr[0] + ":00";
         this.increment = time_arr[1];
-        this.showDropdown(); // hide dropdown after selection
+        this.TimeshowDropdown(); // hide dropdown after selection
+    }
+
+    // switches color of pieces user is playing as
+    setColor(event) {
+        const color = event.target.getAttribute('data-color');
+        this.color_button.innerText = "Playing as " + color;
+        this.offset = color === 'white' ? 7 : 0;
+        this.row_dir = color === 'white' ? -1 : 1;
+        this.fetchGameState();  //re-render board
+        this.renderLabels(color);
+        this.showColorDropdown(); // hide dropdown after selection
+    }
+
+    // to implement
+    setOpponent(event) {
+        this.showOppDropdown();
     }
 
 

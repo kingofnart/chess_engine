@@ -12,6 +12,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 10px;
 }
 
 #game-container-wrapper {
@@ -173,6 +174,7 @@ body {
 .start-button {
     padding: 10px, 5px;
     margin: auto;
+    border: double 2px #000000;
 }
 
 
@@ -195,6 +197,10 @@ body {
     color: black;
 }
 
+#bottom-row {
+    margin-top: 20px;
+}
+
 .end-message {
     padding: 15px 32px;
     margin: auto;
@@ -205,13 +211,19 @@ body {
     font-family: "Lucida Console", "Courier New", monospace;
 }
 
-/* click drop menu from w3schools: */
+#dropdown-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .dropbtn {
     background-color: #537992;
     color: white;
     padding: 10px 5px;
     border-radius: 5px;
-    font-size: 16px;
+    border: solid 2px #081c37;
+    font-size: 12px;
     font-family: "Lucida Console", "Courier New", monospace;
     border: none;
     cursor: pointer;
