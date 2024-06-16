@@ -1,5 +1,6 @@
 import copy
 from grid import Grid
+from engine import Engine
 from connect import connect
 from flask import current_app
 from flask_login import current_user
@@ -12,6 +13,7 @@ class Game():
     def __init__(self):
 
         self.board = Grid()
+        self.engine = Engine(self.board)
         self.turn = 0  # 0 = white, 1 = black
         self.stop = False
         self.stop_condition = -1
@@ -21,7 +23,6 @@ class Game():
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, move):
-        # check if trying to reset
         if move[0] == "reset":
             self.turn = 0
             self.stop = False
@@ -47,11 +48,16 @@ class Game():
                 else:
                     self.stop_condition = 1
             else:  # timers still running
-                sq1 = [int(move[0][0]), int(move[0][2])]
-                sq2 = [int(move[1][0]), int(move[1][2])]
-                if self.board.valid_move([sq1, sq2], self.turn, set_enpassant=True):
+                # check if move is from computer
+                if move[0] == "random":
+                    mv = self.engine.random_move(self.turn)
+                    print(f"random move: {mv}")
+                else:
+                    # move is in form: ['y1,x1','y2,x2'] => move[0][1]=move[1][1]=','
+                    mv = [[int(move[0][0]), int(move[0][2])], [int(move[1][0]), int(move[1][2])]]
+                if self.board.valid_move(mv, self.turn, set_enpassant=True):
                     tmp_board = copy.deepcopy(self.board)
-                    tmp_board.apply_move([sq1, sq2], self.turn)
+                    tmp_board.apply_move(mv, self.turn)
                     # check opponents attacked squares for check
                     if not tmp_board.king_safety(not self.turn):
                         # return coords to flash the king thats being put in check
@@ -60,7 +66,7 @@ class Game():
                         else:
                             ret_coords = self.board.w_coords
                         return {'error': 'king safety', 'coords': ret_coords.tolist()}
-                    self.board.apply_move([sq1, sq2], self.turn)
+                    self.board.apply_move(mv, self.turn)
                     # need to make a flag to tell frontend if queening is occurring
                     promotion_info = None
                     if self.board.get_queening() is not None:

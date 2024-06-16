@@ -4,6 +4,7 @@ class ChessBoard {
         this.gameID = 0
         this.gameContainer = document.getElementById('game-container');
         this.gameContainerWrapper = document.getElementById('game-container-wrapper');
+        this.opponent_displayed = document.getElementById('opponent-displayed');
         this.turnIndicator = document.getElementById('turn-indicator');
         this.blackTimer = document.getElementById('black-timer');
         this.whiteTimer = document.getElementById('white-timer');
@@ -18,6 +19,7 @@ class ChessBoard {
         this.bot_mat_cnt = document.getElementById('bot-mat-cnt')
         this.offest = 7;
         this.row_dir = -1;
+        this.opponent = "pnp";
         this.selectedSquare = null;
         this.gameRunning = true;
         this.names_w = {
@@ -86,6 +88,10 @@ class ChessBoard {
         this.update_material_diff(0);
         this.offest = 7;
         this.row_dir = -1;
+        this.time_control_button.disabled = false;
+        this.color_button.disabled = false;
+        this.opponent_button.disabled = false;
+        this.resignButton.disabled = true;
         await this.makeMove(this.gameID, ["reset"]);
         await this.fetchGameState();
         this.setColor({ target: { getAttribute: () => 'white' } });
@@ -126,6 +132,7 @@ class ChessBoard {
                     this.addIncrement(result.turn);
                     this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
                     this.update_material_diff(result.material_diff);
+                    return 1;
                 } else {
                     alert("Error in response from makeMove");
                 }
@@ -148,7 +155,7 @@ class ChessBoard {
 
     // method to handle user clicking on squares
     // waits for two different squares to be slected then sends them to makeMove
-    handleClick(event) {
+    async handleClick(event) {
         if (this.turnIndicator.hidden === false) {
             const square = event.target.closest('.square');
             if (!square) return;
@@ -156,9 +163,19 @@ class ChessBoard {
             if (this.selectedSquare) {
                 if (this.selectedSquare != square) {
                     const move = [this.selectedSquare.dataset.coordinate, square.dataset.coordinate];
-                    this.makeMove(this.gameID, move);
+                    const res = await this.makeMove(this.gameID, move);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
+                    // call makemove again if bot is playing
+                    if (res === 1 && this.opponent !== "pnp") {
+                        console.log("Bot is playing...", this.opponent, this.opponent === "random")
+                        const res2 = await this.makeMove(this.gameID, [this.opponent]);
+                        if (res2 === 1) {
+                            console.log("Bot move applied successfully.")
+                        } else {
+                            console.log("Bot move failed.")
+                        }
+                    }
                 } else {
                     this.flashInvalidMove(this.selectedSquare, this.selectedSquare);
                     this.selectedSquare.classList.remove('selected');
@@ -174,12 +191,13 @@ class ChessBoard {
 
     // function to update board handling promotions
     updateBoard(w_coords, b_coords, turn, promotion) {
-        if (promotion) {
-            this.promoteQueen(promotion);
-        }
         this.renderBoard(w_coords, b_coords);
         this.updateTurnIndicator(turn);
         this.toggleTimers(turn);
+        if (promotion) {
+            // wait for the DOM to update before promoting the queen
+            setTimeout(() => this.promoteQueen(promotion), 0);
+        }
     }
 
 
@@ -364,6 +382,12 @@ class ChessBoard {
 
     // to implement
     setOpponent(event) {
+        this.opponent = event.target.getAttribute('data-opp');
+        if (this.opponent === "pnp") {
+            this.opponent_displayed.innerText = "Pass and Play";
+        } else {
+            this.opponent_displayed.innerText = "Opponent: " + this.opponent;
+        }
         this.showOppDropdown();
     }
 
@@ -447,8 +471,14 @@ class ChessBoard {
         const square = document.querySelector(`[data-coordinate='${input.coord}']`);
         if (square) {
             const img = square.querySelector('img');
+            if (img) {
             // only allowing promoting to queen for now
             img.src = this.getPieceImageUrl('Q', input.color);
+            } else {
+                console.error("Error in promoteQueen: no img found at square ", input.coord);
+            }
+        } else {
+            console.error("Error in promoteQueen: no square found at coord ", input.coord);
         }
     }
 

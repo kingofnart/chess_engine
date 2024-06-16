@@ -211,8 +211,19 @@ body {
     font-family: "Lucida Console", "Courier New", monospace;
 }
 
+h3 {
+    font-size: 20px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    margin: 10px;
+    padding: 5px;
+    background-color: #28282863;
+    color: white;
+    border-radius: 10px;
+}
+
 #dropdown-container {
     display: flex;
+    gap: 5px;
     justify-content: center;
     align-items: center;
 }
@@ -237,6 +248,7 @@ body {
 .dropdown {
     position: relative;
     display: inline-block;
+    margin: 0;
 }
 
 .dropdown-content {

@@ -366,7 +366,7 @@ def apply_moves(driver, moves):
                     print(driver.page_source)
                     raise
                 target.click()
-                time.sleep(0.2)
+                time.sleep(0.5)
                 applied = True
             except StaleElementReferenceException:
                 retries -= 1

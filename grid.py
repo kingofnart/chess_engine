@@ -72,6 +72,11 @@ class Grid():
         return self.queening
     def get_material_diff(self):
         return self.material_diff
+    def get_valid_moves(self, color):
+        if color:
+            return self.valid_moves_b
+        else:
+            return self.valid_moves_w
     
 
     # setters
@@ -169,6 +174,8 @@ class Grid():
             else:  # white
                 self.valid_moves_w = []
                 valid_moves = self.valid_moves_w
+        else:
+            valid_moves = None
         for piece, coord in zip(pieces, coords):
             if not piece.captured:
                 match piece.type:
@@ -220,33 +227,33 @@ class Grid():
                     # queen
                     case 1:
                         # just gonna search all 8 directions in order
-                        lst = self.line_search(0, 1, coord, get_valid=validation)  # 0
+                        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 1, coord, get_valid=validation)  # pi/4
+                        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 0, coord, get_valid=validation)  # pi/2
+                        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, -1, coord, get_valid=validation)  # 3pi/4
+                        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(0, -1, coord, get_valid=validation)  # pi
+                        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, -1, coord, get_valid=validation)  # 5pi/4
+                        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
                         self.add_to_list(attacked_list, lst) 
-                        lst = self.line_search(-1, 0, coord, get_valid=validation)  # 3pi/2
+                        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 1, coord, get_valid=validation)  # 7pi/4
+                        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
                         self.add_to_list(attacked_list, lst)
 
                     # rook
                     case 2:
                         # only horizontals & verticals
-                        lst = self.line_search(0, 1, coord, get_valid=validation)  # 0
+                        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 0, coord, get_valid=validation)  # pi/2
+                        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(0, -1, coord, get_valid=validation)  # pi
+                        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 0, coord, get_valid=validation)  # 3pi/2
+                        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
                         self.add_to_list(attacked_list, lst)
 
                     # knight
@@ -301,13 +308,13 @@ class Grid():
                     # bishop
                     case 4:
                         # only diagonals
-                        lst = self.line_search(1, 1, coord, get_valid=validation)  # pi/4
+                        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, -1, coord, get_valid=validation)  # 3pi/4
+                        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, -1, coord, get_valid=validation)  # 5pi/4
+                        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
                         self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 1, coord, get_valid=validation)  # 7pi/4
+                        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
                         self.add_to_list(attacked_list, lst)
 
                     # pawn
@@ -336,7 +343,7 @@ class Grid():
                     
                     case _:
                         raise Exception("Invalid piece id")
-
+                               
 
     # helper function for attacked_squares to add each element of list only if it's unique
     # might want to change attacked_squares to set of tuples instead of list of lists
@@ -350,7 +357,7 @@ class Grid():
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
-    def line_search(self, y, x, coord, get_valid = False): # x, y \in {-1,0,1} to set search direction
+    def line_search(self, y, x, coord, get_valid = False, valid_mvs=None): # x, y \in {-1,0,1} to set search direction
         search = True
         lst = []
         color = self.grid[coord[0]][coord[1]].get_color()
@@ -361,9 +368,9 @@ class Grid():
             lst.append(idx.copy())
             if get_valid:
                 if color:
-                    self.update_validmoves_lst([coord.tolist(), idx], color, self.valid_moves_b)
+                    self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
                 else:
-                    self.update_validmoves_lst([coord.tolist(), idx], color, self.valid_moves_w)
+                    self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
             if self.grid[idx[0]][idx[1]] != 0:  # found piece, stop search
                 search = False
             idx[0] = idx[0] + y
@@ -373,7 +380,6 @@ class Grid():
 
     # function to test if move is valid
     def valid_move(self, move, color, set_enpassant=0):
-        
         # move = [[y1, x1], [y2, x2]]
         piece = self.grid[move[0][0]][move[0][1]]
         if piece:
@@ -791,7 +797,9 @@ class Grid():
             tmp_board.apply_move(move, color)
             # check opponents attacked squares for check
             if(tmp_board.king_safety(not color)):
-                valid_lst.append(move)
+                # create copy of move to avoid reference issues
+                move_copy = copy.deepcopy(move)
+                valid_lst.append(move_copy)
             tmp_board = None  # remove reference for garbage collection
 
     
