@@ -15,7 +15,7 @@ from flask import session
 @pytest.fixture(scope="module")
 def driver():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    #chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
@@ -366,7 +366,7 @@ def apply_moves(driver, moves):
                     print(driver.page_source)
                     raise
                 target.click()
-                time.sleep(0.2)
+                time.sleep(0.5)
                 applied = True
             except StaleElementReferenceException:
                 retries -= 1
