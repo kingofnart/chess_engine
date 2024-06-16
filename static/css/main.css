@@ -223,6 +223,7 @@ h3 {
 
 #dropdown-container {
     display: flex;
+    gap: 5px;
     justify-content: center;
     align-items: center;
 }
@@ -247,6 +248,7 @@ h3 {
 .dropdown {
     position: relative;
     display: inline-block;
+    margin: 0;
 }
 
 .dropdown-content {
