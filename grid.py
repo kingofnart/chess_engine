@@ -132,6 +132,7 @@ class Grid():
         self.material_w = [0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1]
         self.material_b = [0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1]
         self.board_history = []
+        self.move_history = []
         self.attacked_squares_w = []
         self.attacked_squares_b = []
         self.valid_moves_w = []

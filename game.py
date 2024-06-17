@@ -28,6 +28,7 @@ class Game():
         if move[0] == "reset":
             self.turn = 0
             self.stop = False
+            self.save = True
             self.stop_condition = -1
             self.board.reset()
             return { 'status': 'reset' }
