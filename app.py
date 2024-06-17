@@ -149,9 +149,9 @@ def get_user_games(user_id):
         return []
     with conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT game_id, game_history, game_time FROM games WHERE user_id = %s", (user_id,))
+            cur.execute("SELECT game_id, game_history, game_time, opponent, color FROM games WHERE user_id = %s", (user_id,))
             games = cur.fetchall()
-    return [{"id": game[0], "moves": game[1], "time": game[2]} for game in games]
+    return [{"id": game[0], "moves": game[1], "time": game[2], "opponent": game[3], "color": game[4]} for game in games]
 
 
 if __name__ == '__main__':

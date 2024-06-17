@@ -17,8 +17,8 @@ class ChessBoard {
         this.time_control_button = document.getElementById('time-control-button');
         this.top_mat_cnt = document.getElementById('top-mat-cnt')
         this.bot_mat_cnt = document.getElementById('bot-mat-cnt')
-        this.offest = 7;
-        this.row_dir = -1;
+        this.offset = 7;
+        this.direction = -1;
         this.opponent = "pnp";
         this.selectedSquare = null;
         this.gameRunning = true;
@@ -86,8 +86,8 @@ class ChessBoard {
         this.startButton.style.display = 'block';
         this.turnIndicator.hidden = true;
         this.update_material_diff(0);
-        this.offest = 7;
-        this.row_dir = -1;
+        this.offset = 7;
+        this.direction = -1;
         this.time_control_button.disabled = false;
         this.color_button.disabled = false;
         this.opponent_button.disabled = false;
@@ -212,7 +212,7 @@ class ChessBoard {
                 square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
                 // 7-row adds white pieces at the bottom
                 // want to dynamically change this to reflect color user is playing
-                square.dataset.coordinate = `${this.offset + this.row_dir*row},${col}`;
+                square.dataset.coordinate = `${this.offset + this.direction*row},${col}`;
                 // `${7 - row},${col}` ~= "7-row,col"
                 this.gameContainer.appendChild(square);
             }
@@ -324,7 +324,19 @@ class ChessBoard {
         button.classList.add('reset-button', 'button');
         button.textContent = "Reset";
         reset_row.appendChild(button);
-        await this.makeMove(this.gameID, ["save game"]);
+        if (this.opponent === "pnp") {
+            var opp_save = "Pass and Play";
+        } else if (this.opponent === "random") {
+            var opp_save = "Random Bot";
+        } else {
+            console.error("Error in endGame: invalid opponent");
+        }
+        if (this.direction === -1) {
+            var color_save = "White";
+        } else {
+            var color_save = "Black";
+        }
+        await this.makeMove(this.gameID, ["save game", opp_save, color_save]);
         this.resignButton.disabled = true;
     }
 
@@ -387,7 +399,7 @@ class ChessBoard {
         const color = event.target.getAttribute('data-color');
         this.color_button.innerText = "Playing as " + color;
         this.offset = color === 'white' ? 7 : 0;
-        this.row_dir = color === 'white' ? -1 : 1;
+        this.direction = color === 'white' ? -1 : 1;
         this.fetchGameState();  //re-render board
         this.renderLabels(color);
         this.toggleDropdown("color-drop-cont", this.color_button); // hide dropdown after selection

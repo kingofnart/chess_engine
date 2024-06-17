@@ -24,7 +24,9 @@ def initialize_database():
             game_id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(user_id),
             game_history TEXT NOT NULL,
-            game_time TIMESTAMPTZ NOT NULL
+            game_time TIMESTAMPTZ NOT NULL,
+            opponent TEXT NOT NULL,
+            color TEXT NOT NULL
         );
                     
         CREATE INDEX idx_games_user_id ON games (user_id);
