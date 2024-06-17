@@ -16,6 +16,7 @@ class Game():
         self.engine = Engine(self.board)
         self.turn = 0  # 0 = white, 1 = black
         self.stop = False
+        self.save = True
         self.stop_condition = -1
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
@@ -23,6 +24,7 @@ class Game():
 
     # ChessBoard class will call this when it gets two clicks input
     def make_move(self, move):
+        print(f"recieved move: {move}")
         if move[0] == "reset":
             self.turn = 0
             self.stop = False
@@ -52,9 +54,16 @@ class Game():
                 if move[0] == "random":
                     mv = self.engine.random_move(self.turn)
                     print(f"random move: {mv}")
-                else:
+                elif 'nothingtoseehere' in move:
+                    print(f"history move: {move}")
+                    move.pop(2)
+                    mv = move
+                    print(f"history mv: {mv}")
+                    self.save = False
+                else: # move from player via handleClick
                     # move is in form: ['y1,x1','y2,x2'] => move[0][1]=move[1][1]=','
                     mv = [[int(move[0][0]), int(move[0][2])], [int(move[1][0]), int(move[1][2])]]
+                # check if move is from history board
                 if self.board.valid_move(mv, self.turn, set_enpassant=True):
                     tmp_board = copy.deepcopy(self.board)
                     tmp_board.apply_move(mv, self.turn)
@@ -78,8 +87,9 @@ class Game():
                         promotion_info = {'index': self.board.queening.id, 'color': self.turn, 
                                         'coord': coords_lst[self.board.queening.id].tolist()}
                         self.board.set_queening(None)
-                    if len(move) == 2:
-                        self.board.update_history(move)
+                    if self.save:
+                        print(f"game: updating history with: {mv}")
+                        self.board.update_history(mv)
                     # check stopping conditions
                     if self.board.check_threefold():
                         self.stop = True
@@ -89,7 +99,7 @@ class Game():
                         # => check_mate checks the length of the valid_moves list for NOT color
                         (p,q) = self.board.check_mate(self.turn)
                         if (p,q) != (-1,-1):
-                            if len(move) == 2:
+                            if self.save:
                                 self.stop = True
                                 if p:  # black ended game
                                     if q:  # black stalemated white
@@ -130,10 +140,14 @@ class Game():
             'history': self.board.board_history
         }
     
+
     def save_game(self, history):
         with current_app.app_context():
             if not current_user.is_authenticated:
                 return "User not logged in", 401
+        print(f"PRE to_native: {history}")
+        history = self.to_native(history)
+        print(f"PPOST to_native: {history}")
         local_tz = get_localzone() # get local machines timzone
         game_time = datetime.now(local_tz).replace(second=0, microsecond=0)
         conn = connect()
@@ -141,8 +155,18 @@ class Game():
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
+                print(f"saving move history: {history}")
                 cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (current_user.id, history, game_time))
                 conn.commit()
+
+
+    def to_native(self, value):
+        if isinstance(value, list):
+            return [self.to_native(item) for item in value]
+        elif not isinstance(value, int):
+            return int(value)
+        return value
+
 
     def revert_coords(self, new_w_coords, new_b_coords):
         self.stop = False

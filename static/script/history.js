@@ -26,6 +26,8 @@ class ChessBoardHistory {
             [[7,4], [7,3], [7,0], [7,7], [7,1], [7,6], [7,2], [7,5], 
             [6,0], [6,1], [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]]
         ]
+        this.offest = 7;
+        this.row_dir = -1;
         this.moveCounter = 0;
         this.coords = [this.starting_coords];
         this.renderBoard(this.starting_coords[0], this.starting_coords[1], init_gameID);
@@ -34,6 +36,7 @@ class ChessBoardHistory {
 
     async makeMove(gameID, move) {
         try {
+            console.log("history.js sending move: ", move);
             const response = await fetch(`/move`, {
                 method: 'POST',
                 headers: {
@@ -42,8 +45,10 @@ class ChessBoardHistory {
                 body: JSON.stringify({ move, gameID })
             });
             const result = await response.json();
+            console.log("history.js received response: ", result);
             if (result.status === 'move applied') {
                 this.updateBoard(result.w_coords, result.b_coords, result.promotion, gameID);
+                console.log("makeMove returning: ", [result.w_coords, result.b_coords]);
                 return [result.w_coords, result.b_coords];
             } else {
                 alert("Error in response from makeMove");
@@ -143,6 +148,7 @@ class ChessBoardHistory {
         if (chessBoard) {
             if (this.moveCounter < this.gameMoves.length && this.gameMoves[0].length > 0) {
                 let right_move = this.gameMoves[this.moveCounter];
+                console.log("move idx: ", this.moveCounter, "right_move: ", right_move);
                 if (right_move.length === 2) { right_move.push("nothingtoseehere") }
                 const [w_coords, b_coords] = await chessBoard.makeMove(right_gameID, right_move);
                 this.coords.push([w_coords, b_coords]);
@@ -157,7 +163,7 @@ class ChessBoardHistory {
 
 function getMovesById(gamesList, get_gameID) {
     const foundGame = gamesList.find(searchGame => searchGame.id === parseInt(get_gameID));
-    let movesInJSON = foundGame.moves.replace(/{{/g, '[').replace(/}}/g, ']').replace(/{/g, '[').replace(/}/g, ']').replace(/"/g, '"');
+    let movesInJSON = foundGame.moves.replace(/{{/g, '[[').replace(/}}/g, ']]').replace(/{/g, '[').replace(/}/g, ']').replace(/"/g, '"');
     movesInJSON = `[${movesInJSON}]`;
     const res = JSON.parse(movesInJSON);
     return res;
@@ -169,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     boards.forEach(boardElement => {
         const ID = boardElement.id.split('-')[2];
         const mv_lst = getMovesById(games2js, ID)
-        const chessBoard = new ChessBoardHistory(ID, mv_lst);
+        console.log("mv_lst: ", mv_lst, "gameID: ", ID)
+        const chessBoard = new ChessBoardHistory(ID, mv_lst[0]);
         chessBoards[ID] = chessBoard;
     });
     const gameTimes = document.querySelectorAll('.game-time');

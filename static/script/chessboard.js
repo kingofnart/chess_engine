@@ -40,9 +40,9 @@ class ChessBoard {
         this.startButton.addEventListener('click', () => this.startGame());
         this.resignButton.addEventListener('click', () => this.endGame(7));
         this.resignButton.disabled = true;
-        this.color_button.addEventListener('click', () => this.showColorDropdown());
-        this.opponent_button.addEventListener('click', () => this.showOppDropdown());
-        this.time_control_button.addEventListener('click', () => this.showTimeDropdown());
+        this.color_button.addEventListener('click', () => this.toggleDropdown("color-drop-cont", this.color_button));
+        this.opponent_button.addEventListener('click', () => this.toggleDropdown("opp-drop-cont", this.opponent_button));
+        this.time_control_button.addEventListener('click', () => this.toggleDropdown("time-drop-cont", this.time_control_button));
         document.querySelectorAll('.time-option').forEach(button => {
             button.addEventListener('click', (event) => this.setTimeControl(event));
         });
@@ -96,7 +96,7 @@ class ChessBoard {
         await this.fetchGameState();
         this.setColor({ target: { getAttribute: () => 'white' } });
         this.renderLabels("white");
-        this.showColorDropdown();  // hide dropdown
+        this.toggleDropdown("color-drop-cont", this.color_button);
     }
 
 
@@ -288,7 +288,7 @@ class ChessBoard {
 
 
     // method to start game and create turn indicator text
-    startGame() {
+    async startGame() {
         this.startButton.style.display = 'none';
         this.turnIndicator.hidden = false;
         this.startTimer("white");
@@ -296,6 +296,15 @@ class ChessBoard {
         this.color_button.disabled = true;
         this.opponent_button.disabled = true;
         this.resignButton.disabled = false;
+        if (this.opponent !== "pnp" && this.offset === 0) { // bot is white
+            console.log("Bot is playing...", this.opponent, this.opponent === "random")
+            const res2 = await this.makeMove(this.gameID, [this.opponent]);
+            if (res2 === 1) {
+                console.log("Bot move applied successfully.")
+            } else {
+                console.log("Bot move failed.")
+            }
+        }
     }
 
     
@@ -347,17 +356,20 @@ class ChessBoard {
 
 
     // method to show/hide dropdown menu
-    showColorDropdown() {
-        document.getElementById('color-drop-cont').classList.toggle('show');
+    toggleDropdown(dropdownId, button) {
+        // hide other dropdowns
+        document.querySelectorAll('.dropdown-content').forEach((content) => {
+            if (content.id !== dropdownId) {
+                content.classList.remove('show');
+                content.previousElementSibling.classList.remove('active');
+            }
+        });
+
+        const dropdownContent = document.getElementById(dropdownId);
+        dropdownContent.classList.toggle('show');
+        button.classList.toggle('active');
     }
 
-    showOppDropdown() {
-        document.getElementById('opp-drop-cont').classList.toggle('show');
-    }
-
-    showTimeDropdown() {
-        document.getElementById('time-drop-cont').classList.toggle('show');
-    }
 
     // method to change the time control
     setTimeControl(event) {
@@ -366,8 +378,9 @@ class ChessBoard {
         this.whiteTimer.innerText = time_arr[0] + ":00";
         this.blackTimer.innerText = time_arr[0] + ":00";
         this.increment = time_arr[1];
-        this.TimeshowDropdown(); // hide dropdown after selection
+        this.toggleDropdown("time-drop-cont", this.time_control_button); // hide dropdown after selection
     }
+
 
     // switches color of pieces user is playing as
     setColor(event) {
@@ -377,10 +390,11 @@ class ChessBoard {
         this.row_dir = color === 'white' ? -1 : 1;
         this.fetchGameState();  //re-render board
         this.renderLabels(color);
-        this.showColorDropdown(); // hide dropdown after selection
+        this.toggleDropdown("color-drop-cont", this.color_button); // hide dropdown after selection
     }
 
-    // to implement
+
+    // changes the opponent
     setOpponent(event) {
         this.opponent = event.target.getAttribute('data-opp');
         if (this.opponent === "pnp") {
@@ -388,7 +402,7 @@ class ChessBoard {
         } else {
             this.opponent_displayed.innerText = "Opponent: " + this.opponent;
         }
-        this.showOppDropdown();
+        this.toggleDropdown("opp-drop-cont", this.opponent_button);
     }
 
 
@@ -525,17 +539,12 @@ document.addEventListener('DOMContentLoaded', () => {
     new ChessBoard();
 });
 
-// from w3schools:
 // Close the dropdown if the user clicks outside of it
 window.onclick = function(event) {
     if (!event.target.matches('.dropbtn')) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-                openDropdown.classList.remove('show');
-            }
-        }
+        document.querySelectorAll('.dropdown-content').forEach((content) => {
+            content.classList.remove('show');
+            content.previousElementSibling.classList.remove('active');
+        });
     }
 }
