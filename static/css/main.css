@@ -223,7 +223,7 @@ h3 {
 
 #dropdown-container {
     display: flex;
-    gap: 5px;
+    gap: 3px;
     justify-content: center;
     align-items: center;
 }
@@ -232,13 +232,26 @@ h3 {
     background-color: #537992;
     color: white;
     padding: 10px 5px;
-    border-radius: 5px;
+    border-radius: 1px;
     border: solid 2px #081c37;
-    font-size: 12px;
+    font-size: 10px;
     font-family: "Lucida Console", "Courier New", monospace;
     border: none;
     cursor: pointer;
     user-select: none;
+    position: relative;
+}
+
+.dropbtn::after {
+    content: "\25B6"; /* Unicode for right arrow */
+    display: inline-block;
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+
+.dropbtn.active::after {
+    /* content: "\25BC"; Unicode for down arrow */
+    transform: rotate(90deg);
 }
 
 .dropbtn:hover, .dropbtn:focus {
@@ -254,18 +267,19 @@ h3 {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #4f4769;
-    min-width: 60px;
+    background-color: #67808f;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
+    width: 100%;
 }
 
 .dropdown-content button {
     color: white;
     padding: 12px 16px;
     text-decoration: none;
+    font-size: 10px;
     font-family: "Lucida Console", "Courier New", monospace;
     display: block;
     width: 100%;
@@ -275,9 +289,13 @@ h3 {
     cursor: pointer;
 }
 
-.dropdown-content button:hover {background-color: #8b3fa0;}
+.dropdown-content button:hover {
+    background-color: #36465e;
+}
 
-.show {display: block;}
+.dropdown-content.show {
+    display: block;
+}
 
 .time-trouble {
     background-color: #c43620;

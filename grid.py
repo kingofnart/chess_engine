@@ -741,6 +741,7 @@ class Grid():
         self.board_history.append(lst)
         if move:
             self.move_history.append(move)
+            print(f"grid: updated history with move {move}, new history: {self.move_history}")
 
 
     # function to check for a threefold repetition => draw
