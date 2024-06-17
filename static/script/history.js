@@ -2,7 +2,7 @@ const chessBoards = {};
 
 class ChessBoardHistory {
 
-    constructor(init_gameID, init_moves) {
+    constructor(init_gameID, init_moves, init_color) {
         this.gameMoves = init_moves;
         this.gameContainer = document.getElementById(`game-container-${init_gameID}`);
         this.gameContainerWrapper = document.getElementById(`game-container-wrapper-${init_gameID}`);
@@ -26,8 +26,13 @@ class ChessBoardHistory {
             [[7,4], [7,3], [7,0], [7,7], [7,1], [7,6], [7,2], [7,5], 
             [6,0], [6,1], [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]]
         ]
-        this.offest = 7;
-        this.row_dir = -1;
+        if (init_color === 'White') {
+            this.offset = 7;
+            this.direction = -1;
+        } else {
+            this.offset = 0;
+            this.direction = 1;
+        }
         this.moveCounter = 0;
         this.coords = [this.starting_coords];
         this.renderBoard(this.starting_coords[0], this.starting_coords[1], init_gameID);
@@ -73,7 +78,7 @@ class ChessBoardHistory {
             for (let col = 0; col < 8; col++) {
                 const square = document.createElement('button');
                 square.classList.add('square-hist', (row + col) % 2 === 0 ? 'light' : 'dark');
-                square.dataset.coordinate = `${7 - row},${col},${render_gameID}`;
+                square.dataset.coordinate = `${this.offset + this.direction*row},${col},${render_gameID}`;
                 this.gameContainer.appendChild(square);
             }
         }
@@ -165,8 +170,11 @@ function getMovesById(gamesList, get_gameID) {
     const foundGame = gamesList.find(searchGame => searchGame.id === parseInt(get_gameID));
     let movesInJSON = foundGame.moves.replace(/{{/g, '[[').replace(/}}/g, ']]').replace(/{/g, '[').replace(/}/g, ']').replace(/"/g, '"');
     movesInJSON = `[${movesInJSON}]`;
-    const res = JSON.parse(movesInJSON);
-    return res;
+    const mvs = JSON.parse(movesInJSON);
+    const opp = foundGame.opponent;
+    const color = foundGame.color;
+    console.log("opp: ", opp, "color: ", color);
+    return [mvs, opp, color];
 }
 
 
@@ -174,9 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const boards = document.querySelectorAll('.game-history-container');
     boards.forEach(boardElement => {
         const ID = boardElement.id.split('-')[2];
-        const mv_lst = getMovesById(games2js, ID)
-        console.log("mv_lst: ", mv_lst, "gameID: ", ID)
-        const chessBoard = new ChessBoardHistory(ID, mv_lst[0]);
+        const game_info = getMovesById(games2js, ID)
+        console.log("mv_lst: ", game_info[0], "opponent: ", game_info[1], "color played: ", game_info[2], "gameID: ", ID)
+        const chessBoard = new ChessBoardHistory(ID, game_info[0][0], game_info[2]);
         chessBoards[ID] = chessBoard;
     });
     const gameTimes = document.querySelectorAll('.game-time');

@@ -33,7 +33,7 @@ class Game():
             self.board.reset()
             return { 'status': 'reset' }
         elif move[0] == "save game":
-            self.save_game(self.board.move_history)
+            self.save_game(self.board.move_history, move[1], move[2])
             return { 'status': 'game saved' }
         elif move[0] == "revert":
             self.revert_coords(move[1], move[2])
@@ -142,7 +142,7 @@ class Game():
         }
     
 
-    def save_game(self, history):
+    def save_game(self, history, opponent, color):
         with current_app.app_context():
             if not current_user.is_authenticated:
                 return "User not logged in", 401
@@ -157,7 +157,8 @@ class Game():
         with conn:
             with conn.cursor() as cur:
                 print(f"saving move history: {history}")
-                cur.execute("INSERT INTO games (user_id, game_history, game_time) VALUES (%s, %s, %s)", (current_user.id, history, game_time))
+                cur.execute("INSERT INTO games (user_id, game_history, game_time, opponent, color) VALUES (%s, %s, %s, %s, %s)", 
+                            (current_user.id, history, game_time, opponent, color))
                 conn.commit()
 
 
