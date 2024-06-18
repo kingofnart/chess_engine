@@ -6,8 +6,8 @@ class ChessBoard {
         this.gameContainerWrapper = document.getElementById('game-container-wrapper');
         this.opponent_displayed = document.getElementById('opponent-displayed');
         this.turnIndicator = document.getElementById('turn-indicator');
-        this.blackTimer = document.getElementById('black-timer');
-        this.whiteTimer = document.getElementById('white-timer');
+        this.topTimer = document.getElementById('top-timer');
+        this.bottomTimer = document.getElementById('bottom-timer');
         this.rowLabels = document.getElementById('row-labels');
         this.columnLabels = document.getElementById('column-labels');
         this.startButton = document.getElementById('start-button');
@@ -67,14 +67,10 @@ class ChessBoard {
             0: "K", 1: "Q", 2: "R", 3: "R", 4: "N", 5: "N", 6: "B", 7: "B",
             8: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 14: "P", 15: "P"
         };
-        this.whiteTimer.innerText = "5:00";
-        this.blackTimer.innerText = "5:00";
-        if (this.whiteTimer.classList.contains('time-trouble')) {
-            this.whiteTimer.classList.remove('time-trouble');
-        }
-        if (this.blackTimer.classList.contains('time-trouble')) {
-            this.blackTimer.classList.remove('time-trouble');
-        }
+        this.topTimer.innerText = "5:00";
+        this.bottomTimer.innerText = "5:00";
+        this.topTimer.classList.remove('time-trouble');
+        this.bottomTimer.classList.remove('time-trouble');
         const end_message = document.querySelector(".end-message");
         if (end_message != null) {
             end_message.remove();
@@ -387,8 +383,8 @@ class ChessBoard {
     setTimeControl(event) {
         const time = event.target.getAttribute('data-time');
         var time_arr = JSON.parse(time);
-        this.whiteTimer.innerText = time_arr[0] + ":00";
-        this.blackTimer.innerText = time_arr[0] + ":00";
+        this.topTimer.innerText = time_arr[0] + ":00";
+        this.bottomTimer.innerText = time_arr[0] + ":00";
         this.increment = time_arr[1];
         this.toggleDropdown("time-drop-cont", this.time_control_button); // hide dropdown after selection
     }
@@ -400,6 +396,17 @@ class ChessBoard {
         this.color_button.innerText = "Playing as " + color;
         this.offset = color === 'white' ? 7 : 0;
         this.direction = color === 'white' ? -1 : 1;
+        if (color === 'white') {
+            this.topTimer.classList.remove('white-timer');
+            this.topTimer.classList.add('black-timer');
+            this.bottomTimer.classList.remove('black-timer');
+            this.bottomTimer.classList.add('white-timer');
+        } else {
+            this.topTimer.classList.remove('black-timer');
+            this.topTimer.classList.add('white-timer');
+            this.bottomTimer.classList.remove('white-timer');
+            this.bottomTimer.classList.add('black-timer');
+        }
         this.fetchGameState();  //re-render board
         this.renderLabels(color);
         this.toggleDropdown("color-drop-cont", this.color_button); // hide dropdown after selection
@@ -440,7 +447,7 @@ class ChessBoard {
 
     // method to start timers and check if timer reached 0
     startTimer(color) {
-        const timerElement = color === 'white' ? this.whiteTimer : this.blackTimer;
+        const timerElement = color === 'white' ? document.getElementsByClassName('white-timer')[0] : document.getElementsByClassName('black-timer')[0];
         this.timerHandles[color] = setInterval(() => {
             // get time in seconds
             let time = this.parseTime(timerElement.innerText);
@@ -468,7 +475,7 @@ class ChessBoard {
     // method to add increment to turn's timer
     addIncrement(turn) {
         // if turn=1, color=black
-        const timerElement = turn ? this.blackTimer : this.whiteTimer;
+        const timerElement = turn ? this.topTimer : this.bottomTimer;
         let time = this.parseTime(timerElement.innerText);
         time += this.increment;
         timerElement.innerText = this.formatTime(time);
