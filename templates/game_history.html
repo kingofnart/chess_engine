@@ -23,14 +23,16 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Time played</th>
+                        <th>Info</th>
                         <th>Game</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for game in games %}
                     <tr>
-                        <td><span class="game-time" data-time="{{ game.time }}"></span></td>
+                        <td>
+                            <span class="game-info" data-time="{{ game.time }}" data-opponent="{{ game.opponent }}"></span>
+                        </td>
                         <td>
                             <div class='game-history-wrapper' id="game-container-wrapper-{{ game.id }}">
                                 <div class='game-history-container' id="game-container-{{ game.id }}"></div>

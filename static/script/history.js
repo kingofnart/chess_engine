@@ -187,12 +187,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const chessBoard = new ChessBoardHistory(ID, game_info[0][0], game_info[2]);
         chessBoards[ID] = chessBoard;
     });
-    const gameTimes = document.querySelectorAll('.game-time');
+    const gameTimes = document.querySelectorAll('.game-info');
     gameTimes.forEach(function(element) {
         const rawTime = element.getAttribute('data-time');
+        const opponent = element.getAttribute('data-opponent');
         const date = new Date(rawTime);
-        const options = { year: 'numeric', month: 'long', day: 'numeric', 
-            hour: 'numeric', minute: 'numeric', hour12: true, timeZoneName: 'short' };
-        element.textContent = date.toLocaleString('en-US', options);
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: 'numeric', 
+            hour12: true, 
+            timeZoneName: 'short' 
+        };
+        const formattedTime = date.toLocaleString('en-US', options);
+        element.innerHTML = `${formattedTime}<br>Opponent: ${opponent}`;
     });
 });

@@ -72,11 +72,13 @@ body {
     padding: 5px 10px 5px 30px;
     background-color: rgb(23, 150, 40);
     border-radius: 15px;
+    display: flex;
+    align-items: center;
 }
 
-#white_timer {
+/* #white_timer {
     margin-left: auto;
-}
+} */
 
 .square {
     width: 50px;
