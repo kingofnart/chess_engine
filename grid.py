@@ -380,22 +380,32 @@ class Grid():
     
 
     # function to test if move is valid
-    def valid_move(self, move, color, set_enpassant=0):
+    def valid_move(self, move, color, set_enpassant=0, printing=False):
         # move = [[y1, x1], [y2, x2]]
         piece = self.grid[move[0][0]][move[0][1]]
         if piece:
+            if printing:
+                print(f"GRID: found piece of type {piece.get_type()} at square {move[0]}")
             # check to make sure you're moving the right color piece
             if piece.color == color:
+                if printing:
+                    print(f"GRID: piece color is correct")
                 # make sure you're not capturing your own piece
                 piece2 = self.grid[move[1][0]][move[1][1]]
                 if piece2:
+                    if printing:
+                        print(f"GRID: capturing {piece2.get_type()} at square {move[1]}")
                     if piece2.color == color:
+                        if printing:
+                            print(f"GRID: can't capture own piece")
                         return 0
                 
                 match piece.type:
                     
                     # king
                     case 0:
+                        if printing:
+                            print(f"GRID: king move")
                         dif1 = np.abs(move[0][0] - move[1][0])
                         dif2 = np.abs(move[0][1] - move[1][1])
                         # normal king move
@@ -461,6 +471,8 @@ class Grid():
 
                     # queen
                     case 1: 
+                        if printing:
+                            print(f"GRID: queen move")
                         for pos in self.line_search(1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
                                 return 1
@@ -490,6 +502,8 @@ class Grid():
 
                     # rook
                     case 2:
+                        if printing:
+                            print(f"GRID: rook move")
                         for pos in self.line_search(1, 0, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
                                 return 1
@@ -507,6 +521,8 @@ class Grid():
 
                     # knight
                     case 3:
+                        if printing:
+                            print(f"GRID: knight move")
                         if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
                             if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
                                 return 1
@@ -518,6 +534,8 @@ class Grid():
 
                     # bishop
                     case 4:
+                        if printing:
+                            print(f"GRID: bishop move")
                         for pos in self.line_search(1, 1, move[0]):
                             if move[1][0] == pos[0] and move[1][1] == pos[1]:
                                 return 1
@@ -535,6 +553,8 @@ class Grid():
 
                     # pawn
                     case 5:
+                        if printing:
+                            print(f"GRID: pawn move")
                         # first get direction pawn is moving
                         if piece.color == 0:  # white
                             sign = 1 
@@ -542,16 +562,28 @@ class Grid():
                             sign = -1 
                         # normal pawn move
                         if move[0][1] == move[1][1]:  # pawns only move forward unless capturing
+                            if printing:
+                                print(f"GRID: pawn not capturing")
                             if move[0][0] + sign == move[1][0]:  # check for piece infront of pawn
+                                if printing:
+                                    print(f"GRID: normal pawn move")
                                 if not piece2:  # valid move
                                     return 1
                                 else:
+                                    if printing:
+                                        print(f"GRID: can't move forward, piece in front of pawn")
                                     return 0
                             elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
+                                if printing:
+                                    print(f"GRID: pawn moving two squares from starting position")
                                 if not piece2:
+                                    # this is for making sure pawns dont jump over pieces
                                     if not self.grid[move[0][0]+sign][move[0][1]]:
                                         return 1
-                                    else: return 0
+                                    else: 
+                                        if printing:
+                                            print(f"GRID: can't move two squares, piece in front of pawn")
+                                        return 0
                                 else: return 0
                             else:  # invalid move
                                 return 0
@@ -559,9 +591,13 @@ class Grid():
                         elif move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
                             # make sure move is diagonal
                             if move[0][0] + sign != move[1][0]:  # invalid move
+                                if printing:
+                                    print(f"GRID: pawns dont move that way")
                                 return 0
                             # En Passant
                             elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
+                                if printing:
+                                    print(f"GRID: no piece at {move[1]}, checking for en passant")
                                 # en passant requirements: pawn left or right of current pawn
                                 # that pawn has enpassant flag (just made first move of two squares)
                                 # check square:[row move0][col move1] for en passantable pawn
@@ -572,21 +608,33 @@ class Grid():
                                             self.set_someone_attempting_enpassant_move(True)
                                         return 1
                                     else:  # no en pesant
+                                        if printing:
+                                            print(f"GRID: pawn not able to be en passanted")
                                         return 0
-                                else: 
+                                else:
+                                    if printing:
+                                        print(f"GRID: no pawn to en passant") 
                                     return 0
                             elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
                                 return 1
 
                         else:  # invalid move
-                                return 0
+                            if printing:
+                                print(f"GRID: pawns definitely don't move that way")
+                            return 0
                     
                     case _:  # invalid piece id
+                        if printing:
+                            print(f"GRID: invalid piece type: {piece.get_type()}")
                         return 0
                     
             else:  # moving piece of wrong color
+                if printing:
+                    print(f"GRID: moving piece of color {piece.color} but it's {color}'s turn")
                 return 0
         else:  # not piece
+            if printing:
+                print(f"GRID: no piece at square {move[0]}")
             return 0
         
 
@@ -742,7 +790,7 @@ class Grid():
         self.board_history.append(lst)
         if move:
             self.move_history.append(move)
-            print(f"grid: updated history with move {move}, new history: {self.move_history}")
+            #print(f"grid: updated history with move {move}, new history: {self.move_history}")
 
 
     # function to check for a threefold repetition => draw

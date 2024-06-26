@@ -125,6 +125,7 @@ class ChessBoard {
                     this.fetchGameState();
                     this.endGame(result.end_result);
                 } else if (result.status === 'move applied') { // proceed with game
+                    console.log("Turn: ", result.turn);
                     this.addIncrement(result.turn);
                     this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
                     this.update_material_diff(result.material_diff);
@@ -427,15 +428,15 @@ class ChessBoard {
 
     // method to update the turn indicator based on the current turn
     updateTurnIndicator(turn) {
-        this.turnIndicator.style.background = turn === true ? "black" : "white";
-        this.turnIndicator.style.color = turn === true ? "white" : "black";
-        this.turnIndicator.innerText = turn === true ? "Black to move" : "White to move";
+        this.turnIndicator.style.background = turn === 1 ? "black" : "white";
+        this.turnIndicator.style.color = turn === 1 ? "white" : "black";
+        this.turnIndicator.innerText = turn === 1 ? "Black to move" : "White to move";
     }
 
 
     // toggle the timers
     toggleTimers(turn) {
-        if (turn === true) {
+        if (turn === 1) {
             clearInterval(this.timerHandles.white);
             this.startTimer('black');
         } else {
@@ -448,6 +449,7 @@ class ChessBoard {
     // method to start timers and check if timer reached 0
     startTimer(color) {
         const timerElement = color === 'white' ? document.getElementsByClassName('white-timer')[0] : document.getElementsByClassName('black-timer')[0];
+        clearInterval(this.timerHandles[color]);
         this.timerHandles[color] = setInterval(() => {
             // get time in seconds
             let time = this.parseTime(timerElement.innerText);
@@ -475,7 +477,7 @@ class ChessBoard {
     // method to add increment to turn's timer
     addIncrement(turn) {
         // if turn=1, color=black
-        const timerElement = turn ? this.topTimer : this.bottomTimer;
+        const timerElement = turn === 1 ? this.topTimer : this.bottomTimer;
         let time = this.parseTime(timerElement.innerText);
         time += this.increment;
         timerElement.innerText = this.formatTime(time);

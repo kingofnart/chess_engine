@@ -9,7 +9,6 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from flask import session
 
 
 @pytest.fixture(scope="module")
@@ -19,13 +18,27 @@ def driver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920,1080")
-    
+    # set up chromedriver
     service = ChromeService(executable_path=ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    # Wait for the app to be ready before calling register_testuser
+    for attempt in range(10):
+        try:
+            print(f"Attempting to load login page... Attempt {attempt+1}")
+            app_url = os.getenv("APP_URL", "http://localhost:8000")
+            print(f"os.getenv: {app_url}")
+            driver.get(app_url)
+            if driver.title: 
+                print(f"App is ready, title: {driver.title}")
+                break
+            else:
+                print("Attempt failed, retrying...")
+        except Exception as e:
+            print(f"Try failed on attempt {attempt+1} exception: {e}")
+            time.sleep(3)
 
     register_testuser(driver)
-    driver.get(os.getenv("APP_URL", "http://localhost:5000"))
+    driver.get(os.getenv("APP_URL", "http://localhost:8000"))
 
     yield driver
     driver.quit()
@@ -39,13 +52,14 @@ def test_valid_login(driver):
         screenshot_path = "/static/screenshots/login_timeout.png"
         driver.save_screenshot(screenshot_path)
         print(f"Screenshot saved to {screenshot_path}")
-        raise    
+        raise
     assert "Chess Game" in driver.title
 
 
 def test_invalid_login(driver):
     print("---------- test_invalid_login ----------")
-    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
+    driver.get("http://localhost:8000/login")
+    print(f"Current URL: {driver.current_url}")
     username_input = driver.find_element(By.ID, 'username')
     password_input = driver.find_element(By.ID, 'password')
     login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
@@ -54,33 +68,27 @@ def test_invalid_login(driver):
     password_input.send_keys("invalid_password")
     login_button.click()
     
-    error_message = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, 'error'))
-    )
+    error_message = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'error')))
     assert "Invalid credentials" in error_message.text
 
 
 def test_navigation_to_register(driver):
     print("---------- test_navigation_to_register ----------")
-    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
+    driver.get("http://localhost:8000/login")
     register_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/register"]')
     register_link.click()
     
-    WebDriverWait(driver, 10).until(
-        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/register"))
-    )
+    WebDriverWait(driver, 10).until(EC.url_to_be("http://localhost:8000/register"))
     assert "Register" in driver.title
 
 
 def test_navigation_to_login(driver):
     print("---------- test_navigation_to_login ----------")
-    driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
+    driver.get("http://localhost:8000/register")
     login_link = driver.find_element(By.CSS_SELECTOR, 'a[href="/login"]')
     login_link.click()
     
-    WebDriverWait(driver, 10).until(
-        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/login"))
-    )
+    WebDriverWait(driver, 10).until(EC.url_to_be("http://localhost:8000/login"))
     assert "Login" in driver.title
 
 
@@ -90,9 +98,7 @@ def test_logout(driver):
     logout_button = driver.find_element(By.ID, 'logout')
     logout_button.click()
     
-    WebDriverWait(driver, 10).until(
-        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/login"))
-    )
+    WebDriverWait(driver, 10).until(EC.url_to_be("http://localhost:8000/login"))
     assert "Login" in driver.title
 
 
@@ -351,7 +357,7 @@ def apply_moves(driver, moves):
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[0]}"]'))
                     )
                 except:
-                    driver.save_screenshot("/chess_engine/static/screenshots/source_error.png")
+                    driver.save_screenshot("/static/screenshots/source_error.png")
                     print(driver.page_source)
                     raise
                 
@@ -362,7 +368,7 @@ def apply_moves(driver, moves):
                     EC.presence_of_element_located((By.CSS_SELECTOR, f'[data-coordinate="{move[1]}"]'))
                     )
                 except:
-                    driver.save_screenshot("/chess_engine/static/screenshots/target_error.png")
+                    driver.save_screenshot("/static/screenshots/target_error.png")
                     print(driver.page_source)
                     raise
                 target.click()
@@ -379,19 +385,19 @@ def apply_moves(driver, moves):
 def getPieceImageUrl(type, color):
     match type:
         case 'Q':
-            return 'http://localhost:5000/static/images/Qb.png' if color else 'http://localhost:5000/static/images/Qw.png'
+            return 'http://localhost:8000/static/images/Qb.png' if color else 'http://localhost:8000/static/images/Qw.png'
         case 'K':
-            return 'http://localhost:5000/static/images/Kb.png' if color else 'http://localhost:5000/static/images/Kw.png'
+            return 'http://localhost:8000/static/images/Kb.png' if color else 'http://localhost:8000/static/images/Kw.png'
         case 'R':
-            return 'http://localhost:5000/static/images/Rb.png' if color else 'http://localhost:5000/static/images/Rw.png'
+            return 'http://localhost:8000/static/images/Rb.png' if color else 'http://localhost:8000/static/images/Rw.png'
         case 'B':
-            return 'http://localhost:5000/static/images/Bb.png' if color else 'http://localhost:5000/static/images/Bw.png'
+            return 'http://localhost:8000/static/images/Bb.png' if color else 'http://localhost:8000/static/images/Bw.png'
         case 'N':
-            return 'http://localhost:5000/static/images/Nb.png' if color else 'http://localhost:5000/static/images/Nw.png'
+            return 'http://localhost:8000/static/images/Nb.png' if color else 'http://localhost:8000/static/images/Nw.png'
         case 'P':
-            return 'http://localhost:5000/static/images/Pb.png' if color else 'http://localhost:5000/static/images/Pw.png'
+            return 'http://localhost:8000/static/images/Pb.png' if color else 'http://localhost:8000/static/images/Pw.png'
         case _:
-            return 'http://localhost:5000/static/images/empty.png'
+            return 'http://localhost:8000/static/images/empty.png'
 
 
 def reset_coords():
@@ -447,7 +453,7 @@ def start(driver):
         EC.presence_of_element_located((By.ID, 'start-button'))
         )
     except:
-        driver.save_screenshot("/chess_engine/static/screenshots/start_error.png")
+        driver.save_screenshot("/static/screenshots/start_error.png")
         print(driver.page_source)
         raise
     start.click()
@@ -471,22 +477,41 @@ def reset(driver):
 
 
 def login(driver):
-    driver.get(os.getenv("APP_URL", "http://localhost:5000/login"))
-    username_input = driver.find_element(By.ID, 'username')
-    password_input = driver.find_element(By.ID, 'password')
-    login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
-    username_input.send_keys("valid_username")
-    password_input.send_keys("valid_password")
-    login_button.click()
-    WebDriverWait(driver, 10).until(
-        EC.url_to_be(os.getenv("APP_URL", "http://localhost:5000/"))
-    )
+    driver.get(os.getenv("APP_URL", "http://localhost:8000/login"))
+    print(f"Pre login driver URL: {driver.current_url}")
+    # check if at login page (or redirected to login page from home page)
+    if driver.current_url == "http://localhost:8000/login" or driver.current_url == "http://localhost:8000/login?next=%2F":
+        username_input = driver.find_element(By.ID, 'username')
+        password_input = driver.find_element(By.ID, 'password')
+        login_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
+        username_input.send_keys("valid_username")
+        password_input.send_keys("valid_password")
+        login_button.click()
+    home_url = "http://localhost:8000/"
+    print(f"Post login driver URL: {driver.current_url}, expected: {home_url}, equal: {driver.current_url == home_url}")
+    WebDriverWait(driver, 10).until(EC.url_to_be(home_url))
 
 def register_testuser(driver):
-    driver.get(os.getenv("APP_URL", "http://localhost:5000/register"))
-    username_input = driver.find_element(By.ID, 'username')
-    password_input = driver.find_element(By.ID, 'password')
-    register_button = driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]')
-    username_input.send_keys("valid_username")
-    password_input.send_keys("valid_password")
-    register_button.click()
+    register_url = "http://localhost:8000/register"
+    driver.get(register_url)
+    print(f"Accessing {register_url}")
+    try:
+        username_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'username'))
+        )
+        password_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'password'))
+        )
+        register_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'button[type="submit"]'))
+        )
+        print("Found registration form elements")
+        username_input.send_keys("valid_username")
+        password_input.send_keys("valid_password")
+        register_button.click()
+    except TimeoutException as e:
+        print(f"TimeoutException: {e}")
+        screenshot_path = "/static/screenshots/register_timeout.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {screenshot_path}")
+        raise

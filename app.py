@@ -4,18 +4,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from game import Game
 from connect import connect
 import os
+import sys
+import logging
+
+gameControllers = {}
+printing = False
+gameControllers[0] = Game(0, printing)
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('CHESS_DB_SECRET_KEY')
-DATABASE_URL = os.getenv('DATABASE_URL')
-gameControllers = {}
-mainGame = 0
-gameControllers[mainGame] = Game()
+#DATABASE_URL = os.getenv('DATABASE_URL')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
 
 class User(UserMixin):
     def __init__(self, user_id, username, password):
@@ -71,7 +76,7 @@ def move():
 @app.route('/state', methods=['GET'])
 @login_required
 def state():
-    result = gameControllers[mainGame].get_state()
+    result = gameControllers[0].get_state() # only used for game actively being played
     return jsonify(result)
 
 
@@ -91,12 +96,10 @@ def register():
                 existing_user = cur.fetchone()
                 if existing_user:
                     return render_template('register.html', error="Username already taken")
-                
                 cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
                 conn.commit()
 
         return redirect(url_for('login'))
-
     return render_template('register.html')
 
 
@@ -137,7 +140,7 @@ def game_history():
     user_id = current_user.id
     games = get_user_games(user_id) 
     for game in games:
-        gameC = Game()
+        gameC = Game(game["id"])
         gameControllers[game["id"]] = gameC
     return render_template('game_history.html', username=current_user.username, games=games)
 
