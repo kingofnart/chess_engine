@@ -29,6 +29,8 @@ class Piece:
         return self.captured
     def get_color(self):
         return self.color
+    def get_type(self):
+        return self.type
     
 
     # for queening pawns

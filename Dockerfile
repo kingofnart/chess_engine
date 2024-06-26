@@ -18,6 +18,8 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
+RUN apt-get update && apt-get install -y curl
+
 RUN apt-get update && apt-get install -y libpq-dev build-essential
 
 COPY requirements.txt ./
