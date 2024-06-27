@@ -140,7 +140,8 @@ class Game():
                         print(f"GAME: game over, stop condition: {self.stop_condition}")
                     return {
                         'status': 'end', 
-                        'end_result': self.stop_condition
+                        'end_result': self.stop_condition,
+                        'promotion': promotion_info
                     }
                 # proceed with game
                 if self.printing:
