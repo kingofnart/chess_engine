@@ -122,10 +122,12 @@ class ChessBoard {
                             document.querySelector(`[data-coordinate='${result.coords[0]}']`));
                     }
                 } else if (result.status === 'end') { // game over
+                    if (result.promotion) {
+                        this.promoteQueen(result.promotion);
+                    }
                     this.fetchGameState();
                     this.endGame(result.end_result);
                 } else if (result.status === 'move applied') { // proceed with game
-                    console.log("Turn: ", result.turn);
                     this.addIncrement(result.turn);
                     this.updateBoard(result.w_coords, result.b_coords, result.turn, result.promotion);
                     this.update_material_diff(result.material_diff);
@@ -188,13 +190,13 @@ class ChessBoard {
 
     // function to update board handling promotions
     updateBoard(w_coords, b_coords, turn, promotion) {
+        if (promotion) {
+            this.promoteQueen(promotion)
+        }
         this.renderBoard(w_coords, b_coords);
         this.updateTurnIndicator(turn);
         this.toggleTimers(turn);
-        if (promotion) {
-            // wait for the DOM to update before promoting the queen
-            setTimeout(() => this.promoteQueen(promotion), 0);
-        }
+
     }
 
 
@@ -501,20 +503,22 @@ class ChessBoard {
 
     // input form: {'index': piece id, 'color': piece color, 'coord': piece position}
     promoteQueen(input) {
+        // only need to update letter in names array
+        // render board will update the image
         let names = input.color ? this.names_b : this.names_w;
         names[input.index] = 'Q';
-        const square = document.querySelector(`[data-coordinate='${input.coord}']`);
-        if (square) {
-            const img = square.querySelector('img');
-            if (img) {
-            // only allowing promoting to queen for now
-            img.src = this.getPieceImageUrl('Q', input.color);
-            } else {
-                console.error("Error in promoteQueen: no img found at square ", input.coord);
-            }
-        } else {
-            console.error("Error in promoteQueen: no square found at coord ", input.coord);
-        }
+        // const square = document.querySelector(`[data-coordinate='${input.coord}']`);
+        // if (square) {
+        //     const img = square.querySelector('img');
+        //     if (img) {
+        //     // only allowing promoting to queen for now
+        //     img.src = this.getPieceImageUrl('Q', input.color);
+        //     } else {
+        //         console.error("Error in promoteQueen: no img found at square ", input.coord);
+        //     }
+        // } else {
+        //     console.error("Error in promoteQueen: no square found at coord ", input.coord);
+        // }
     }
 
 
