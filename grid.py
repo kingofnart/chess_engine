@@ -183,173 +183,195 @@ class Grid():
                     
                     # king
                     case 0:
-                        # only move one square, no moving off the board
-                        if coord[0] != 0:
-                            c2 = (coord + [-1,0]).tolist()
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] != 0:
-                                c2 = (coord + [-1,-1]).tolist()
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] != 7:
-                                c2 = (coord + [-1,1]).tolist()
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[0] != 7:
-                            c2 = (coord + [1,0]).tolist()
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                               self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] != 0:
-                                c2 = (coord + [1,-1]).tolist()
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] != 7:
-                                c2 = (coord + [1,1]).tolist()
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[1] != 0:
-                            c2 = (coord + [0,-1]).tolist()
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[1] != 7:
-                            c2 = (coord + [0,1]).tolist()
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+                        self.get_king_attacked_squares(color, coord, attacked_list, valid_moves, validation)
                     
                     # queen
                     case 1:
-                        # just gonna search all 8 directions in order
-                        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
-                        self.add_to_list(attacked_list, lst) 
-                        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
-                        self.add_to_list(attacked_list, lst)
+                        self.get_queen_attacked_squares(coord, attacked_list, valid_moves, validation)
 
                     # rook
                     case 2:
-                        # only horizontals & verticals
-                        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
-                        self.add_to_list(attacked_list, lst)
+                        self.get_rook_attacked_squares(coord, attacked_list, valid_moves, validation)
 
                     # knight
                     case 3:
-                        # check for move 2 squares in one cardinal directrion
-                        # then check for move 1 square perpendicular
-                        if coord[0] >= 2:  # move up
-                            if coord[1] > 0:
-                                c2 = [coord[0] - 2, coord[1] - 1]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] < 7:
-                                c2 = [coord[0] - 2, coord[1] + 1]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[0] <= 5:  # move down
-                            if coord[1] > 0:
-                                c2 = [coord[0] + 2, coord[1] - 1]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[1] < 7:
-                                c2 = [coord[0] + 2, coord[1] + 1]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[1] >= 2:  # move left
-                            if coord[0] > 0:
-                                c2 = [coord[0] - 1, coord[1] - 2]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[0] < 7:
-                                c2 = [coord[0] + 1, coord[1] - 2]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[1] <= 5:  # move right
-                            if coord[0] > 0:
-                                c2 = [coord[0] - 1, coord[1] + 2]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if coord[0] < 7:
-                                c2 = [coord[0] + 1, coord[1] + 2]
-                                self.add_to_list(attacked_list, [c2])
-                                if validation:
-                                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+                        self.get_knight_attacked_squares(color, coord, attacked_list, valid_moves, validation)
                     
                     # bishop
                     case 4:
-                        # only diagonals
-                        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
-                        self.add_to_list(attacked_list, lst)
-                        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
-                        self.add_to_list(attacked_list, lst)
+                        self.get_bishop_attacked_squares(coord, attacked_list, valid_moves, validation)
 
                     # pawn
                     case 5:
-                        if color:  # black
-                            sign = -1
-                        else:  # white
-                            sign = 1
-                        if coord[1] > 0:
-                            c2 = [coord[0] + sign, coord[1] - 1]
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        if coord[1] < 7:
-                            c2 = [coord[0] + sign, coord[1] + 1]
-                            self.add_to_list(attacked_list, [c2])
-                            if validation:
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                        # also have to check non-captures for valid moves
-                        if validation:
-                            c2 = [coord[0] + sign, coord[1]]
-                            self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
-                            if not piece.get_moved():
-                                c2 = [coord[0] + 2*sign, coord[1]]
-                                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+                        self.get_pawn_attacked_squares(piece, color, coord, attacked_list, valid_moves, validation)
                     
                     case _:
                         raise Exception("Invalid piece id")
-                               
+                    
+    
+    def get_king_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
+        # only move one square, no moving off the board
+        if coord[0] != 0:
+            c2 = (coord + [-1,0]).tolist()
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] != 0:
+                c2 = (coord + [-1,-1]).tolist()
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] != 7:
+                c2 = (coord + [-1,1]).tolist()
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[0] != 7:
+            c2 = (coord + [1,0]).tolist()
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] != 0:
+                c2 = (coord + [1,-1]).tolist()
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] != 7:
+                c2 = (coord + [1,1]).tolist()
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[1] != 0:
+            c2 = (coord + [0,-1]).tolist()
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[1] != 7:
+            c2 = (coord + [0,1]).tolist()
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+
+    
+    def get_queen_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+        # search all 8 directions in order
+        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
+        self.add_to_list(attacked_list, lst) 
+        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
+        self.add_to_list(attacked_list, lst)
+
+
+    def get_rook_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+        # only horizontals & verticals
+        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
+        self.add_to_list(attacked_list, lst)
+
+
+    def get_knight_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
+    # check for move 2 squares in one cardinal directrion
+        # then check for move 1 square perpendicular
+        if coord[0] >= 2:  # move up
+            if coord[1] > 0:
+                c2 = [coord[0] - 2, coord[1] - 1]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] < 7:
+                c2 = [coord[0] - 2, coord[1] + 1]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[0] <= 5:  # move down
+            if coord[1] > 0:
+                c2 = [coord[0] + 2, coord[1] - 1]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[1] < 7:
+                c2 = [coord[0] + 2, coord[1] + 1]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[1] >= 2:  # move left
+            if coord[0] > 0:
+                c2 = [coord[0] - 1, coord[1] - 2]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[0] < 7:
+                c2 = [coord[0] + 1, coord[1] - 2]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[1] <= 5:  # move right
+            if coord[0] > 0:
+                c2 = [coord[0] - 1, coord[1] + 2]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if coord[0] < 7:
+                c2 = [coord[0] + 1, coord[1] + 2]
+                self.add_to_list(attacked_list, [c2])
+                if validation:
+                    self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+
+
+    def get_bishop_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+        # only diagonals
+        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
+        self.add_to_list(attacked_list, lst)
+        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
+        self.add_to_list(attacked_list, lst)
+
+
+    def get_pawn_attacked_squares(self, piece, color, coord, attacked_list, valid_moves, validation):
+        if color:  # black
+            sign = -1
+        else:  # white
+            sign = 1
+        if coord[1] > 0:
+            c2 = [coord[0] + sign, coord[1] - 1]
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        if coord[1] < 7:
+            c2 = [coord[0] + sign, coord[1] + 1]
+            self.add_to_list(attacked_list, [c2])
+            if validation:
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+        # also have to check non-captures for valid moves
+        if validation:
+            c2 = [coord[0] + sign, coord[1]]
+            self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+            if not piece.get_moved():
+                c2 = [coord[0] + 2*sign, coord[1]]
+                self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
+
 
     # helper function for attacked_squares to add each element of list only if it's unique
-    # might want to change attacked_squares to set of tuples instead of list of lists
     def add_to_list(self, old, new):
-        
         if len(new) > 0:
             for x in new:
                 if x not in old:
@@ -402,227 +424,24 @@ class Grid():
                 
                 match piece.type:
                     
-                    # king
-                    case 0:
-                        if printing:
-                            print(f"GRID: king move")
-                        dif1 = np.abs(move[0][0] - move[1][0])
-                        dif2 = np.abs(move[0][1] - move[1][1])
-                        # normal king move
-                        if dif1 <= 1 and dif2 <= 1:
-                            if move[1][0] >= 0 and move[1][0] <= 7 and move[1][1] >= 0 and move[1][1] <= 7:
-                                return 1
-                        # castling
-                        # requirements: king and rook can't have moved yet
-                        # no pieces in between king and rook
-                        # king doesn't move through check
-                        # king moves two squares left or right
-                        # rook placed next to king on the other side than it used to be
-                        elif move[0][1] + 2 == move[1][1]:  # caslting kingside
-                            # make sure squares between king and rook are empty
-                            if self.grid[move[0][0]][move[0][1] + 1] != 0 or self.grid[move[0][0]][move[0][1] + 2] != 0:
-                                return 0
-                            if color:
-                                atck_lst = self.attacked_squares_w
-                                # check black h rook and king haven't moved yet
-                                if self.b_pcs[3].get_moved() or piece.get_moved():
-                                    return 0
-                            else:
-                                atck_lst = self.attacked_squares_b
-                                # check white h rook and king haven't moved yet
-                                if self.w_pcs[3].get_moved() or piece.get_moved():
-                                    return 0
-                            # cant castle through, out of, or into check
-                            for pos in atck_lst:
-                                if move[0][0] == pos[0] and move[0][1] == pos[1]:
-                                    return 0
-                                elif move[0][0] == pos[0] and move[0][1] + 1 == pos[1]:
-                                    return 0
-                                elif move[0][0] == pos[0] and move[0][1] + 2 == pos[1]:
-                                    return 0
-                            self.set_castle_kingside(1)
-                            return 1
-                        elif move[0][1] - 2 == move[1][1]:  # caslting queenside
-                            # make sure squares between king and rook are empty
-                            if self.grid[move[0][0]][move[0][1] - 1] != 0 or self.grid[move[0][0]][move[0][1] - 2] != 0 \
-                                or self.grid[move[0][0]][move[0][1] - 3] != 0:
-                                return 0
-                            if color:
-                                atck_lst = self.attacked_squares_w
-                                # check black a rook and king haven't moved yet
-                                if self.b_pcs[2].get_moved() or piece.get_moved():
-                                    return 0
-                            else:
-                                atck_lst = self.attacked_squares_b
-                                # check white a rook and king haven't moved yet
-                                if self.w_pcs[2].get_moved() or piece.get_moved():
-                                    return 0
-                            # cant castle through, out of, or into check
-                            for pos in atck_lst:
-                                if move[0][0] == pos[0] and move[0][1] == pos[1]:
-                                    return 0
-                                elif move[0][0] == pos[0] and move[0][1] - 1 == pos[1]:
-                                    return 0
-                                elif move[0][0] == pos[0] and move[0][1] - 2 == pos[1]:
-                                    return 0
-                            self.set_castle_queenside(1)
-                            return 1
-                        return 0
-
-                    # queen
-                    case 1: 
-                        if printing:
-                            print(f"GRID: queen move")
-                        for pos in self.line_search(1, 0, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(1, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(0, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, 0, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(0, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(1, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        else: 
-                            return 0
-
-                    # rook
-                    case 2:
-                        if printing:
-                            print(f"GRID: rook move")
-                        for pos in self.line_search(1, 0, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(0, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, 0, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(0, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        else: 
-                            return 0
-
-                    # knight
-                    case 3:
-                        if printing:
-                            print(f"GRID: knight move")
-                        if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
-                            if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
-                                return 1
-                        elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
-                            if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
-                                return 1
-                        else: 
-                            return 0
-
-                    # bishop
-                    case 4:
-                        if printing:
-                            print(f"GRID: bishop move")
-                        for pos in self.line_search(1, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, 1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(-1, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        for pos in self.line_search(1, -1, move[0]):
-                            if move[1][0] == pos[0] and move[1][1] == pos[1]:
-                                return 1
-                        else: 
-                            return 0
-
-                    # pawn
-                    case 5:
-                        if printing:
-                            print(f"GRID: pawn move")
-                        # first get direction pawn is moving
-                        if piece.color == 0:  # white
-                            sign = 1 
-                        else:  # black
-                            sign = -1 
-                        # normal pawn move
-                        if move[0][1] == move[1][1]:  # pawns only move forward unless capturing
-                            if printing:
-                                print(f"GRID: pawn not capturing")
-                            if move[0][0] + sign == move[1][0]:  # check for piece infront of pawn
-                                if printing:
-                                    print(f"GRID: normal pawn move")
-                                if not piece2:  # valid move
-                                    return 1
-                                else:
-                                    if printing:
-                                        print(f"GRID: can't move forward, piece in front of pawn")
-                                    return 0
-                            elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
-                                if printing:
-                                    print(f"GRID: pawn moving two squares from starting position")
-                                if not piece2:
-                                    # this is for making sure pawns dont jump over pieces
-                                    if not self.grid[move[0][0]+sign][move[0][1]]:
-                                        return 1
-                                    else: 
-                                        if printing:
-                                            print(f"GRID: can't move two squares, piece in front of pawn")
-                                        return 0
-                                else: return 0
-                            else:  # invalid move
-                                return 0
-                        # capturing pawn move
-                        elif move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
-                            # make sure move is diagonal
-                            if move[0][0] + sign != move[1][0]:  # invalid move
-                                if printing:
-                                    print(f"GRID: pawns dont move that way")
-                                return 0
-                            # En Passant
-                            elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
-                                if printing:
-                                    print(f"GRID: no piece at {move[1]}, checking for en passant")
-                                # en passant requirements: pawn left or right of current pawn
-                                # that pawn has enpassant flag (just made first move of two squares)
-                                # check square:[row move0][col move1] for en passantable pawn
-                                pawn2 = self.grid[move[0][0]][move[1][1]]
-                                if pawn2 != 0:  # en pesant?
-                                    if pawn2.get_enpassant():  # yes en pesant
-                                        if set_enpassant:
-                                            self.set_someone_attempting_enpassant_move(True)
-                                        return 1
-                                    else:  # no en pesant
-                                        if printing:
-                                            print(f"GRID: pawn not able to be en passanted")
-                                        return 0
-                                else:
-                                    if printing:
-                                        print(f"GRID: no pawn to en passant") 
-                                    return 0
-                            elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
-                                return 1
-
-                        else:  # invalid move
-                            if printing:
-                                print(f"GRID: pawns definitely don't move that way")
-                            return 0
+                    case 0:  # king
+                        return self.valid_king_move(move, piece, color)
                     
+                    case 1:  # queen
+                        return self.valid_queen_move(move)
+
+                    case 2:  # rook
+                        return self.valid_rook_move(move)
+                    
+                    case 3:  # knight
+                        return self.valid_knight_move(move)
+                    
+                    case 4:  # bishop
+                        return self.valid_bishop_move(move)
+                                        
+                    case 5:  # pawn
+                        return self.valid_pawn_move(move, piece, piece2, set_enpassant, printing)
+                                      
                     case _:  # invalid piece id
                         if printing:
                             print(f"GRID: invalid piece type: {piece.get_type()}")
@@ -637,6 +456,215 @@ class Grid():
                 print(f"GRID: no piece at square {move[0]}")
             return 0
         
+
+    def valid_king_move(self, move, piece, color):
+        dif1 = np.abs(move[0][0] - move[1][0])
+        dif2 = np.abs(move[0][1] - move[1][1])
+        # normal king move
+        if dif1 <= 1 and dif2 <= 1:
+            if move[1][0] >= 0 and move[1][0] <= 7 and move[1][1] >= 0 and move[1][1] <= 7:
+                return 1
+        # castling
+        # requirements: king and rook can't have moved yet
+        # no pieces in between king and rook
+        # king doesn't move through check
+        # king moves two squares left or right
+        # rook placed next to king on the other side than it used to be
+        elif move[0][1] + 2 == move[1][1]:  # caslting kingside
+            # make sure squares between king and rook are empty
+            if self.grid[move[0][0]][move[0][1] + 1] != 0 or self.grid[move[0][0]][move[0][1] + 2] != 0:
+                return 0
+            if color:
+                atck_lst = self.attacked_squares_w
+                # check black h rook and king haven't moved yet
+                if self.b_pcs[3].get_moved() or piece.get_moved():
+                    return 0
+            else:
+                atck_lst = self.attacked_squares_b
+                # check white h rook and king haven't moved yet
+                if self.w_pcs[3].get_moved() or piece.get_moved():
+                    return 0
+            # cant castle through, out of, or into check
+            for pos in atck_lst:
+                if move[0][0] == pos[0] and move[0][1] == pos[1]:
+                    return 0
+                elif move[0][0] == pos[0] and move[0][1] + 1 == pos[1]:
+                    return 0
+                elif move[0][0] == pos[0] and move[0][1] + 2 == pos[1]:
+                    return 0
+            self.set_castle_kingside(1)
+            return 1
+        elif move[0][1] - 2 == move[1][1]:  # caslting queenside
+            # make sure squares between king and rook are empty
+            if self.grid[move[0][0]][move[0][1] - 1] != 0 or self.grid[move[0][0]][move[0][1] - 2] != 0 \
+                or self.grid[move[0][0]][move[0][1] - 3] != 0:
+                return 0
+            if color:
+                atck_lst = self.attacked_squares_w
+                # check black a rook and king haven't moved yet
+                if self.b_pcs[2].get_moved() or piece.get_moved():
+                    return 0
+            else:
+                atck_lst = self.attacked_squares_b
+                # check white a rook and king haven't moved yet
+                if self.w_pcs[2].get_moved() or piece.get_moved():
+                    return 0
+            # cant castle through, out of, or into check
+            for pos in atck_lst:
+                if move[0][0] == pos[0] and move[0][1] == pos[1]:
+                    return 0
+                elif move[0][0] == pos[0] and move[0][1] - 1 == pos[1]:
+                    return 0
+                elif move[0][0] == pos[0] and move[0][1] - 2 == pos[1]:
+                    return 0
+            self.set_castle_queenside(1)
+            return 1
+        return 0
+    
+
+    def valid_queen_move(self, move):
+        for pos in self.line_search(1, 0, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(1, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(0, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, 0, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(0, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(1, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        else: 
+            return 0
+        
+    
+    def valid_rook_move(self, move):
+        for pos in self.line_search(1, 0, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(0, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, 0, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(0, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        else: 
+            return 0
+
+
+    def valid_knight_move(self, move):
+        if move[0][0] + 2 == move[1][0] or move[0][0] - 2 == move[1][0]:
+            if move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]:
+                return 1
+        elif move[0][1] + 2 == move[1][1] or move[0][1] - 2 == move[1][1]:
+            if move[0][0] + 1 == move[1][0] or move[0][0] - 1 == move[1][0]:
+                return 1
+        else: 
+            return 0
+
+
+    def valid_bishop_move(self, move):
+        for pos in self.line_search(1, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, 1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(-1, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        for pos in self.line_search(1, -1, move[0]):
+            if move[1][0] == pos[0] and move[1][1] == pos[1]:
+                return 1
+        else: 
+            return 0
+
+
+    def valid_pawn_move(self, move, piece, piece2, set_enpassant, printing):
+        # first get direction pawn is moving
+        if piece.color == 0:  # white
+            sign = 1 
+        else:  # black
+            sign = -1 
+        # normal pawn move
+        if move[0][1] == move[1][1]:  # pawns only move forward unless capturing
+            if printing:
+                print(f"GRID: pawn not capturing")
+            if move[0][0] + sign == move[1][0]:  # check for piece infront of pawn
+                if printing:
+                    print(f"GRID: normal pawn move")
+                if not piece2:  # valid move
+                    return 1
+                else:
+                    if printing:
+                        print(f"GRID: can't move forward, piece in front of pawn")
+                    return 0
+            elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
+                if printing:
+                    print(f"GRID: pawn moving two squares from starting position")
+                if not piece2:
+                    # this is for making sure pawns dont jump over pieces
+                    if not self.grid[move[0][0]+sign][move[0][1]]:
+                        return 1
+                    else: 
+                        if printing:
+                            print(f"GRID: can't move two squares, piece in front of pawn")
+                        return 0
+                else: return 0
+            else:  # invalid move
+                return 0
+        # capturing pawn move
+        elif move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
+            # make sure move is diagonal
+            if move[0][0] + sign != move[1][0]:  # invalid move
+                if printing:
+                    print(f"GRID: pawns don't move that way")
+                return 0
+            # En Passant
+            elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
+                if printing:
+                    print(f"GRID: no piece at {move[1]}, checking for en passant")
+                # en passant requirements: pawn left or right of current pawn
+                # that pawn has enpassant flag (just made first move of two squares)
+                # check square:[row move0][col move1] for en passantable pawn
+                pawn2 = self.grid[move[0][0]][move[1][1]]
+                if pawn2 != 0:  # en pesant?
+                    if pawn2.get_enpassant():  # yes en pesant
+                        if set_enpassant:
+                            self.set_someone_attempting_enpassant_move(True)
+                        return 1
+                    else:  # no en pesant
+                        if printing:
+                            print(f"GRID: pawn not able to be en passanted")
+                        return 0
+                else:
+                    if printing:
+                        print(f"GRID: no pawn to en passant") 
+                    return 0
+            elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
+                return 1
+
+        else:  # invalid move
+            if printing:
+                print(f"GRID: pawns definitely don't move that way")
+            return 0
+
 
     # function to reset enpassant for all pawns (also all pieces but only pawns matter)
     def unenpassant(self, color):
@@ -675,107 +703,132 @@ class Grid():
         
         piece = self.grid[move[0][0]][move[0][1]]
         piece.set_moved(True)
+        
         # castling
         if self.get_castle_kingside():
-            if color:  # black to move
-                # king on e8, hasn't moved
-                rook = self.grid[7][7]  # black h rook, hasn't moved
-                self.grid[7][6] = piece
-                self.grid[7][5] = rook
-                self.grid[7][4] = 0  # don't forget to remove old reference to king
-                self.grid[7][7] = 0  # and the old reference to the rook
-                self.b_coords[piece.id] = [7,6]
-                self.b_coords[rook.id] = [7,5]
-                rook.set_moved(True)
-            else: # white to move
-                # king on e1, hasn't moved
-                rook = self.grid[0][7]  # white h rook, hasn't moved
-                self.grid[0][6] = piece
-                self.grid[0][5] = rook
-                self.grid[0][4] = 0
-                self.grid[0][7] = 0
-                self.w_coords[piece.id] = [0,6]
-                self.w_coords[rook.id] = [0,5]
-                rook.set_moved(True)
-            self.set_castle_kingside(0)
+            self.apply_castle_kingside(piece, color)
+
         elif self.get_castle_queenside():
-            if color: # black to move
-                # king on e8, hasn't moved
-                rook = self.grid[7][0]  # black a rook, hasn't moved
-                self.grid[7][2] = piece
-                self.grid[7][3] = rook
-                self.grid[7][4] = 0
-                self.grid[7][0] = 0 
-                self.b_coords[piece.id] = [7,2]
-                self.b_coords[rook.id] = [7,3]
-                rook.set_moved(True)
-            else: # white to move
-                # king on e1, hasn't moved
-                rook = self.grid[0][0]  # white a rook, hasn't moved
-                self.grid[0][2] = piece
-                self.grid[0][3] = rook
-                self.grid[0][4] = 0
-                self.grid[0][0] = 0  # ARGGGGGGGGGGGGGGGGG!!!!!!!!!!!!!!!!!! ;-;^10^10^10^10
-                self.w_coords[piece.id] = [0,2]
-                self.w_coords[rook.id] = [0,3]
-                rook.set_moved(True)
-            self.set_castle_queenside(0)
+            self.apply_castle_queenside(piece, color)
+
         # en passant
         elif self.get_someone_attempting_enpassant_move():
-            if color:  # black en passanting white
-                sign = 1
-                cap_coords = self.w_coords
-                self.b_coords[piece.id] = move[1]
-            else:  # white en passanting black
-                sign = -1
-                cap_coords = self.b_coords
-                self.w_coords[piece.id] = move[1]
-            # direction (kingside/queenside) pawn to capture is on is contained in move[1][1]
-            pawn2 = self.grid[move[1][0] + sign][move[1][1]]
-            # remove en passanted pawn
-            pawn2.set_captured(1)
-            self.grid[move[1][0] + sign][move[1][1]] = 0
-            cap_coords[pawn2.id] = [-1,-1]
-            if sign:  # black en passanting white => white pawn captured
-                self.material_w[pawn2.id] = 0
-            else:  # white en passanting black => black pawn captured
-                self.material_b[pawn2.id] = 0
-            # update grid
-            self.grid[move[1][0]][move[1][1]] = piece
-            self.grid[move[0][0]][move[0][1]] = 0
-            self.set_someone_attempting_enpassant_move(False)
+            self.apply_enpassant(move, piece, color)
+
         # normal move
         else:
-            piece2 = self.grid[move[1][0]][move[1][1]]
-            self.grid[move[1][0]][move[1][1]] = piece
-            self.grid[move[0][0]][move[0][1]] = 0
-            if color:  # color = black
-                self.b_coords[piece.id] = move[1]
-                if piece2 != 0:
-                    piece2.set_captured(1)
-                    self.w_coords[piece2.id] = [-1,-1]
-                    self.material_w[piece2.id] = 0
-            else:  # color = white
-                self.w_coords[piece.id] = move[1]
-                if piece2 != 0:
-                    piece2.set_captured(1)
-                    self.b_coords[piece2.id] = [-1,-1]
-                    self.material_b[piece2.id] = 0
-        # check if pawn moved 2 squares and set it's en passant flag
-        # also check if pawn has reach the opponents back rank and make it a queen
-        if piece.type == 5:
-            if color:
-                sign = -2
-                rank = 0
-            else:
-                sign = 2
-                rank = 7
-            if move[0][0] + sign == move[1][0] and move[0][1] == move[1][1]:
-                piece.set_enpassant(1)
-            elif move[1][0] == rank: # pawn has reached opponent's back rank
-                piece.make_queen()
-                self.set_queening(piece)
+            self.apply_normal_move(move, piece, color)
 
+        # set enpassant flag or promotion flag
+        if piece.type == 5:
+            self.special_pawn_moves(move, piece, color)
+
+
+    def apply_castle_kingside(self, piece, color):
+        if color:  # black to move
+            # king on e8, hasn't moved
+            rook = self.grid[7][7]  # black h rook, hasn't moved
+            self.grid[7][6] = piece
+            self.grid[7][5] = rook
+            self.grid[7][4] = 0  # don't forget to remove old reference to king
+            self.grid[7][7] = 0  # and the old reference to the rook
+            self.b_coords[piece.id] = [7,6]
+            self.b_coords[rook.id] = [7,5]
+            rook.set_moved(True)
+        else: # white to move
+            # king on e1, hasn't moved
+            rook = self.grid[0][7]  # white h rook, hasn't moved
+            self.grid[0][6] = piece
+            self.grid[0][5] = rook
+            self.grid[0][4] = 0
+            self.grid[0][7] = 0
+            self.w_coords[piece.id] = [0,6]
+            self.w_coords[rook.id] = [0,5]
+            rook.set_moved(True)
+        self.set_castle_kingside(0)
+
+
+    def apply_castle_queenside(self, piece, color):
+        if color: # black to move
+            # king on e8, hasn't moved
+            rook = self.grid[7][0]  # black a rook, hasn't moved
+            self.grid[7][2] = piece
+            self.grid[7][3] = rook
+            self.grid[7][4] = 0
+            self.grid[7][0] = 0 
+            self.b_coords[piece.id] = [7,2]
+            self.b_coords[rook.id] = [7,3]
+            rook.set_moved(True)
+        else: # white to move
+            # king on e1, hasn't moved
+            rook = self.grid[0][0]  # white a rook, hasn't moved
+            self.grid[0][2] = piece
+            self.grid[0][3] = rook
+            self.grid[0][4] = 0
+            self.grid[0][0] = 0 
+            self.w_coords[piece.id] = [0,2]
+            self.w_coords[rook.id] = [0,3]
+            rook.set_moved(True)
+        self.set_castle_queenside(0)
+
+
+    def apply_enpassant(self, move, piece, color):
+        if color:  # black en passanting white
+            sign = 1
+            cap_coords = self.w_coords
+            self.b_coords[piece.id] = move[1]
+        else:  # white en passanting black
+            sign = -1
+            cap_coords = self.b_coords
+            self.w_coords[piece.id] = move[1]
+        # direction (kingside/queenside) pawn to capture is on is contained in move[1][1]
+        pawn2 = self.grid[move[1][0] + sign][move[1][1]]
+        # remove en passanted pawn
+        pawn2.set_captured(1)
+        self.grid[move[1][0] + sign][move[1][1]] = 0
+        cap_coords[pawn2.id] = [-1,-1]
+        if sign:  # black en passanting white => white pawn captured
+            self.material_w[pawn2.id] = 0
+        else:  # white en passanting black => black pawn captured
+            self.material_b[pawn2.id] = 0
+        # update grid
+        self.grid[move[1][0]][move[1][1]] = piece
+        self.grid[move[0][0]][move[0][1]] = 0
+        self.set_someone_attempting_enpassant_move(False)
+
+    
+    def apply_normal_move(self, move, piece, color):
+        piece2 = self.grid[move[1][0]][move[1][1]]
+        self.grid[move[1][0]][move[1][1]] = piece
+        self.grid[move[0][0]][move[0][1]] = 0
+        if color:  # color = black
+            self.b_coords[piece.id] = move[1]
+            if piece2 != 0:
+                piece2.set_captured(1)
+                self.w_coords[piece2.id] = [-1,-1]
+                self.material_w[piece2.id] = 0
+        else:  # color = white
+            self.w_coords[piece.id] = move[1]
+            if piece2 != 0:
+                piece2.set_captured(1)
+                self.b_coords[piece2.id] = [-1,-1]
+                self.material_b[piece2.id] = 0
+
+    
+    def special_pawn_moves(self, move, piece, color):
+        # check if pawn moved 2 squares and set it's en passant flag
+        # also check if pawn has reach the opponents back rank and set promotion flag
+        if color:
+            sign = -2
+            rank = 0
+        else:
+            sign = 2
+            rank = 7
+        if move[0][0] + sign == move[1][0] and move[0][1] == move[1][1]:
+            piece.set_enpassant(1)
+        elif move[1][0] == rank: # pawn has reached opponent's back rank
+            piece.make_queen()
+            self.set_queening(piece)
 
     # function to add boardstate to history list to check for threefold repetition
     def update_history(self, move=None):
