@@ -77,6 +77,11 @@ class Grid():
             return self.valid_moves_b
         else:
             return self.valid_moves_w
+    def get_coords(self, color):
+        if color:
+            return self.b_coords
+        else:
+            return self.w_coords
     
 
     # setters
@@ -92,6 +97,25 @@ class Grid():
         self.w_coords = np.array(new_coords)
     def set_black_coords(self, new_coords):
         self.b_coords = np.array(new_coords)
+
+    # method to set all pieces to not moved (for history boards)
+    def set_unmoved(self):
+        for piece in self.w_pcs:
+            piece.set_moved(False)
+        for piece in self.b_pcs:
+            piece.set_moved(False)
+
+    # method to set grid according to coordinates (for history boards)
+    def set_grid(self, white, black):
+        for n in range(8):
+            for m in range(8):
+                self.grid[n][m] = 0
+        type_mapping = {0:0, 1:1, 2:2, 3:2, 4:3, 5:3, 6:4, 7:4, 
+                        8:5, 9:5, 10:5, 11:5, 12:5, 13:5, 14:5, 15:5}
+        for index, coord in enumerate(white):
+            self.grid[coord[0]][coord[1]] = Piece(0, type_mapping[index], index)
+        for index, coord in enumerate(black):
+            self.grid[coord[0]][coord[1]] = Piece(1, type_mapping[index], index)
 
 
     # function to reset board to starting position  
@@ -909,24 +933,3 @@ class Grid():
     # method to caulculate material difference
     def material_count(self):
         self.material_diff = np.sum(self.material_w) - np.sum(self.material_b)
-
-    
-    # method to set all pieces to not moved (for history boards)
-    def set_unmoved(self):
-        for piece in self.w_pcs:
-            piece.set_moved(False)
-        for piece in self.b_pcs:
-            piece.set_moved(False)
-
-
-    # method to set grid according to coordinates (for history boards)
-    def set_grid(self, white, black):
-        for n in range(8):
-            for m in range(8):
-                self.grid[n][m] = 0
-        type_mapping = {0:0, 1:1, 2:2, 3:2, 4:3, 5:3, 6:4, 7:4, 
-                        8:5, 9:5, 10:5, 11:5, 12:5, 13:5, 14:5, 15:5}
-        for index, coord in enumerate(white):
-            self.grid[coord[0]][coord[1]] = Piece(0, type_mapping[index], index)
-        for index, coord in enumerate(black):
-            self.grid[coord[0]][coord[1]] = Piece(1, type_mapping[index], index)
