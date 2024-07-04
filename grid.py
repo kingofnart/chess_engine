@@ -39,6 +39,8 @@ class Grid():
         self.material_w = np.array([0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1])
         self.material_b = np.array([0,9,5,5,3,3,3,3,1,1,1,1,1,1,1,1])
         self.material_diff = 0
+        # used to reset material counts
+        self.material_lookup = {0:0, 1:9, 2:5, 3:5, 4:3, 5:3, 6:3, 7:3, 8:1, 9:1, 10:1, 11:1, 12:1, 13:1, 14:1, 15:1}
         # initialize lists
         self.board_history = []
         self.move_history = []
@@ -195,11 +197,14 @@ class Grid():
         if validation:
             if color:  # black
                 self.valid_moves_b = []
+                # updating valid_moves will also update self.valid_moves_b
                 valid_moves = self.valid_moves_b
             else:  # white
                 self.valid_moves_w = []
+                # updating valid_moves will also update self.valid_moves_w
                 valid_moves = self.valid_moves_w
         else:
+            # still need to initialize valid_moves
             valid_moves = None
         for piece, coord in zip(pieces, coords):
             if not piece.captured:
@@ -414,10 +419,7 @@ class Grid():
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
             lst.append(idx.copy())
             if get_valid:
-                if color:
-                    self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
-                else:
-                    self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
+                self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
             if self.grid[idx[0]][idx[1]] != 0:  # found piece, stop search
                 search = False
             idx[0] = idx[0] + y
@@ -811,6 +813,7 @@ class Grid():
         pawn2.set_captured(1)
         self.grid[move[1][0] + sign][move[1][1]] = 0
         cap_coords[pawn2.id] = [-1,-1]
+        print(f"CAPTURED!! {pawn2.id}")
         if sign:  # black en passanting white => white pawn captured
             self.material_w[pawn2.id] = 0
         else:  # white en passanting black => black pawn captured
@@ -830,12 +833,14 @@ class Grid():
             if piece2 != 0:
                 piece2.set_captured(1)
                 self.w_coords[piece2.id] = [-1,-1]
+                print(f"CAPTURED!! {piece2.id}")
                 self.material_w[piece2.id] = 0
         else:  # color = white
             self.w_coords[piece.id] = move[1]
             if piece2 != 0:
                 piece2.set_captured(1)
                 self.b_coords[piece2.id] = [-1,-1]
+                print(f"CAPTURED!! {piece2.id}")
                 self.material_b[piece2.id] = 0
 
     
@@ -892,7 +897,9 @@ class Grid():
         # need to check if not color's king is in color's attacked squares
         self.attacked_squares(not color, validation=1)  # get not color's available moves
         # checking if black is checkmating/stalemating white
+        print(f"GRID: checking if {color} is checkmating/stalemating {not color}")
         if color: 
+            print(f"Number of valid moves for white: {len(self.valid_moves_w)}\nvalid moves: {self.valid_moves_w}")
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
@@ -905,6 +912,7 @@ class Grid():
             else: return (-1,-1)
         # checking if white is checkmating/stalemating black
         else:
+            print(f"Number of valid moves for black: {len(self.valid_moves_b)}\nvalid moves: {self.valid_moves_b}")
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]
@@ -925,11 +933,29 @@ class Grid():
             # check opponents attacked squares for check
             if(tmp_board.king_safety(not color)):
                 # create copy of move to avoid reference issues
-                move_copy = copy.deepcopy(move)
+                move_copy = copy.deepcopy(move) # must be deepcopy
                 valid_lst.append(move_copy)
-            tmp_board = None  # remove reference for garbage collection
+            del tmp_board  # release memory
 
     
     # method to caulculate material difference
-    def material_count(self):
+    def update_material_count(self):
         self.material_diff = np.sum(self.material_w) - np.sum(self.material_b)
+        print(f"Material difference: {self.material_diff}")
+
+    
+    def reset_material_count(self):
+        for i in range(16):
+            if self.w_coords[i][0] == -1 and self.w_coords[i][1] == -1:
+                self.material_w[i] = self.material_lookup[i]
+            if self.b_coords[i][0] == -1 and self.b_coords[i][1] == -1:
+                self.material_b[i] = self.material_lookup[i]
+
+    # method to undo move (setting coordinates to input coords)
+    def undo_move(self, input_coords_w, input_coords_b):
+        # want to reset moved flag so pawns can move 2 squares
+        self.set_unmoved()
+        self.set_white_coords(input_coords_w)
+        self.set_black_coords(input_coords_b)
+        self.set_grid(self.w_coords, self.b_coords)
+        self.reset_material_count()
