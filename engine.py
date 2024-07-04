@@ -25,6 +25,7 @@ class Engine():
     # -> optimal move for black is minimizing the score
     # used for evaluating all moves at all levels (0->depth) ** does not save the move **
     def minimax_recursive(self, color, depth, input_board):
+        # print(f"depth: {depth}, color: {color}")
         # stop condition
         # color about to move, check game_ended with not color
         if depth == 0 or self.game_ended(int(not color), input_board):
@@ -32,7 +33,6 @@ class Engine():
         # save current coordinates to undo move
         prev_coords_w = input_board.w_coords.copy()
         prev_coords_b = input_board.b_coords.copy()
-        print(f"previous coords: white: {prev_coords_w}, black: {prev_coords_b}")
 
         # recursive case
         if color:
@@ -40,7 +40,6 @@ class Engine():
             best_score = float('inf')
             # find lowest score given optimal play from white
             for move in input_board.get_valid_moves(color):
-                print(f"making move for black: {move}")
                 input_board.apply_move(move, color)
                 score = self.minimax_recursive(int(not color), depth - 1, input_board)
                 input_board.undo_move(prev_coords_w, prev_coords_b)

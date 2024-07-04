@@ -8,8 +8,7 @@ import sys
 import logging
 
 gameControllers = {}
-printing = False
-gameControllers[0] = Game(0, printing)
+gameControllers[0] = Game(0)
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)

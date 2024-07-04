@@ -107,7 +107,7 @@ class Grid():
         for piece in self.b_pcs:
             piece.set_moved(False)
 
-    # method to set grid according to coordinates (for history boards)
+    # method to set grid according to coordinates (for undoing moves)
     def set_grid(self, white, black):
         for n in range(8):
             for m in range(8):
@@ -195,6 +195,8 @@ class Grid():
             pieces = self.w_pcs
             coords = self.w_coords
         if validation:
+            # print(f"GRID: determining valid moves for {self.color_names[color]}\ncurrent board state:")
+            # self.print_board()
             if color:  # black
                 self.valid_moves_b = []
                 # updating valid_moves will also update self.valid_moves_b
@@ -216,11 +218,11 @@ class Grid():
                     
                     # queen
                     case 1:
-                        self.get_queen_attacked_squares(coord, attacked_list, valid_moves, validation)
+                        self.get_queen_attacked_squares(color, coord, attacked_list, valid_moves, validation)
 
                     # rook
                     case 2:
-                        self.get_rook_attacked_squares(coord, attacked_list, valid_moves, validation)
+                        self.get_rook_attacked_squares(color, coord, attacked_list, valid_moves, validation)
 
                     # knight
                     case 3:
@@ -228,7 +230,7 @@ class Grid():
                     
                     # bishop
                     case 4:
-                        self.get_bishop_attacked_squares(coord, attacked_list, valid_moves, validation)
+                        self.get_bishop_attacked_squares(color, coord, attacked_list, valid_moves, validation)
 
                     # pawn
                     case 5:
@@ -237,6 +239,8 @@ class Grid():
                     case _:
                         raise Exception("Invalid piece id")
                     
+        #if validation:
+            # print(f"GRID: # valid moves for {self.color_names[color]}: {len(valid_moves)}")                    
     
     def get_king_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
         # only move one square, no moving off the board
@@ -282,35 +286,35 @@ class Grid():
                 self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
 
     
-    def get_queen_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+    def get_queen_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
         # search all 8 directions in order
-        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
+        lst = self.line_search(0, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 0
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
+        lst = self.line_search(1, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi/4
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
+        lst = self.line_search(1, 0, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi/2
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
+        lst = self.line_search(1, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
+        lst = self.line_search(0, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
+        lst = self.line_search(-1, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
         self.add_to_list(attacked_list, lst) 
-        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
+        lst = self.line_search(-1, 0, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
+        lst = self.line_search(-1, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
         self.add_to_list(attacked_list, lst)
 
 
-    def get_rook_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+    def get_rook_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
         # only horizontals & verticals
-        lst = self.line_search(0, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 0
+        lst = self.line_search(0, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 0
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/2
+        lst = self.line_search(1, 0, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi/2
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(0, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi
+        lst = self.line_search(0, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(-1, 0, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
+        lst = self.line_search(-1, 0, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 3pi/2
         self.add_to_list(attacked_list, lst)
 
 
@@ -363,15 +367,15 @@ class Grid():
                     self.update_validmoves_lst([coord.tolist(), c2], color, valid_moves)
 
 
-    def get_bishop_attacked_squares(self, coord, attacked_list, valid_moves, validation):
+    def get_bishop_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
         # only diagonals
-        lst = self.line_search(1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # pi/4
+        lst = self.line_search(1, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # pi/4
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
+        lst = self.line_search(1, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 3pi/4
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(-1, -1, coord, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
+        lst = self.line_search(-1, -1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 5pi/4
         self.add_to_list(attacked_list, lst)
-        lst = self.line_search(-1, 1, coord, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
+        lst = self.line_search(-1, 1, coord, piece_color=color, get_valid=validation, valid_mvs=valid_moves)  # 7pi/4
         self.add_to_list(attacked_list, lst)
 
 
@@ -409,17 +413,16 @@ class Grid():
 
     # helper function for attacked_squares to search along vert/hor/diag lines
     # for queen, rook, bishop
-    def line_search(self, y, x, coord, get_valid = False, valid_mvs=None): # x, y \in {-1,0,1} to set search direction
+    def line_search(self, y, x, coord, piece_color=None, get_valid = False, valid_mvs=None): # x, y \in {-1,0,1} to set search direction
         search = True
         lst = []
-        color = self.grid[coord[0]][coord[1]].get_color()
         # don't set square piece is on to attacked, piece cant attack itself!
         idx = [coord[0] + y, coord[1] + x] 
         # want to search in straight line until you find piece or edge of board
         while idx[0] <= 7 and idx[0] >= 0 and idx[1] <= 7 and idx[1] >= 0 and search:
             lst.append(idx.copy())
             if get_valid:
-                self.update_validmoves_lst([coord.tolist(), idx], color, valid_mvs)
+                self.update_validmoves_lst([coord.tolist(), idx], piece_color, valid_mvs)
             if self.grid[idx[0]][idx[1]] != 0:  # found piece, stop search
                 search = False
             idx[0] = idx[0] + y
@@ -428,24 +431,16 @@ class Grid():
     
 
     # function to test if move is valid
-    def valid_move(self, move, color, set_enpassant=0, printing=False):
+    def valid_move(self, move, color, set_enpassant=0):
         # move = [[y1, x1], [y2, x2]]
         piece = self.grid[move[0][0]][move[0][1]]
         if piece:
-            if printing:
-                print(f"GRID: found piece of type {piece.get_type()} at square {move[0]}")
             # check to make sure you're moving the right color piece
             if piece.color == color:
-                if printing:
-                    print(f"GRID: piece color is correct")
                 # make sure you're not capturing your own piece
                 piece2 = self.grid[move[1][0]][move[1][1]]
                 if piece2:
-                    if printing:
-                        print(f"GRID: capturing {piece2.get_type()} at square {move[1]}")
                     if piece2.color == color:
-                        if printing:
-                            print(f"GRID: can't capture own piece")
                         return 0
                 
                 match piece.type:
@@ -466,20 +461,14 @@ class Grid():
                         return self.valid_bishop_move(move)
                                         
                     case 5:  # pawn
-                        return self.valid_pawn_move(move, piece, piece2, set_enpassant, printing)
+                        return self.valid_pawn_move(move, piece, piece2, set_enpassant)
                                       
                     case _:  # invalid piece id
-                        if printing:
-                            print(f"GRID: invalid piece type: {piece.get_type()}")
                         return 0
                     
             else:  # moving piece of wrong color
-                if printing:
-                    print(f"GRID: moving piece of color {piece.color} but it's {color}'s turn")
                 return 0
         else:  # not piece
-            if printing:
-                print(f"GRID: no piece at square {move[0]}")
             return 0
         
 
@@ -622,7 +611,7 @@ class Grid():
             return 0
 
 
-    def valid_pawn_move(self, move, piece, piece2, set_enpassant, printing):
+    def valid_pawn_move(self, move, piece, piece2, set_enpassant):
         # first get direction pawn is moving
         if piece.color == 0:  # white
             sign = 1 
@@ -630,27 +619,17 @@ class Grid():
             sign = -1 
         # normal pawn move
         if move[0][1] == move[1][1]:  # pawns only move forward unless capturing
-            if printing:
-                print(f"GRID: pawn not capturing")
             if move[0][0] + sign == move[1][0]:  # check for piece infront of pawn
-                if printing:
-                    print(f"GRID: normal pawn move")
                 if not piece2:  # valid move
                     return 1
                 else:
-                    if printing:
-                        print(f"GRID: can't move forward, piece in front of pawn")
                     return 0
             elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
-                if printing:
-                    print(f"GRID: pawn moving two squares from starting position")
                 if not piece2:
                     # this is for making sure pawns dont jump over pieces
                     if not self.grid[move[0][0]+sign][move[0][1]]:
                         return 1
                     else: 
-                        if printing:
-                            print(f"GRID: can't move two squares, piece in front of pawn")
                         return 0
                 else: return 0
             else:  # invalid move
@@ -659,13 +638,9 @@ class Grid():
         elif move[0][1] + 1 == move[1][1] or move[0][1] - 1 == move[1][1]: # attempted capture
             # make sure move is diagonal
             if move[0][0] + sign != move[1][0]:  # invalid move
-                if printing:
-                    print(f"GRID: pawns don't move that way")
                 return 0
             # En Passant
             elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
-                if printing:
-                    print(f"GRID: no piece at {move[1]}, checking for en passant")
                 # en passant requirements: pawn left or right of current pawn
                 # that pawn has enpassant flag (just made first move of two squares)
                 # check square:[row move0][col move1] for en passantable pawn
@@ -676,19 +651,13 @@ class Grid():
                             self.set_someone_attempting_enpassant_move(True)
                         return 1
                     else:  # no en pesant
-                        if printing:
-                            print(f"GRID: pawn not able to be en passanted")
                         return 0
                 else:
-                    if printing:
-                        print(f"GRID: no pawn to en passant") 
                     return 0
             elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
                 return 1
 
         else:  # invalid move
-            if printing:
-                print(f"GRID: pawns definitely don't move that way")
             return 0
 
 
@@ -813,7 +782,6 @@ class Grid():
         pawn2.set_captured(1)
         self.grid[move[1][0] + sign][move[1][1]] = 0
         cap_coords[pawn2.id] = [-1,-1]
-        print(f"CAPTURED!! {pawn2.id}")
         if sign:  # black en passanting white => white pawn captured
             self.material_w[pawn2.id] = 0
         else:  # white en passanting black => black pawn captured
@@ -833,14 +801,12 @@ class Grid():
             if piece2 != 0:
                 piece2.set_captured(1)
                 self.w_coords[piece2.id] = [-1,-1]
-                print(f"CAPTURED!! {piece2.id}")
                 self.material_w[piece2.id] = 0
         else:  # color = white
             self.w_coords[piece.id] = move[1]
             if piece2 != 0:
                 piece2.set_captured(1)
                 self.b_coords[piece2.id] = [-1,-1]
-                print(f"CAPTURED!! {piece2.id}")
                 self.material_b[piece2.id] = 0
 
     
@@ -892,14 +858,14 @@ class Grid():
     # returns tuple (color that ended game, x) where x = 0 for checkmate, x = 1 for stalemate
     # returns (-1, -1) if game not ended yet
     def check_mate(self, color):
+        # print(f"GRID: checking if {self.color_names[color]} is checkmating/stalemating {self.color_names[not color]}")
         # color = side that just moved => about to be not color's turn
-        # not color might be check mated or in stalemate
+        # not color might be in checkmate or in stalemate
         # need to check if not color's king is in color's attacked squares
         self.attacked_squares(not color, validation=1)  # get not color's available moves
         # checking if black is checkmating/stalemating white
-        print(f"GRID: checking if {color} is checkmating/stalemating {not color}")
-        if color: 
-            print(f"Number of valid moves for white: {len(self.valid_moves_w)}\nvalid moves: {self.valid_moves_w}")
+        if color: # black just moved
+            #print(f"Number of valid moves for white: {len(self.valid_moves_w)}")
             if len(self.valid_moves_w) == 0:
                 self.attacked_squares(color)
                 king_pos = self.w_coords[0]
@@ -911,8 +877,8 @@ class Grid():
                     return (1,1)
             else: return (-1,-1)
         # checking if white is checkmating/stalemating black
-        else:
-            print(f"Number of valid moves for black: {len(self.valid_moves_b)}\nvalid moves: {self.valid_moves_b}")
+        else: # white just moved
+            #print(f"Number of valid moves for black: {len(self.valid_moves_b)}")
             if len(self.valid_moves_b) == 0:
                 self.attacked_squares(color)
                 king_pos = self.b_coords[0]
@@ -941,14 +907,14 @@ class Grid():
     # method to caulculate material difference
     def update_material_count(self):
         self.material_diff = np.sum(self.material_w) - np.sum(self.material_b)
-        print(f"Material difference: {self.material_diff}")
+        #print(f"Material difference: {self.material_diff}")
 
     
     def reset_material_count(self):
         for i in range(16):
-            if self.w_coords[i][0] == -1 and self.w_coords[i][1] == -1:
+            if self.w_coords[i][0] != -1:
                 self.material_w[i] = self.material_lookup[i]
-            if self.b_coords[i][0] == -1 and self.b_coords[i][1] == -1:
+            if self.b_coords[i][0] != -1:
                 self.material_b[i] = self.material_lookup[i]
 
     # method to undo move (setting coordinates to input coords)
@@ -959,3 +925,20 @@ class Grid():
         self.set_black_coords(input_coords_b)
         self.set_grid(self.w_coords, self.b_coords)
         self.reset_material_count()
+        self.update_material_count()
+
+
+    # print board state for debugging
+    def print_board(self):
+        white = self.w_coords.tolist()
+        black = self.b_coords.tolist()
+        for i in range(8):
+            print(end="|")
+            for j in range(8):
+                if [i,j] in white:
+                    print("w", end="|")
+                elif [i,j] in black:
+                    print("b", end="|")
+                else:
+                    print("0", end="|")
+            print()

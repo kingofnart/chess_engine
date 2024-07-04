@@ -10,7 +10,7 @@ from tzlocal import get_localzone
 
 class Game():
 
-    def __init__(self, game_id, printing=False):
+    def __init__(self, game_id):
 
         self.lock = threading.Lock()
         self.board = Grid()
@@ -18,12 +18,12 @@ class Game():
         self.turn = 0  # 0 = white, 1 = black
         self.stop = False
         self.save = True
+        self.minimax_depth = 2
         self.stop_condition = -1
         self.promotion_info = None
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
         # 3=white stalemate, 4=black checkmate, 5=black stalemate, 6=threefold
         self.id = game_id
-        self.printing = printing
 
 
     # ChessBoard class will call this when it gets two clicks input
@@ -32,9 +32,6 @@ class Game():
         # about to update data structures, acquire lock
         with self.lock:
 
-            if self.printing:
-                print(f"GAME {self.id}: recieved {move} from frontend. It is color {self.turn}'s turn.")
-            
             if move[0] == "reset":
                 return self.reset()
             
@@ -62,29 +59,19 @@ class Game():
             # check if move is from computer
             if move[0] == "random":
                 mv = self.engine.random_move(self.turn)
-                if self.printing:
-                    print(f"GAME: random move: {mv}")
             elif move[0] == "minimax":
-                mv = self.engine.minimax(self.turn, 2)
-                if self.printing:
-                    print(f"GAME: minimax move: {mv}")
+                mv = self.engine.minimax(self.turn, self.minimax_depth)
             # check if move is from history board
             elif 'nothingtoseehere' in move:
                 move.pop(2)
                 mv = move
-                if self.printing:
-                    print(f"GAME: history move: {mv}")
                 self.save = False
             else: # move from player via handleClick
                 # move is in form: ['y1,x1','y2,x2'] => move[0][1]=move[1][1]=','
                 mv = [[int(move[0][0]), int(move[0][2])], [int(move[1][0]), int(move[1][2])]]
-                if self.printing:
-                    print(f"GAME: player move: {mv}, calling valid_move with color {self.turn}...")
             
             self.promotion_info = None
-            if self.board.valid_move(mv, self.turn, set_enpassant=True, printing=self.printing):
-                if self.printing:
-                    print(f"GAME: move is valid, checking king safety...")
+            if self.board.valid_move(mv, self.turn, set_enpassant=True):
                 tmp_board = copy.deepcopy(self.board)
                 tmp_board.apply_move(mv, self.turn)
                 # check opponents attacked squares for check
@@ -102,8 +89,6 @@ class Game():
                 # need to make a flag to tell frontend if queening is occurring
                 
                 if self.board.get_queening() is not None:
-                    if self.printing:
-                        print(f"GAME: queening detected")
                     # promotion has piece id as index, color, coordinate
                     if self.turn:  # black queening
                         coords_lst = self.board.b_coords
@@ -113,8 +98,6 @@ class Game():
                                     'coord': coords_lst[self.board.queening.id].tolist()}
                     self.board.set_queening(None)
                 if self.save:
-                    if self.printing:
-                        print(f"GAME: updating history with {mv}")
                     self.board.update_history(mv)
                 # check stopping conditions
                 if self.board.check_threefold():
@@ -137,29 +120,18 @@ class Game():
                             else:  # white checkmate
                                 self.stop_condition = 2
             else: 
-                if self.printing:
-                    print(f"GAME: invalid move")
                 return {'error': 'invalid'}  # valid_move() failed
         if self.stop:
             # return in json format
-            if self.printing:
-                print(f"GAME: game over, stop condition: {self.stop_condition}")
             return {
                 'status': 'end', 
                 'end_result': self.stop_condition,
                 'promotion': self.promotion_info
             }
         # proceed with game
-        if self.printing:
-            print(f"GAME: color {self.turn} has made their move")
         self.turn = 0 if self.turn else 1
-        if self.printing:
-            print(f"GAME: it is now color {self.turn}'s turn")
         self.board.unenpassant(self.turn)
         self.board.update_material_count()
-        if self.printing:
-            print(f"GAME: move applied, updated coordinates:")
-            self.print_board()
         return {
             'status': 'move applied',
             'w_coords': self.board.w_coords.tolist(), 
@@ -176,9 +148,6 @@ class Game():
         self.save = True
         self.stop_condition = -1
         self.board.reset()
-        if self.printing:
-            print(f"GAME {self.id}: board reset. Turn: {self.turn}")
-            self.print_board()
         return { 'status': 'reset' }
     
 
@@ -194,8 +163,6 @@ class Game():
             return "Error connecting to database", 500
         with conn:
             with conn.cursor() as cur:
-                if self.printing:
-                    print(f"GAME: saving move history {history}")
                 cur.execute("INSERT INTO games (user_id, game_history, game_time, opponent, color) VALUES (%s, %s, %s, %s, %s)", 
                             (current_user.id, history, game_time, opponent, color))
                 conn.commit()
@@ -231,18 +198,3 @@ class Game():
         elif not isinstance(value, int):
             return int(value)
         return value
-
-
-    # for debugging
-    def print_board(self):
-        white = self.board.w_coords.tolist()
-        black = self.board.b_coords.tolist()
-        for i in range(8):
-            for j in range(8):
-                if [i,j] in white:
-                    print("w", end="|")
-                elif [i,j] in black:
-                    print("b", end="|")
-                else:
-                    print("0", end="|")
-            print()
