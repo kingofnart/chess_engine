@@ -167,7 +167,7 @@ class ChessBoard {
                     this.selectedSquare = null;
                     // call makemove again if bot is playing
                     if (res === 1 && this.opponent !== "pnp") {
-                        console.log("Bot is playing...", this.opponent, this.opponent === "random")
+                        console.log("Bot is playing...", this.opponent, "random: ", this.opponent === "random", "minimax: ", this.opponent === "minimax")
                         const res2 = await this.makeMove(this.gameID, [this.opponent]);
                         if (res2 === 1) {
                             console.log("Bot move applied successfully.")
@@ -296,7 +296,7 @@ class ChessBoard {
         this.opponent_button.disabled = true;
         this.resignButton.disabled = false;
         if (this.opponent !== "pnp" && this.offset === 0) { // bot is white
-            console.log("Bot is playing...", this.opponent, this.opponent === "random")
+            console.log("Bot is playing...", this.opponent, "random: ", this.opponent === "random", "minimax: ", this.opponent === "minimax")
             const res2 = await this.makeMove(this.gameID, [this.opponent]);
             if (res2 === 1) {
                 console.log("Bot move applied successfully.")
@@ -327,6 +327,8 @@ class ChessBoard {
             var opp_save = "Pass and Play";
         } else if (this.opponent === "random") {
             var opp_save = "Random Bot";
+        } else if (this.opponent === "minimax") {
+            var opp_save = "Minimax Bot";
         } else {
             console.error("Error in endGame: invalid opponent");
         }
@@ -418,6 +420,7 @@ class ChessBoard {
 
     // changes the opponent
     setOpponent(event) {
+        // get opponent name from button data-opp attribute
         this.opponent = event.target.getAttribute('data-opp');
         if (this.opponent === "pnp") {
             this.opponent_displayed.innerText = "Pass and Play";
@@ -507,18 +510,6 @@ class ChessBoard {
         // render board will update the image
         let names = input.color ? this.names_b : this.names_w;
         names[input.index] = 'Q';
-        // const square = document.querySelector(`[data-coordinate='${input.coord}']`);
-        // if (square) {
-        //     const img = square.querySelector('img');
-        //     if (img) {
-        //     // only allowing promoting to queen for now
-        //     img.src = this.getPieceImageUrl('Q', input.color);
-        //     } else {
-        //         console.error("Error in promoteQueen: no img found at square ", input.coord);
-        //     }
-        // } else {
-        //     console.error("Error in promoteQueen: no square found at coord ", input.coord);
-        // }
     }
 
 

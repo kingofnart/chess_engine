@@ -64,6 +64,10 @@ class Game():
                 mv = self.engine.random_move(self.turn)
                 if self.printing:
                     print(f"GAME: random move: {mv}")
+            elif move[0] == "minimax":
+                mv = self.engine.minimax(self.turn, 2)
+                if self.printing:
+                    print(f"GAME: minimax move: {mv}")
             # check if move is from history board
             elif 'nothingtoseehere' in move:
                 move.pop(2)
@@ -93,7 +97,7 @@ class Game():
                     if print:
                         print(f"GAME: move puts king in check: {mv}")
                     return {'error': 'king safety', 'coords': ret_coords.tolist()}
-                tmp_board = None
+                del tmp_board # release memory
                 self.board.apply_move(mv, self.turn)
                 # need to make a flag to tell frontend if queening is occurring
                 
@@ -102,7 +106,7 @@ class Game():
                         print(f"GAME: queening detected")
                     # promotion has piece id as index, color, coordinate
                     if self.turn:  # black queening
-                        coords_lst = self.board.w_coords
+                        coords_lst = self.board.b_coords
                     else:  # white queening
                         coords_lst = self.board.w_coords
                     self.promotion_info = {'index': self.board.queening.id, 'color': self.turn, 
@@ -152,7 +156,7 @@ class Game():
         if self.printing:
             print(f"GAME: it is now color {self.turn}'s turn")
         self.board.unenpassant(self.turn)
-        self.board.material_count()
+        self.board.update_material_count()
         if self.printing:
             print(f"GAME: move applied, updated coordinates:")
             self.print_board()
@@ -202,11 +206,7 @@ class Game():
         self.stop = False
         self.stop_condition = -1
         self.turn = not self.turn
-        # want to reset moved flag so pawns can move 2 squares
-        self.board.set_unmoved()
-        self.board.set_white_coords(new_w_coords)
-        self.board.set_black_coords(new_b_coords)
-        self.board.set_grid(self.board.w_coords, self.board.b_coords)
+        self.board.undo_move(new_w_coords, new_b_coords)
         return {
             'status': 'move applied',
             'w_coords': self.board.w_coords.tolist(),
