@@ -165,9 +165,9 @@ class ChessBoard {
                     const res = await this.makeMove(this.gameID, move);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
+
                     // call makemove again if bot is playing
                     if (res === 1 && this.opponent !== "pnp") {
-                        console.log("Bot is playing...", this.opponent, "random: ", this.opponent === "random", "minimax: ", this.opponent === "minimax")
                         const res2 = await this.makeMove(this.gameID, [this.opponent]);
                         if (res2 === 1) {
                             console.log("Bot move applied successfully.")
@@ -175,14 +175,69 @@ class ChessBoard {
                             console.log("Bot move failed.")
                         }
                     }
+
                 } else {
                     this.flashInvalidMove(this.selectedSquare, this.selectedSquare);
                     this.selectedSquare.classList.remove('selected');
                     this.selectedSquare = null;
                 }
+
             } else { // add square to selected class and wait for another click
                 this.selectedSquare = square;
                 this.selectedSquare.classList.add('selected');
+            }
+        }
+    }
+
+
+    // Handle drag start event
+    handleDragStart(event) {
+        if (this.turnIndicator.hidden === false) {
+            const square = event.target.closest('.square');
+            if (square) {
+                event.dataTransfer.setData('text/plain', square.dataset.coordinate);
+                event.dataTransfer.effectAllowed = 'move';
+                square.classList.add('dragging');
+            }
+        }
+    }
+
+    // Handle drag over event
+    handleDragOver(event) {
+        if (this.turnIndicator.hidden === false) {
+            event.preventDefault();
+        }
+    }
+
+    // Handle drop event
+    async handleDrop(event) {
+        if (this.turnIndicator.hidden === false) {
+            event.preventDefault();
+            const fromCoord = event.dataTransfer.getData('text/plain');
+            const square = event.target.closest('.square');
+            if (square) {
+                const toCoord = square.dataset.coordinate;
+                const move = [fromCoord, toCoord];
+                const res = await this.makeMove(this.gameID, move);
+
+                if (res === 1 && this.opponent !== "pnp") {
+                    const res2 = await this.makeMove(this.gameID, [this.opponent]);
+                    if (res2 === 1) {
+                        console.log("Bot move applied successfully.");
+                    } else {
+                        console.log("Bot move failed.");
+                    }
+                }
+            }
+        }
+    }
+
+    // Handle drag end event
+    handleDragEnd(event) {
+        if (this.turnIndicator.hidden === false) {
+            const square = event.target.closest('.square');
+            if (square) {
+                square.classList.remove('dragging');
             }
         }
     }
@@ -213,6 +268,9 @@ class ChessBoard {
                 // want to dynamically change this to reflect color user is playing
                 square.dataset.coordinate = `${this.offset + this.direction*row},${col}`;
                 // `${7 - row},${col}` ~= "7-row,col"
+                // add dragover and drop event listeners
+                square.addEventListener('dragover', (event) => this.handleDragOver(event));
+                square.addEventListener('drop', (event) => this.handleDrop(event));
                 this.gameContainer.appendChild(square);
             }
         }
@@ -232,6 +290,9 @@ class ChessBoard {
                 const img = document.createElement('img');
                 img.src = this.getPieceImageUrl(names[index], color);
                 img.classList.add('piece');
+                img.setAttribute('draggable', true);
+                img.addEventListener('dragstart', (event) => this.handleDragStart(event));
+                img.addEventListener('dragend', (event) => this.handleDragEnd(event));
                 square.appendChild(img);
             }
         });

@@ -152,6 +152,18 @@ body {
     box-shadow: inset 2px 2px 5px #000000; 
 }
 
+/* Remove focus outline for dragging */
+.square:focus,
+.piece:focus,
+.square:active,
+.piece:active {
+    outline: none;
+}
+
+.dragging .piece {
+    cursor: move;
+}
+
 .invalid-move {
     background-color: red !important;
 }
