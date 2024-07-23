@@ -64,7 +64,7 @@ jobs:
           docker compose up --build -d db
           docker compose up --build -d app
           sleep 10
-          docker compose exec -T app python src/chess_app/init_db.py
+          docker compose exec -T app python chess_engine/src/chess_app/init_db.py
           sleep 10
           docker compose up --build --abort-on-container-exit test
           docker cp chess_engine-test-1:src/chess_app/static/screenshots chess_engine/src/chess_app/static/screenshots
