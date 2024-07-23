@@ -1,4 +1,4 @@
-from connect import connect
+from src.chess_app.connect import connect
 import json
 
 def store_game(user_id, game_history):

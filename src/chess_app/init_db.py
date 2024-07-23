@@ -1,4 +1,4 @@
-from connect import connect
+from src.chess_app.connect import connect
 
 def initialize_database():
     conn = connect()

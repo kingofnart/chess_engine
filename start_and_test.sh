@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start the server
-gunicorn -w 1 -b 0.0.0.0:8000 app:app --log-level debug &
+gunicorn --chdir /chess_engine/src/chess_app -w 1 -b 0.0.0.0:8000 app:app --log-level debug &
 sleep 3
 GUNICORN_PID=$!
 echo "Starting Gunicorn with PID $GUNICORN_PID"

@@ -23,11 +23,12 @@ services:
       - DATABASE_URL
       - CHESS_DB_SECRET_KEY
       - APP_URL=http://localhost:8000
-    command: ["gunicorn", "--chdir", "/chess_engine", "-w", "1", "-b", "0.0.0.0:8000", "app:app", "--log-level", "debug", "--access-logfile", "-", "--error-logfile", "-"]
+      - PYTHONPATH=/chess_engine/src/chess_app
+    command: ["gunicorn", "--chdir", "/chess_engine/src/chess_app", "-w", "1", "-b", "0.0.0.0:8000", "app:app", "--log-level", "debug", "--access-logfile", "-", "--error-logfile", "-"]
 
   test:
     volumes:
-      - ./chess_engine/static/screenshots:/static/screenshots
+      - /chess_engine/src/chess_app/static/screenshots
     build:
       context: .
       dockerfile: Dockerfile.test
@@ -40,6 +41,7 @@ services:
       - DATABASE_URL
       - CHESS_DB_SECRET_KEY
       - APP_URL=http://localhost:8000
+      - PYTHONPATH=/chess_engine/src/chess_app
     command: ["/usr/local/bin/start_and_test.sh"]
 
   adminer:
