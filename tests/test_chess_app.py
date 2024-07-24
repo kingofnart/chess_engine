@@ -21,6 +21,9 @@ def driver():
     # set up chromedriver
     chrome_driver_path=ChromeDriverManager().install()
     print(f"executable_path: {chrome_driver_path}")
+    if "THIRD_PARTY_NOTICES" in chrome_driver_path:
+        print("THIRD_PARTY_NOTICES in path, setting path manually to use 126.0.6478.182")
+        chrome_driver_path = "/root/.wdm/drivers/chromedriver/linux64/126.0.6478.182/chromedriver-linux64/chromedriver"
     service = ChromeService(executable_path=chrome_driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     # Wait for the app to be ready before calling register_testuser
