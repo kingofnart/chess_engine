@@ -19,7 +19,9 @@ def driver():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     # set up chromedriver
-    service = ChromeService(executable_path=ChromeDriverManager().install())
+    chrome_driver_path=ChromeDriverManager().install()
+    print(f"executable_path: {chrome_driver_path}")
+    service = ChromeService(executable_path=chrome_driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     # Wait for the app to be ready before calling register_testuser
     for attempt in range(10):
