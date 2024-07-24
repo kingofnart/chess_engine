@@ -28,6 +28,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=/chess_engine/src" >> $GITHUB_ENV
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -57,7 +60,6 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CHESS_DB_SECRET_KEY: ${{ secrets.CHESS_DB_SECRET_KEY }}
-          PYTHONPATH: /chess_engine/src/chess_app
         run: |
           set -e
           mkdir -p chess_engine/src/chess_app/static/screenshots
