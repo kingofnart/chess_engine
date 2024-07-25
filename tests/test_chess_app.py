@@ -17,6 +17,7 @@ def driver():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-search-engine-choice-screen")
     chrome_options.add_argument("--disable-gpu")
     # set up chromedriver
     chrome_driver_path=ChromeDriverManager().install()
