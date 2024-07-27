@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, url_for, redirect
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from game import Game
-from connect import connect
+from src.chess_app.connect import connect
 import os
 import sys
 import logging

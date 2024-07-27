@@ -1,8 +1,7 @@
-import sys, os, numpy as np
+import numpy as np
 # Add the root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from grid import Grid
-from piece import Piece
+from chess_app.grid import Grid
+from chess_app.piece import Piece
 
 
 

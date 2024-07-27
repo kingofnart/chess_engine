@@ -2,7 +2,7 @@ import copy
 import threading
 from grid import Grid
 from engine import Engine
-from connect import connect
+from src.chess_app.connect import connect
 from flask import current_app
 from flask_login import current_user
 from datetime import datetime
