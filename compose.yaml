@@ -28,7 +28,7 @@ services:
 
   test:
     volumes:
-      - /chess_engine/src/chess_app/static/screenshots
+      - ./chess_engine/src/chess_app/static/screenshots:/src/chess_app/static/screenshots
     build:
       context: .
       dockerfile: Dockerfile.test
