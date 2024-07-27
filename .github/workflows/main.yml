@@ -60,14 +60,11 @@ jobs:
         run: |
           set -e
           mkdir -p chess_engine/src/chess_app/static/screenshots
-          docker compose build --no-cache db
-          docker compose up -d db
-          docker compose build --no-cache app
-          docker compose up -d app
+          docker compose up --build -d db
+          docker compose up --build -d app
           sleep 10
           docker compose exec -T app python /chess_engine/src/chess_app/init_db.py
           sleep 10
-          docker compose build --no-cache test
           docker compose up --build --abort-on-container-exit test
           docker cp chess_engine-test-1:src/chess_app/static/screenshots chess_engine/src/chess_app/static/screenshots
           ls -l chess_engine/src/chess_app/static/screenshots
