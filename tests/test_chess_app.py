@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
-from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -17,12 +17,11 @@ def driver():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-search-engine-choice-screen")
     chrome_options.add_argument("--disable-gpu")
     # set up chromedriver
     chrome_driver_path=ChromeDriverManager().install()
     print(f"executable_path: {chrome_driver_path}")
-    service = ChromeService(executable_path=chrome_driver_path)
+    service = Service(executable_path=chrome_driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     # Wait for the app to be ready before calling register_testuser
     for attempt in range(10):

@@ -66,13 +66,8 @@ jobs:
           docker compose exec -T app python /chess_engine/src/chess_app/init_db.py
           sleep 10
           docker compose up --build --abort-on-container-exit test
-
-          echo "Checking if screenshots directory exists within the container..."
-          docker compose exec -T test ls -l /src/chess_app/static || true
-          docker compose exec -T test ls -l /src/chess_app/static/screenshots || true
           
-          echo "Copying screenshots directory from container to host..."
-          docker cp chess_engine-test-1:src/chess_app/static/screenshots chess_engine/src/chess_app/static/screenshots
+          docker cp chess_engine-test-1:/src/chess_app/static/screenshots chess_engine/src/chess_app/static/screenshots
           ls -l chess_engine/src/chess_app/static/screenshots
           
           exit_code=$?
