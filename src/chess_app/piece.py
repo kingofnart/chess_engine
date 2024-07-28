@@ -36,3 +36,8 @@ class Piece:
     # for queening pawns
     def make_queen(self):
         self.type = 1
+
+
+    # for unqueening pawns
+    def unmake_queen(self):
+        self.type = 5
