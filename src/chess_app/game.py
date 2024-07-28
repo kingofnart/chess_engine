@@ -39,7 +39,8 @@ class Game():
                 return self.save_game(self.board.move_history, move[1], move[2])
             
             elif move[0] == "revert":
-                return self.revert(move[1], move[2])
+                print(f"GAME: revert promotion: {move[3]}")
+                return self.revert(move[1], move[2], move[3])
             
             else:
                 return self.apply_move(move)
@@ -169,11 +170,14 @@ class Game():
         return { 'status': 'game saved' }
     
 
-    def revert(self, new_w_coords, new_b_coords):
+    def revert(self, new_w_coords, new_b_coords, promoted):
         self.stop = False
         self.stop_condition = -1
         self.turn = not self.turn
         self.board.undo_move(new_w_coords, new_b_coords)
+        if promoted is not None:
+            print(f"GAME: revert not None; promotion: {promoted}")
+            self.board.undo_queen(promoted[0], promoted[1])
         return {
             'status': 'move applied',
             'w_coords': self.board.w_coords.tolist(),

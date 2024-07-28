@@ -53,8 +53,8 @@ class ChessBoardHistory {
             console.log("history.js received response: ", result);
             if (result.status === 'move applied') {
                 this.updateBoard(result.w_coords, result.b_coords, result.promotion, gameID);
-                console.log("makeMove returning: ", [result.w_coords, result.b_coords]);
-                return [result.w_coords, result.b_coords];
+                console.log("makeMove returning: ", [result.w_coords, result.b_coords, result.promotion]);
+                return [result.w_coords, result.b_coords, result.promotion];
             } else {
                 alert("Error in response from makeMove");
             }
@@ -112,6 +112,17 @@ class ChessBoardHistory {
     }
 
 
+    unpromoteQueen(input) {
+        let names = input.color ? this.names_b : this.names_w;
+        names[input.index] = 'P';
+        const square = document.querySelector(`[data-coordinate='${input.coord}']`);
+        if (square) {
+            const img = square.querySelector('img');
+            img.src = this.getPieceImageUrl('P', input.color);
+        }
+    }
+
+
     getPieceImageUrl(type, color) {
         switch (type) {
             case 'Q':
@@ -136,9 +147,17 @@ class ChessBoardHistory {
         const chessBoard = chessBoards[left_gameID];
         if (chessBoard) {
             if (this.coords.length > 1) {
+                const promote = this.coords[this.coords.length - 1][2];
                 this.coords.pop();
-                const [w_coords, b_coords] = this.coords[this.coords.length - 1];
-                const left_move = ["revert", w_coords, b_coords];
+                const [w_coords, b_coords] = this.coords[this.coords.length - 1].slice(0, 2);
+                console.log("move left coords: ", w_coords, b_coords, promote)
+                let ret_promote = null;
+                if (promote !== null && promote !== undefined) { 
+                    console.log("[MoveLeft] promote: ", promote);
+                    this.unpromoteQueen(promote);
+                    ret_promote = [promote['color'], promote['index']]
+                }
+                const left_move = ["revert", w_coords, b_coords, ret_promote];
                 const result = await this.makeMove(left_gameID, left_move);
                 chessBoard.renderBoard(w_coords, b_coords, left_gameID);
                 this.moveCounter -= 1;
@@ -155,8 +174,8 @@ class ChessBoardHistory {
                 let right_move = this.gameMoves[this.moveCounter];
                 console.log("move idx: ", this.moveCounter, "right_move: ", right_move);
                 if (right_move.length === 2) { right_move.push("nothingtoseehere") }
-                const [w_coords, b_coords] = await chessBoard.makeMove(right_gameID, right_move);
-                this.coords.push([w_coords, b_coords]);
+                const [w_coords, b_coords, promote] = await chessBoard.makeMove(right_gameID, right_move);
+                this.coords.push([w_coords, b_coords, promote]);
                 this.moveCounter += 1;
             }
         } else {

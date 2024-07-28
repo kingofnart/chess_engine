@@ -25,7 +25,7 @@ class Grid():
         self.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
                                   [7,6], [7,2], [7,5], [6,0], [6,1], 
                                   [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])
-        self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
+        self.grid_info = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
                       self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
                      self.w_pcs[8:], 
                      [0 for _ in range(8)], 
@@ -107,17 +107,18 @@ class Grid():
         for piece in self.b_pcs:
             piece.set_moved(False)
 
+
     # method to set grid according to coordinates (for undoing moves)
     def set_grid(self, white, black):
         for n in range(8):
             for m in range(8):
-                self.grid[n][m] = 0
+                self.grid_info[n][m] = 0
         type_mapping = {0:0, 1:1, 2:2, 3:2, 4:3, 5:3, 6:4, 7:4, 
                         8:5, 9:5, 10:5, 11:5, 12:5, 13:5, 14:5, 15:5}
         for index, coord in enumerate(white):
-            self.grid[coord[0]][coord[1]] = Piece(0, type_mapping[index], index)
+            self.grid_info[coord[0]][coord[1]] = Piece(0, type_mapping[index], index)
         for index, coord in enumerate(black):
-            self.grid[coord[0]][coord[1]] = Piece(1, type_mapping[index], index)
+            self.grid_info[coord[0]][coord[1]] = Piece(1, type_mapping[index], index)
 
 
     # function to reset board to starting position  
@@ -144,7 +145,7 @@ class Grid():
         self.b_coords = np.array([[7,4], [7,3], [7,0], [7,7], [7,1], 
                                   [7,6], [7,2], [7,5], [6,0], [6,1], 
                                   [6,2], [6,3], [6,4], [6,5], [6,6], [6,7]])
-        self.grid = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
+        self.grid_info = [[self.w_pcs[2], self.w_pcs[4], self.w_pcs[6], self.w_pcs[1], 
                       self.w_pcs[0], self.w_pcs[7], self.w_pcs[5], self.w_pcs[3]], 
                      self.w_pcs[8:], 
                      [0 for _ in range(8)], 
@@ -177,7 +178,7 @@ class Grid():
 
     # function to save list of all squares attacked by a color
     # validation flag is if you want to store all valid moves
-    # don't want to validate if im checking attacked squares on tmp grid for king safety
+    # don't want to validate if im checking attacked squares on tmp grid_info for king safety
     def attacked_squares(self, color, validation=0):
         
         attacked_list = []
@@ -195,8 +196,6 @@ class Grid():
             pieces = self.w_pcs
             coords = self.w_coords
         if validation:
-            # print(f"GRID: determining valid moves for {self.color_names[color]}\ncurrent board state:")
-            # self.print_board()
             if color:  # black
                 self.valid_moves_b = []
                 # updating valid_moves will also update self.valid_moves_b
@@ -239,8 +238,6 @@ class Grid():
                     case _:
                         raise Exception("Invalid piece id")
                     
-        #if validation:
-            # print(f"GRID: # valid moves for {self.color_names[color]}: {len(valid_moves)}")                    
     
     def get_king_attacked_squares(self, color, coord, attacked_list, valid_moves, validation):
         # only move one square, no moving off the board
@@ -423,7 +420,7 @@ class Grid():
             lst.append(idx.copy())
             if get_valid:
                 self.update_validmoves_lst([coord.tolist(), idx], piece_color, valid_mvs)
-            if self.grid[idx[0]][idx[1]] != 0:  # found piece, stop search
+            if self.grid_info[idx[0]][idx[1]] != 0:  # found piece, stop search
                 search = False
             idx[0] = idx[0] + y
             idx[1] = idx[1] + x
@@ -433,12 +430,12 @@ class Grid():
     # function to test if move is valid
     def valid_move(self, move, color, set_enpassant=0):
         # move = [[y1, x1], [y2, x2]]
-        piece = self.grid[move[0][0]][move[0][1]]
+        piece = self.grid_info[move[0][0]][move[0][1]]
         if piece:
             # check to make sure you're moving the right color piece
             if piece.color == color:
                 # make sure you're not capturing your own piece
-                piece2 = self.grid[move[1][0]][move[1][1]]
+                piece2 = self.grid_info[move[1][0]][move[1][1]]
                 if piece2:
                     if piece2.color == color:
                         return 0
@@ -487,7 +484,7 @@ class Grid():
         # rook placed next to king on the other side than it used to be
         elif move[0][1] + 2 == move[1][1]:  # caslting kingside
             # make sure squares between king and rook are empty
-            if self.grid[move[0][0]][move[0][1] + 1] != 0 or self.grid[move[0][0]][move[0][1] + 2] != 0:
+            if self.grid_info[move[0][0]][move[0][1] + 1] != 0 or self.grid_info[move[0][0]][move[0][1] + 2] != 0:
                 return 0
             if color:
                 atck_lst = self.attacked_squares_w
@@ -511,8 +508,8 @@ class Grid():
             return 1
         elif move[0][1] - 2 == move[1][1]:  # caslting queenside
             # make sure squares between king and rook are empty
-            if self.grid[move[0][0]][move[0][1] - 1] != 0 or self.grid[move[0][0]][move[0][1] - 2] != 0 \
-                or self.grid[move[0][0]][move[0][1] - 3] != 0:
+            if self.grid_info[move[0][0]][move[0][1] - 1] != 0 or self.grid_info[move[0][0]][move[0][1] - 2] != 0 \
+                or self.grid_info[move[0][0]][move[0][1] - 3] != 0:
                 return 0
             if color:
                 atck_lst = self.attacked_squares_w
@@ -627,7 +624,7 @@ class Grid():
             elif move[0][0] + 2*sign == move[1][0] and not piece.get_moved(): # valid move
                 if not piece2:
                     # this is for making sure pawns dont jump over pieces
-                    if not self.grid[move[0][0]+sign][move[0][1]]:
+                    if not self.grid_info[move[0][0]+sign][move[0][1]]:
                         return 1
                     else: 
                         return 0
@@ -640,11 +637,11 @@ class Grid():
             if move[0][0] + sign != move[1][0]:  # invalid move
                 return 0
             # En Passant
-            elif self.grid[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
+            elif self.grid_info[move[1][0]][move[1][1]] == 0:  # no piece forward-diagonal from pawn
                 # en passant requirements: pawn left or right of current pawn
                 # that pawn has enpassant flag (just made first move of two squares)
                 # check square:[row move0][col move1] for en passantable pawn
-                pawn2 = self.grid[move[0][0]][move[1][1]]
+                pawn2 = self.grid_info[move[0][0]][move[1][1]]
                 if pawn2 != 0:  # en pesant?
                     if pawn2.get_enpassant():  # yes en pesant
                         if set_enpassant:
@@ -654,7 +651,7 @@ class Grid():
                         return 0
                 else:
                     return 0
-            elif self.grid[move[1][0]][move[1][1]] != 0:  # valid capture
+            elif self.grid_info[move[1][0]][move[1][1]] != 0:  # valid capture
                 return 1
 
         else:  # invalid move
@@ -696,7 +693,7 @@ class Grid():
     # function to apply move
     def apply_move(self, move, color):
         
-        piece = self.grid[move[0][0]][move[0][1]]
+        piece = self.grid_info[move[0][0]][move[0][1]]
         piece.set_moved(True)
         
         # castling
@@ -722,21 +719,21 @@ class Grid():
     def apply_castle_kingside(self, piece, color):
         if color:  # black to move
             # king on e8, hasn't moved
-            rook = self.grid[7][7]  # black h rook, hasn't moved
-            self.grid[7][6] = piece
-            self.grid[7][5] = rook
-            self.grid[7][4] = 0  # don't forget to remove old reference to king
-            self.grid[7][7] = 0  # and the old reference to the rook
+            rook = self.grid_info[7][7]  # black h rook, hasn't moved
+            self.grid_info[7][6] = piece
+            self.grid_info[7][5] = rook
+            self.grid_info[7][4] = 0  # don't forget to remove old reference to king
+            self.grid_info[7][7] = 0  # and the old reference to the rook
             self.b_coords[piece.id] = [7,6]
             self.b_coords[rook.id] = [7,5]
             rook.set_moved(True)
         else: # white to move
             # king on e1, hasn't moved
-            rook = self.grid[0][7]  # white h rook, hasn't moved
-            self.grid[0][6] = piece
-            self.grid[0][5] = rook
-            self.grid[0][4] = 0
-            self.grid[0][7] = 0
+            rook = self.grid_info[0][7]  # white h rook, hasn't moved
+            self.grid_info[0][6] = piece
+            self.grid_info[0][5] = rook
+            self.grid_info[0][4] = 0
+            self.grid_info[0][7] = 0
             self.w_coords[piece.id] = [0,6]
             self.w_coords[rook.id] = [0,5]
             rook.set_moved(True)
@@ -746,21 +743,21 @@ class Grid():
     def apply_castle_queenside(self, piece, color):
         if color: # black to move
             # king on e8, hasn't moved
-            rook = self.grid[7][0]  # black a rook, hasn't moved
-            self.grid[7][2] = piece
-            self.grid[7][3] = rook
-            self.grid[7][4] = 0
-            self.grid[7][0] = 0 
+            rook = self.grid_info[7][0]  # black a rook, hasn't moved
+            self.grid_info[7][2] = piece
+            self.grid_info[7][3] = rook
+            self.grid_info[7][4] = 0
+            self.grid_info[7][0] = 0 
             self.b_coords[piece.id] = [7,2]
             self.b_coords[rook.id] = [7,3]
             rook.set_moved(True)
         else: # white to move
             # king on e1, hasn't moved
-            rook = self.grid[0][0]  # white a rook, hasn't moved
-            self.grid[0][2] = piece
-            self.grid[0][3] = rook
-            self.grid[0][4] = 0
-            self.grid[0][0] = 0 
+            rook = self.grid_info[0][0]  # white a rook, hasn't moved
+            self.grid_info[0][2] = piece
+            self.grid_info[0][3] = rook
+            self.grid_info[0][4] = 0
+            self.grid_info[0][0] = 0 
             self.w_coords[piece.id] = [0,2]
             self.w_coords[rook.id] = [0,3]
             rook.set_moved(True)
@@ -777,25 +774,25 @@ class Grid():
             cap_coords = self.b_coords
             self.w_coords[piece.id] = move[1]
         # direction (kingside/queenside) pawn to capture is on is contained in move[1][1]
-        pawn2 = self.grid[move[1][0] + sign][move[1][1]]
+        pawn2 = self.grid_info[move[1][0] + sign][move[1][1]]
         # remove en passanted pawn
         pawn2.set_captured(1)
-        self.grid[move[1][0] + sign][move[1][1]] = 0
+        self.grid_info[move[1][0] + sign][move[1][1]] = 0
         cap_coords[pawn2.id] = [-1,-1]
         if sign:  # black en passanting white => white pawn captured
             self.material_w[pawn2.id] = 0
         else:  # white en passanting black => black pawn captured
             self.material_b[pawn2.id] = 0
-        # update grid
-        self.grid[move[1][0]][move[1][1]] = piece
-        self.grid[move[0][0]][move[0][1]] = 0
+        # update grid_info
+        self.grid_info[move[1][0]][move[1][1]] = piece
+        self.grid_info[move[0][0]][move[0][1]] = 0
         self.set_someone_attempting_enpassant_move(False)
 
     
     def apply_normal_move(self, move, piece, color):
-        piece2 = self.grid[move[1][0]][move[1][1]]
-        self.grid[move[1][0]][move[1][1]] = piece
-        self.grid[move[0][0]][move[0][1]] = 0
+        piece2 = self.grid_info[move[1][0]][move[1][1]]
+        self.grid_info[move[1][0]][move[1][1]] = piece
+        self.grid_info[move[0][0]][move[0][1]] = 0
         if color:  # color = black
             self.b_coords[piece.id] = move[1]
             if piece2 != 0:
@@ -825,12 +822,21 @@ class Grid():
             piece.make_queen()
             self.set_queening(piece)
 
+
+    # function to undo promoting to a queen
+    def undo_queen(self, color, id):
+        if color:
+            self.b_pcs[id].unmake_queen()
+        else:
+            self.w_pcs[id].unmake_queen()
+
+
     # function to add boardstate to history list to check for threefold repetition
     def update_history(self, move=None):
         lst = []
         for row in range(8):
             for col in range(8):
-                p = self.grid[row][col]
+                p = self.grid_info[row][col]
                 if p != 0:
                     # 0-15: white; 16-31: black
                     lst.append(p.id + 16*p.color)
@@ -838,7 +844,6 @@ class Grid():
         self.board_history.append(lst)
         if move:
             self.move_history.append(move)
-            #print(f"grid: updated history with move {move}, new history: {self.move_history}")
 
 
     # function to check for a threefold repetition => draw
@@ -858,7 +863,6 @@ class Grid():
     # returns tuple (color that ended game, x) where x = 0 for checkmate, x = 1 for stalemate
     # returns (-1, -1) if game not ended yet
     def check_mate(self, color):
-        # print(f"GRID: checking if {self.color_names[color]} is checkmating/stalemating {self.color_names[not color]}")
         # color = side that just moved => about to be not color's turn
         # not color might be in checkmate or in stalemate
         # need to check if not color's king is in color's attacked squares
