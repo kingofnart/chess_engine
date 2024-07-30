@@ -80,6 +80,9 @@ class ChessBoard {
             reset_button.remove();
         }
         this.startButton.style.display = 'block';
+        this.color_button.style.display = 'block';
+        this.opponent_button.style.display = 'block';
+        this.time_control_button.style.display = 'block';
         this.turnIndicator.hidden = true;
         this.update_material_diff(0);
         this.offset = 7;
@@ -350,6 +353,9 @@ class ChessBoard {
     // method to start game and create turn indicator text
     async startGame() {
         this.startButton.style.display = 'none';
+        this.color_button.style.display = 'none';
+        this.opponent_button.style.display = 'none';
+        this.time_control_button.style.display = 'none';
         this.turnIndicator.hidden = false;
         this.startTimer("white");
         this.time_control_button.disabled = true;
