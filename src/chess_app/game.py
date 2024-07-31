@@ -18,7 +18,7 @@ class Game():
         self.turn = 0  # 0 = white, 1 = black
         self.stop = False
         self.save = True
-        self.minimax_depth = 2
+        self.minimax_depth = 3
         self.stop_condition = -1
         self.promotion_info = None
         # stop conditions: 0=white flag, 1=black flag, 2=white checkmate; 
