@@ -88,4 +88,4 @@ jobs:
       - name: Shut down Docker containers
         if: always()
         run: |
-          docker-compose down
+          docker compose down
