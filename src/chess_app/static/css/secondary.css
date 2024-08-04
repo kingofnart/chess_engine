@@ -9,6 +9,7 @@ body {
     margin: 0;
 }
 
+
 .citation {
     position: fixed;
     bottom: 0;
@@ -20,13 +21,6 @@ body {
     border-radius: 5px;
 }
 
-.container {
-    text-align: center;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
 
 .form-container,
 a.button {
