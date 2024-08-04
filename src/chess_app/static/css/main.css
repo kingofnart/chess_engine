@@ -44,6 +44,17 @@ body {
     outline: 5px solid rgb(26, 20, 1);
 }
 
+.citation {
+    position: fixed;
+    bottom: 0;
+    width: fit-content;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 7px;
+    font-size: 0.5em;
+    border-radius: 5px;
+}
+
 .row {
     display: flex;
     justify-content: space-between;

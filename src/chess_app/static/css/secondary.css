@@ -29,6 +29,17 @@ a.button {
     box-sizing: border-box;
 }
 
+.citation {
+    position: fixed;
+    bottom: 0;
+    width: fit-content;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 7px;
+    font-size: 0.5em;
+    text-align: center;
+    border-radius: 5px;
+}
+
 h2 {
     margin-bottom: 20px;
 }
