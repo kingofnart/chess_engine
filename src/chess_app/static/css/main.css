@@ -44,7 +44,6 @@ body {
     outline: 5px solid rgb(26, 20, 1);
 }
 
-
 .citation {
     position: fixed;
     bottom: 0;
@@ -55,7 +54,6 @@ body {
     font-size: 0.5em;
     border-radius: 5px;
 }
-
 
 .row {
     display: flex;
